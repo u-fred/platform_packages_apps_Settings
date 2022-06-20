@@ -92,6 +92,7 @@ android_library {
         // Settings dependencies
         "FingerprintManagerInteractor",
         "MediaDrmSettingsFlagsLib",
+        "ReverseWirelessCharging",
         "Settings-change-ids",
         "SettingsLib",
         "SettingsLibActivityEmbedding",
