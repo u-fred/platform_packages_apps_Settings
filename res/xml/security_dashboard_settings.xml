@@ -55,6 +55,11 @@
             settings:controller="com.android.settings.security.AutoRebootPrefController" />
 
         <SwitchPreferenceCompat
+            android:key="scramble_pin_layout"
+            android:title="@string/scramble_pin_title"
+            settings:boolSettingField="android.ext.settings.ExtSettings SCRAMBLE_PIN_LAYOUT" />
+
+        <SwitchPreferenceCompat
             android:key="keyguard_camera"
             android:title="@string/keyguard_camera_title"
             settings:boolSettingField=
