@@ -225,6 +225,13 @@
         settings:keywords="@string/keywords_app_pinning"
         settings:controller="com.android.settings.security.ScreenPinningPreferenceController" />
 
+    <SwitchPreferenceCompat
+        android:order="282"
+        android:key="allow_automatic_per_app_epcm"
+        android:title="@string/allow_automatic_per_app_epcm_title"
+        android:summary="@string/allow_automatic_per_app_epcm_summary"
+        settings:boolSettingField="android.ext.settings.ExtSettings ALLOW_DISABLING_HARDENING_VIA_APP_COMPAT_CONFIG" />
+
     <Preference
         android:order="300"
         android:id="@+id/memtag_page"
