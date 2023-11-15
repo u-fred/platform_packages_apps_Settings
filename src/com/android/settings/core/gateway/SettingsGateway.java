@@ -207,6 +207,7 @@ public class SettingsGateway {
      * security exception if the fragment it needs to display is not in this list.
      */
     public static final String[] ENTRY_FRAGMENTS = {
+            com.android.settings.applications.AppNativeDebuggingFragment.class.getName(),
             com.android.settings.applications.AppHardenedMallocFragment.class.getName(),
             com.android.settings.safetycenter.ExploitProtectionFragment.class.getName(),
             AdvancedConnectedDeviceDashboardFragment.class.getName(),
