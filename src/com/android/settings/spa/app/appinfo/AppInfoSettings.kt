@@ -176,6 +176,7 @@ private fun AppInfoSettings(packageInfoPresenter: PackageInfoPresenter) {
             AppExploitProtectionCompatModeSwitchPreference(app, packageInfoPresenter)
             com.android.settings.applications.AppHardenedMallocPreference(app)
             com.android.settings.applications.AppExtendedVaSpacePreference(app)
+            com.android.settings.applications.AppNativeDebuggingPreference(app)
         }
 
         Category(title = stringResource(R.string.app_install_details_group_title)) {
