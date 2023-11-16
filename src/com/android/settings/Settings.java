@@ -490,5 +490,7 @@ public class Settings extends SettingsActivity {
     /** Activity for the Reset mobile network settings. */
     public static class ResetMobileNetworkSettingsActivity extends SettingsActivity { /* empty */ }
 
+    public static class AppHardenedMallocActivity extends SettingsActivity {}
+
     public static class ExploitProtectionActivity extends SettingsActivity {}
 }
