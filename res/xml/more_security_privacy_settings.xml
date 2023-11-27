@@ -226,6 +226,14 @@
         settings:controller="com.android.settings.security.ScreenPinningPreferenceController" />
 
     <SwitchPreferenceCompat
+        android:order="281"
+        android:key="show_system_process_crash_notifs"
+        android:title="@string/show_system_process_crash_notifs_title"
+        android:summary="@string/show_system_process_crash_notifs_summary"
+        settings:boolSettingField=
+            "android.ext.settings.ExtSettings SHOW_SYSTEM_PROCESS_CRASH_NOTIFICATIONS" />
+
+    <SwitchPreferenceCompat
         android:order="282"
         android:key="allow_automatic_per_app_epcm"
         android:title="@string/allow_automatic_per_app_epcm_title"
