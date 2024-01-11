@@ -188,6 +188,7 @@ private fun AppInfoSettings(packageInfoPresenter: PackageInfoPresenter) {
             com.android.settings.applications.AppExtendedVaSpacePreference(app)
             com.android.settings.applications.AppNativeDebuggingPreference(app)
             com.android.settings.applications.AppMemoryDynCodeLoadingPreference(app)
+            com.android.settings.applications.AppStorageDynCodeLoadingPreference(app)
         }
 
         Category(title = stringResource(R.string.app_install_details_group_title)) {
