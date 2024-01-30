@@ -502,4 +502,9 @@
     <dimen name="zen_mode_icon_list_item_size">96dp</dimen>
     <dimen name="zen_mode_icon_list_circle_diameter">56dp</dimen>
     <dimen name="zen_mode_icon_list_icon_size">32dp</dimen>
+
+    <!-- Setup wizard related -->
+    <dimen name="sud_progress_bar_margin_top">
+        @dimen/sud_progress_bar_margin_top_material_you
+    </dimen>
 </resources>
