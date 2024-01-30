@@ -488,4 +488,9 @@
     <dimen name="contrast_button_text_size">14sp</dimen>
     <dimen name="contrast_button_text_spacing">4dp</dimen>
     <dimen name="contrast_button_horizontal_spacing">16dp</dimen>
+
+    <!-- Setup wizard related -->
+    <dimen name="sud_progress_bar_margin_top">
+        @dimen/sud_progress_bar_margin_top_material_you
+    </dimen>
 </resources>
