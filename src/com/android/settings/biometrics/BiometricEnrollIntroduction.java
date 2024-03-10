@@ -293,7 +293,7 @@ public abstract class BiometricEnrollIntroduction extends BiometricEnrollBase
 
     private void updatePasswordQuality() {
         final int passwordQuality = getLockPatternUtils()
-                .getActivePasswordQuality(mUserManager.getCredentialOwnerProfile(mUserId));
+                .getActivePasswordQuality(mUserManager.getCredentialOwnerProfile(mUserId), true);
         mHasPassword = passwordQuality != DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
     }
 

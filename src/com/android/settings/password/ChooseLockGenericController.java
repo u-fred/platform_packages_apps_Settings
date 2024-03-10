@@ -18,7 +18,6 @@ package com.android.settings.password;
 
 import static android.app.admin.DevicePolicyManager.PASSWORD_COMPLEXITY_NONE;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
-
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_NONE;
 
 import android.app.admin.DevicePolicyManager.PasswordComplexity;
@@ -59,11 +58,13 @@ public class ChooseLockGenericController {
     private final int mUnificationProfileId;
     private final ManagedLockPasswordProvider mManagedPasswordProvider;
     private final LockPatternUtils mLockPatternUtils;
+    private final boolean mPrimaryScreenLock;
 
     public ChooseLockGenericController(Context context, int userId,
             ManagedLockPasswordProvider managedPasswordProvider, LockPatternUtils lockPatternUtils,
             boolean hideInsecureScreenLockTypes, int appRequestedMinComplexity,
-            boolean devicePasswordRequirementOnly, int unificationProfileId) {
+            boolean devicePasswordRequirementOnly, int unificationProfileId,
+            boolean primaryScreenLock) {
         mContext = context;
         mUserId = userId;
         mManagedPasswordProvider = managedPasswordProvider;
@@ -72,6 +73,7 @@ public class ChooseLockGenericController {
         mAppRequestedMinComplexity = appRequestedMinComplexity;
         mDevicePasswordRequirementOnly = devicePasswordRequirementOnly;
         mUnificationProfileId = unificationProfileId;
+        mPrimaryScreenLock = primaryScreenLock;
     }
 
     /** Builder class for {@link ChooseLockGenericController} */
@@ -85,6 +87,7 @@ public class ChooseLockGenericController {
         @PasswordComplexity private int mAppRequestedMinComplexity = PASSWORD_COMPLEXITY_NONE;
         private boolean mDevicePasswordRequirementOnly = false;
         private int mUnificationProfileId = UserHandle.USER_NULL;
+        private boolean mPrimaryScreenLock = true;
 
         public Builder(Context context, int userId) {
             this(context, userId, new LockPatternUtils(context));
@@ -150,17 +153,26 @@ public class ChooseLockGenericController {
             return this;
         }
 
+        /**
+         * Sets whether the primary screen lock is being set.
+         */
+        public Builder setPrimaryScreenLock(boolean primaryScreenLock) {
+            mPrimaryScreenLock = primaryScreenLock;
+            return this;
+        }
+
         /** Creates {@link ChooseLockGenericController} instance. */
         public ChooseLockGenericController build() {
             return new ChooseLockGenericController(mContext, mUserId, mManagedPasswordProvider,
                     mLockPatternUtils, mHideInsecureScreenLockTypes, mAppRequestedMinComplexity,
-                    mDevicePasswordRequirementOnly, mUnificationProfileId);
+                    mDevicePasswordRequirementOnly, mUnificationProfileId, mPrimaryScreenLock);
         }
     }
 
     /**
      * Returns whether the given screen lock type should be visible in the given context.
      */
+    // TODO: Review when looking at profiles/users.
     public boolean isScreenLockVisible(ScreenLockType type) {
         final boolean managedProfile = mContext.getSystemService(UserManager.class)
                 .isManagedProfile(mUserId);
@@ -172,16 +184,19 @@ public class ChooseLockGenericController {
             case SWIPE:
                 return !mHideInsecureScreenLockTypes
                     && !mContext.getResources().getBoolean(R.bool.config_hide_swipe_security_option)
-                    && !managedProfile; // Swipe doesn't make sense for profiles.
+                    && !managedProfile // Swipe doesn't make sense for profiles.
+                    && mPrimaryScreenLock;
             case MANAGED:
+                // TODO: Review.
                 return mManagedPasswordProvider.isManagedPasswordChoosable();
             case PATTERN:
                 return false;
             case PIN:
-            case PASSWORD:
                 // Hide the secure lock screen options if the device doesn't support the secure lock
                 // screen feature.
                 return mLockPatternUtils.hasSecureLockScreen();
+            case PASSWORD:
+                return mLockPatternUtils.hasSecureLockScreen() && mPrimaryScreenLock;
         }
         return true;
     }
@@ -191,6 +206,7 @@ public class ChooseLockGenericController {
      * requirements. The lock's visibility ({@link #isScreenLockVisible}) is not considered here.
      */
     public boolean isScreenLockEnabled(ScreenLockType type) {
+        // TODO: Secondary?
         return !mLockPatternUtils.isCredentialsDisabledForUser(mUserId)
                 && type.maxQuality >= upgradeQuality(PASSWORD_QUALITY_UNSPECIFIED);
     }

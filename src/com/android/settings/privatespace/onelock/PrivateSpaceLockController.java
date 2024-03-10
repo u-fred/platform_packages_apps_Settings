@@ -120,7 +120,7 @@ public class PrivateSpaceLockController extends AbstractPreferenceController {
     }
 
     private int getCredentialTypeResId(int userId) {
-        int credentialType = mLockPatternUtils.getCredentialTypeForUser(userId);
+        int credentialType = mLockPatternUtils.getCredentialTypeForUser(userId, true);
         switch (credentialType) {
             case CREDENTIAL_TYPE_PATTERN :
                 return R.string.unlock_set_unlock_mode_pattern;

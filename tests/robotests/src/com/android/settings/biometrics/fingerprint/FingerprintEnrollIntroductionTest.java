@@ -44,6 +44,7 @@ import android.hardware.fingerprint.FingerprintEnrollOptions;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorProperties;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
+import android.os.SystemProperties;
 import android.os.UserManager;
 import android.view.View;
 
@@ -95,6 +96,8 @@ public class FingerprintEnrollIntroductionTest {
 
     @Before
     public void setUp() {
+        SystemProperties.set("setupwizard.theme", "foo");
+
         MockitoAnnotations.initMocks(this);
         mGatekeeperPasswordProvider = new GatekeeperPasswordProvider(mLockPatternUtils);
 
@@ -136,7 +139,7 @@ public class FingerprintEnrollIntroductionTest {
         mFingerprintEnrollIntroduction.mNewChallenge = EXPECTED_CHALLENGE;
 
         final int userId = intent.getIntExtra(EXTRA_USER_ID, 0);
-        when(mLockPatternUtils.getActivePasswordQuality(userId))
+        when(mLockPatternUtils.getActivePasswordQuality(userId, true))
                 .thenReturn(PASSWORD_QUALITY_SOMETHING);
 
         mController.create();

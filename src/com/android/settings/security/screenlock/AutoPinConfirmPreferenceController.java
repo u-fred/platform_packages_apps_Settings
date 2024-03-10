@@ -36,24 +36,34 @@ import com.android.settingslib.core.lifecycle.ObservablePreferenceFragment;
 public class AutoPinConfirmPreferenceController extends AbstractPreferenceController implements
         PreferenceControllerMixin, Preference.OnPreferenceChangeListener {
 
-    private static final String PREF_KEY_PIN_AUTO_CONFIRM = "auto_pin_confirm";
+    public static final String PREF_KEY_PIN_AUTO_CONFIRM = "auto_pin_confirm";
 
     private final int mUserId;
     private final LockPatternUtils mLockPatternUtils;
     private final ObservablePreferenceFragment mParentFragment;
+    private final boolean mIsForPrimaryScreenLock;
+    private final AutoPinConfirmSettingChangeCallback mCallback;
 
     public AutoPinConfirmPreferenceController(Context context, int userId,
             LockPatternUtils lockPatternUtils,
-            ObservablePreferenceFragment parentFragment) {
+            ObservablePreferenceFragment parentFragment,
+            boolean isForPrimaryScreenLock,
+            AutoPinConfirmSettingChangeCallback callback) {
         super(context);
         mUserId = userId;
         mLockPatternUtils = lockPatternUtils;
         mParentFragment = parentFragment;
+        mIsForPrimaryScreenLock = isForPrimaryScreenLock;
+        mCallback = callback;
     }
 
     @Override
     public boolean onPreferenceChange(Preference preference, Object newValue) {
-        launchPinConfirmActivity((boolean) newValue);
+        if (mIsForPrimaryScreenLock) {
+            launchPinConfirmActivity((boolean) newValue);
+        } else if (mCallback != null) {
+            mCallback.call((boolean) newValue);
+        }
         return true;
     }
 
@@ -64,8 +74,8 @@ public class AutoPinConfirmPreferenceController extends AbstractPreferenceContro
 
     @Override
     public boolean isAvailable() {
-        return LockPatternUtils.isAutoPinConfirmFeatureAvailable() && isPinLock()
-                && isPinLengthEligibleForAutoConfirmation();
+        return LockPatternUtils.isAutoPinConfirmFeatureAvailable() &&
+                isPinLock() && isPinLengthEligibleForAutoConfirmation();
     }
 
     @Override
@@ -74,20 +84,22 @@ public class AutoPinConfirmPreferenceController extends AbstractPreferenceContro
     }
 
     private boolean isPinLock() {
-        return mLockPatternUtils.getCredentialTypeForUser(mUserId)
+        // TODO: Make sure mUserId supports second factor if secondary.
+        return mLockPatternUtils.getCredentialTypeForUser(mUserId, mIsForPrimaryScreenLock)
                 == LockPatternUtils.CREDENTIAL_TYPE_PIN;
     }
 
     private boolean isPinLengthEligibleForAutoConfirmation() {
-        return mLockPatternUtils.getPinLength(mUserId) >= MIN_AUTO_PIN_REQUIREMENT_LENGTH;
+        return mLockPatternUtils.getPinLength(mUserId, mIsForPrimaryScreenLock) >=
+                MIN_AUTO_PIN_REQUIREMENT_LENGTH;
     }
 
     private boolean getPinAutoConfirmSettingState() {
-        return mLockPatternUtils.isAutoPinConfirmEnabled(mUserId);
+        return mLockPatternUtils.isAutoPinConfirmEnabled(mUserId, mIsForPrimaryScreenLock);
     }
 
     private void setPinAutoConfirmSettingState(boolean state) {
-        mLockPatternUtils.setAutoPinConfirm(state, mUserId);
+        mLockPatternUtils.setAutoPinConfirm(state, mUserId, mIsForPrimaryScreenLock);
     }
 
     private void launchPinConfirmActivity(boolean newState) {
@@ -102,5 +114,9 @@ public class AutoPinConfirmPreferenceController extends AbstractPreferenceContro
                         : mContext.getString(R.string.auto_confirm_off_pin_verify_description))
                 .setReturnCredentials(true)
                 .show();
+    }
+
+    public interface AutoPinConfirmSettingChangeCallback {
+        void call(boolean newState);
     }
 }

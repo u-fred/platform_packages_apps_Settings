@@ -231,6 +231,9 @@ public class ChooseLockPassword extends SettingsActivity {
 
         private static final int MIN_AUTO_PIN_REQUIREMENT_LENGTH = 6;
 
+        // Whether we are setting a primary or secondary credential.
+        private boolean mPrimaryCredential;
+        // This is always the primary credential, even if we are setting secondary credential.
         private LockscreenCredential mCurrentCredential;
         private LockscreenCredential mChosenPassword;
         private boolean mRequestGatekeeperPassword;
@@ -269,8 +272,6 @@ public class ChooseLockPassword extends SettingsActivity {
 
         private TextChangedHandler mTextChangedHandler;
 
-        private static final int CONFIRM_EXISTING_REQUEST = 58;
-        static final int RESULT_FINISHED = RESULT_FIRST_USER;
         /** Used to store the profile type for which pin/password is being set */
         protected enum ProfileType {
             None,
@@ -279,6 +280,11 @@ public class ChooseLockPassword extends SettingsActivity {
             Other
         };
         protected ProfileType mProfileType;
+
+        private static final int CONFIRM_EXISTING_REQUEST = 58;
+        static final int RESULT_FINISHED = RESULT_FIRST_USER;
+        public static final int RESULT_NOT_FOREGROUND = RESULT_FIRST_USER + 1;
+
 
         /**
          * Keep track internally of where the user is in choosing a pattern.
@@ -486,6 +492,9 @@ public class ChooseLockPassword extends SettingsActivity {
             mForFace = intent.getBooleanExtra(ChooseLockSettingsHelper.EXTRA_KEY_FOR_FACE, false);
             mForBiometrics = intent.getBooleanExtra(
                     ChooseLockSettingsHelper.EXTRA_KEY_FOR_BIOMETRICS, false);
+
+            mPrimaryCredential = intent.getBooleanExtra(
+                    ChooseLockSettingsHelper.EXTRA_KEY_PRIMARY_CREDENTIAL, true);
 
             mPasswordType = intent.getIntExtra(
                     LockPatternUtils.PASSWORD_TYPE_KEY, PASSWORD_QUALITY_NUMERIC);
@@ -713,6 +722,15 @@ public class ChooseLockPassword extends SettingsActivity {
         }
 
         @Override
+        public void onStop() {
+            super.onStop();
+            if (!mPrimaryCredential && !getActivity().isChangingConfigurations()) {
+                getActivity().setResult(RESULT_NOT_FOREGROUND);
+                getActivity().finish();
+            }
+        }
+
+        @Override
         public void onSaveInstanceState(Bundle outState) {
             super.onSaveInstanceState(outState);
             outState.putString(KEY_UI_STAGE, mUiStage.name());
@@ -765,11 +783,11 @@ public class ChooseLockPassword extends SettingsActivity {
          * @return whether password satisfies all the requirements.
          */
         @VisibleForTesting
-        boolean validatePassword(LockscreenCredential credential) {
+        boolean validatePassword(LockscreenCredential credential, boolean primary) {
             mValidationErrors = PasswordMetrics.validateCredential(mMinMetrics, mMinComplexity,
                     credential);
             if (mValidationErrors.isEmpty() && mLockPatternUtils.checkPasswordHistory(
-                        credential.getCredential(), getPasswordHistoryHashFactor(), mUserId)) {
+                        credential.getCredential(), getPasswordHistoryHashFactor(), mUserId, primary)) {
                 mValidationErrors =
                         Collections.singletonList(new PasswordValidationError(RECENTLY_USED));
             }
@@ -799,7 +817,7 @@ public class ChooseLockPassword extends SettingsActivity {
             mChosenPassword = mIsAlphaMode ? LockscreenCredential.createPassword(passwordText)
                     : LockscreenCredential.createPin(passwordText);
             if (mUiStage == Stage.Introduction) {
-                if (validatePassword(mChosenPassword)) {
+                if (validatePassword(mChosenPassword, mPrimaryCredential)) {
                     mFirstPassword = mChosenPassword;
                     mPasswordEntry.setText("");
                     updateStage(Stage.NeedToConfirm);
@@ -972,11 +990,13 @@ public class ChooseLockPassword extends SettingsActivity {
 
             LockscreenCredential password = mIsAlphaMode
                     ? LockscreenCredential.createPassword(mPasswordEntry.getText())
+                    // TODO: Add mPrimaryCredential to this call. Might need to create the method
+                    //  because was originally using createPinOrNone.
                     : LockscreenCredential.createPin(mPasswordEntry.getText());
             final int length = password.size();
             if (mUiStage == Stage.Introduction) {
                 mPasswordRestrictionView.setVisibility(View.VISIBLE);
-                final boolean passwordCompliant = validatePassword(password);
+                final boolean passwordCompliant = validatePassword(password, mPrimaryCredential);
                 String[] messages = convertErrorCodeToMessages();
                 // Update the fulfillment of requirements.
                 mPasswordRequirementAdapter.setRequirements(messages);
@@ -1086,6 +1106,7 @@ public class ChooseLockPassword extends SettingsActivity {
                     .setListener(this)
                     .setRequestGatekeeperPasswordHandle(mRequestGatekeeperPassword)
                     .setRequestWriteRepairModePassword(mRequestWriteRepairModePassword);
+                    // TODO: Add .setPrimary.
 
             getFragmentManager().beginTransaction().add(mSaveAndFinishWorker,
                     FRAGMENT_TAG_SAVE_AND_FINISH).commit();
@@ -1103,10 +1124,10 @@ public class ChooseLockPassword extends SettingsActivity {
             // so that pinLength information is stored accordingly when setting is turned on.
             mLockPatternUtils.setAutoPinConfirm(
                     (mAutoPinConfirmOption != null && mAutoPinConfirmOption.isChecked()),
-                    mUserId);
+                    mUserId, mPrimaryCredential);
 
             mSaveAndFinishWorker.start(mLockPatternUtils,
-                    mChosenPassword, mCurrentCredential, mUserId);
+                    mChosenPassword, mCurrentCredential, mPrimaryCredential, mUserId);
         }
 
         @Override

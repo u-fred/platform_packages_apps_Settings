@@ -17,6 +17,7 @@
 // TODO (b/35202196): move this class out of the root of the package.
 package com.android.settings.password;
 
+import static android.app.Activity.RESULT_CANCELED;
 import static android.app.Activity.RESULT_FIRST_USER;
 import static android.app.admin.DevicePolicyResources.Strings.Settings.WORK_PROFILE_LOCK_ATTEMPTS_FAILED;
 
@@ -109,6 +110,8 @@ public abstract class ConfirmDeviceCredentialBaseFragment extends InstrumentedFr
     protected boolean mRepairMode;
     protected CharSequence mAlternateButtonText;
     protected BiometricManager mBiometricManager;
+    protected boolean mPrimaryCredential;
+
     @Nullable protected RemoteLockscreenValidationSession mRemoteLockscreenValidationSession;
     /** Credential saved so the credential can be set for device if remote validation passes */
     @Nullable protected RemoteLockscreenValidationClient mRemoteLockscreenValidationClient;
@@ -127,6 +130,8 @@ public abstract class ConfirmDeviceCredentialBaseFragment extends InstrumentedFr
                 KeyguardManager.EXTRA_ALTERNATE_BUTTON_LABEL);
         mReturnCredentials = intent.getBooleanExtra(
                 ChooseLockSettingsHelper.EXTRA_KEY_RETURN_CREDENTIALS, false);
+        mPrimaryCredential = intent.getBooleanExtra(
+                ChooseLockSettingsHelper.EXTRA_KEY_PRIMARY_CREDENTIAL, true);
 
         mReturnGatekeeperPassword = intent.getBooleanExtra(
                 ChooseLockSettingsHelper.EXTRA_KEY_REQUEST_GK_PW_HANDLE, false);
@@ -283,7 +288,8 @@ public abstract class ConfirmDeviceCredentialBaseFragment extends InstrumentedFr
     }
 
     protected void refreshLockScreen() {
-        updateErrorMessage(mLockPatternUtils.getCurrentFailedPasswordAttempts(mEffectiveUserId));
+        updateErrorMessage(mLockPatternUtils.getCurrentFailedPasswordAttempts(mEffectiveUserId,
+                mPrimaryCredential));
     }
 
     protected void setAccessibilityTitle(CharSequence supplementalText) {
@@ -327,10 +333,12 @@ public abstract class ConfirmDeviceCredentialBaseFragment extends InstrumentedFr
 
     protected void reportFailedAttempt() {
         updateErrorMessage(
-                mLockPatternUtils.getCurrentFailedPasswordAttempts(mEffectiveUserId) + 1);
-        mLockPatternUtils.reportFailedPasswordAttempt(mEffectiveUserId);
+                mLockPatternUtils.getCurrentFailedPasswordAttempts(mEffectiveUserId,
+                        mPrimaryCredential) + 1);
+        mLockPatternUtils.reportFailedPasswordAttempt(mEffectiveUserId, mPrimaryCredential);
     }
 
+    // TODO: Secondary.
     protected void updateErrorMessage(int numAttempts) {
         final int maxAttempts =
                 mLockPatternUtils.getMaximumFailedPasswordsForWipe(mEffectiveUserId);

@@ -69,6 +69,8 @@ import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowDrawable;
 
+// TODO: LPU.checkPasswordHistory via ChooseLockPassword.validatePassword
+
 @RunWith(RobolectricTestRunner.class)
 @Config(shadows = {
         SettingsShadowResources.class,
@@ -559,7 +561,7 @@ public class ChooseLockPasswordTest {
             Intent intent, String... expectedValidationResult) {
         ChooseLockPassword activity = buildChooseLockPasswordActivity(intent);
         ChooseLockPasswordFragment fragment = getChooseLockPasswordFragment(activity);
-        fragment.validatePassword(userEnteredPassword);
+        fragment.validatePassword(userEnteredPassword, true);
         String[] messages = fragment.convertErrorCodeToMessages();
         assertThat(messages).asList().containsExactly(expectedValidationResult);
     }

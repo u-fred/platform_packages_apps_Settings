@@ -64,13 +64,13 @@ public class PowerButtonInstantLockPreferenceControllerTest {
 
         mPreference = new SwitchPreference(mContext);
         mController = new PowerButtonInstantLockPreferenceController(
-                mContext, TEST_USER_ID, mLockPatternUtils);
+                mContext, TEST_USER_ID, mLockPatternUtils, true);
     }
 
     @Test
     public void isAvailable_lockSetToPattern_shouldReturnTrue() {
         when(mLockPatternUtils.isSecure(TEST_USER_ID)).thenReturn(true);
-        when(mLockPatternUtils.getKeyguardStoredPasswordQuality(TEST_USER_ID))
+        when(mLockPatternUtils.getKeyguardStoredPasswordQuality(TEST_USER_ID, true))
                 .thenReturn(DevicePolicyManager.PASSWORD_QUALITY_SOMETHING);
 
         assertThat(mController.isAvailable()).isTrue();
@@ -79,7 +79,7 @@ public class PowerButtonInstantLockPreferenceControllerTest {
     @Test
     public void isAvailable_lockSetToPin_shouldReturnTrue() {
         when(mLockPatternUtils.isSecure(TEST_USER_ID)).thenReturn(true);
-        when(mLockPatternUtils.getKeyguardStoredPasswordQuality(TEST_USER_ID))
+        when(mLockPatternUtils.getKeyguardStoredPasswordQuality(TEST_USER_ID, true))
                 .thenReturn(DevicePolicyManager.PASSWORD_QUALITY_NUMERIC);
 
         assertThat(mController.isAvailable()).isTrue();
@@ -88,7 +88,7 @@ public class PowerButtonInstantLockPreferenceControllerTest {
     @Test
     public void isAvailable_lockSetToPassword_shouldReturnTrue() {
         when(mLockPatternUtils.isSecure(TEST_USER_ID)).thenReturn(true);
-        when(mLockPatternUtils.getKeyguardStoredPasswordQuality(TEST_USER_ID))
+        when(mLockPatternUtils.getKeyguardStoredPasswordQuality(TEST_USER_ID, true))
                 .thenReturn(DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC);
 
         assertThat(mController.isAvailable()).isTrue();

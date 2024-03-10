@@ -857,7 +857,7 @@ public class ChooseLockPattern extends SettingsActivity {
                 }
             }
             mSaveAndFinishWorker.start(mLockPatternUtils,
-                    mChosenPattern, mCurrentCredential, mUserId);
+                    mChosenPattern, mCurrentCredential, true, mUserId);
         }
 
         @Override

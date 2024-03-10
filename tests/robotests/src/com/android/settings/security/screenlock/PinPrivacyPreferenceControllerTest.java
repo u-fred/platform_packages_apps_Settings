@@ -37,12 +37,21 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
+import org.robolectric.ParameterizedRobolectricTestRunner;
+import org.robolectric.ParameterizedRobolectricTestRunner.Parameter;
+import org.robolectric.ParameterizedRobolectricTestRunner.Parameters;
 
-@RunWith(RobolectricTestRunner.class)
+import java.util.Arrays;
+import java.util.Collection;
+
+@RunWith(ParameterizedRobolectricTestRunner.class)
 public class PinPrivacyPreferenceControllerTest {
-
+    @Parameter public boolean mPrimary;
+    @Parameters
+    public static Collection<Boolean> parameters() {
+        return Arrays.asList(true, false);
+    }
     private static final int TEST_USER_ID = 0;
 
     @Mock
@@ -56,34 +65,44 @@ public class PinPrivacyPreferenceControllerTest {
         MockitoAnnotations.initMocks(this);
         mContext = RuntimeEnvironment.application;
         mController =
-                new PinPrivacyPreferenceController(mContext, TEST_USER_ID, mLockPatternUtils);
+                new PinPrivacyPreferenceController(mContext, TEST_USER_ID, mLockPatternUtils,
+                        mPrimary);
         mPreference = new SwitchPreference(mContext);
     }
 
     @Test
     public void isAvailable_lockSetToPin_shouldReturnTrue() {
-        when(mLockPatternUtils.getCredentialTypeForUser(TEST_USER_ID)).thenReturn(
+        when(mLockPatternUtils.getCredentialTypeForUser(TEST_USER_ID, mPrimary)).thenReturn(
                 CREDENTIAL_TYPE_PIN);
+        assertThat(mController.isAvailable()).isTrue();
+    }
+
+    @Ignore("b/313612259")
+    @Test
+    public void isAvailable_lockSetToPinOrPw_shouldReturnTrue() {
+        when(mLockPatternUtils.getCredentialTypeForUser(TEST_USER_ID, mPrimary)).thenReturn(
+                CREDENTIAL_TYPE_PASSWORD_OR_PIN);
         assertThat(mController.isAvailable()).isTrue();
     }
 
     @Test
     public void isAvailable_lockSetToOther_shouldReturnFalse() {
-        when(mLockPatternUtils.getCredentialTypeForUser(TEST_USER_ID)).thenReturn(
+        when(mLockPatternUtils.getCredentialTypeForUser(TEST_USER_ID, mPrimary)).thenReturn(
                 CREDENTIAL_TYPE_PATTERN);
         assertThat(mController.isAvailable()).isFalse();
     }
 
     @Test
     public void updateState_shouldSetPref() {
-        when(mLockPatternUtils.isPinEnhancedPrivacyEnabled(TEST_USER_ID)).thenReturn(true);
+        when(mLockPatternUtils.isPinEnhancedPrivacyEnabled(TEST_USER_ID, mPrimary)).thenReturn(true);
         mController.updateState(mPreference);
         assertThat(mPreference.isChecked()).isTrue();
     }
 
     @Test
     public void updateState_shouldSetPref_false() {
-        when(mLockPatternUtils.isPinEnhancedPrivacyEnabled(TEST_USER_ID)).thenReturn(false);
+        when(mLockPatternUtils.isPinEnhancedPrivacyEnabled(TEST_USER_ID, mPrimary)).thenReturn(
+                false);
         mController.updateState(mPreference);
         assertThat(mPreference.isChecked()).isFalse();
     }
@@ -91,7 +110,7 @@ public class PinPrivacyPreferenceControllerTest {
     @Test
     public void onPreferenceChange_shouldUpdateLockPatternUtils() {
         mController.onPreferenceChange(mPreference, true);
-        verify(mLockPatternUtils).setPinEnhancedPrivacyEnabled(true, TEST_USER_ID);
+        verify(mLockPatternUtils).setPinEnhancedPrivacyEnabled(true, TEST_USER_ID, mPrimary);
     }
 
     @Test

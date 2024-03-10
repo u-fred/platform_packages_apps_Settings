@@ -67,10 +67,10 @@ public class ConfirmDeviceCredentialUtils {
     }
 
     public static void reportSuccessfulAttempt(LockPatternUtils utils, UserManager userManager,
-            DevicePolicyManager dpm, int userId, boolean isStrongAuth) {
+            DevicePolicyManager dpm, int userId, boolean primary, boolean isStrongAuth) {
         if (isStrongAuth) {
-            utils.reportSuccessfulPasswordAttempt(userId);
-            if (isBiometricUnlockEnabledForPrivateSpace()) {
+            utils.reportSuccessfulPasswordAttempt(userId, primary, false);
+            if (primary && isBiometricUnlockEnabledForPrivateSpace()) {
                 final UserInfo userInfo = userManager.getUserInfo(userId);
                 if (userInfo != null) {
                     if (isProfileThatAlwaysRequiresAuthToDisableQuietMode(userManager, userInfo)
@@ -84,7 +84,7 @@ public class ConfirmDeviceCredentialUtils {
         } else {
             dpm.reportSuccessfulBiometricAttempt(userId);
         }
-        if (!isBiometricUnlockEnabledForPrivateSpace()) {
+        if (primary && !isBiometricUnlockEnabledForPrivateSpace()) {
             if (userManager.isManagedProfile(userId)) {
                 // Disable StrongAuth for work challenge only here.
                 utils.userPresent(userId);

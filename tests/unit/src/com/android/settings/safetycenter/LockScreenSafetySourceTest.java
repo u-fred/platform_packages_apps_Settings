@@ -89,7 +89,7 @@ public class LockScreenSafetySourceTest {
     public void setSafetySourceData_whenScreenLockEnabled_safetyCenterDisabled_doesNotSetData() {
         whenScreenLockIsEnabled();
         when(mSafetyCenterManagerWrapper.isEnabled(mApplicationContext)).thenReturn(false);
-        when(mScreenLockPreferenceDetailsUtils.isAvailable()).thenReturn(true);
+        when(mScreenLockPreferenceDetailsUtils.isAvailable(anyInt())).thenReturn(true);
 
         LockScreenSafetySource.setSafetySourceData(
                 mApplicationContext, mScreenLockPreferenceDetailsUtils, EVENT_SOURCE_STATE_CHANGED);
@@ -101,7 +101,7 @@ public class LockScreenSafetySourceTest {
     @Test
     public void setSafetySourceData_whenScreenLockIsDisabled_setsNullData() {
         when(mSafetyCenterManagerWrapper.isEnabled(mApplicationContext)).thenReturn(true);
-        when(mScreenLockPreferenceDetailsUtils.isAvailable()).thenReturn(false);
+        when(mScreenLockPreferenceDetailsUtils.isAvailable(anyInt())).thenReturn(false);
 
         LockScreenSafetySource.setSafetySourceData(
                 mApplicationContext, mScreenLockPreferenceDetailsUtils, EVENT_SOURCE_STATE_CHANGED);
@@ -512,7 +512,7 @@ public class LockScreenSafetySourceTest {
     }
 
     private void whenScreenLockIsEnabled() {
-        when(mScreenLockPreferenceDetailsUtils.isAvailable()).thenReturn(true);
+        when(mScreenLockPreferenceDetailsUtils.isAvailable(anyInt())).thenReturn(true);
         when(mScreenLockPreferenceDetailsUtils.getSummary(anyInt())).thenReturn(SUMMARY);
 
         Intent launchChooseLockGenericFragment = new Intent(FAKE_ACTION_OPEN_SUB_SETTING);
