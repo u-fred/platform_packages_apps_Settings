@@ -71,6 +71,8 @@ public final class ChooseLockSettingsHelper {
     // Gatekeeper password handle, which can subsequently be used to generate Gatekeeper
     // HardwareAuthToken(s) via LockSettingsService#verifyGatekeeperPasswordHandle
     public static final String EXTRA_KEY_GK_PW_HANDLE = "gk_pw_handle";
+    // Whether we are doing an operation involving the primary or secondary credential.
+    public static final String EXTRA_KEY_PRIMARY_CREDENTIAL = "primary_credential";
     public static final String EXTRA_KEY_REQUEST_WRITE_REPAIR_MODE_PW =
             "request_write_repair_mode_pw";
     public static final String EXTRA_KEY_WROTE_REPAIR_MODE_CREDENTIAL =

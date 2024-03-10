@@ -162,6 +162,9 @@ public class ChooseLockGeneric extends SettingsActivity {
         private boolean mRequestGatekeeperPasswordHandle = false;
         private boolean mPasswordConfirmed = false;
         private boolean mWaitingForConfirmation = false;
+        // Whether we are setting a primary or secondary credential.
+        private boolean mPrimaryCredential;
+        // This is always the primary credential, even if we are setting secondary credential.
         private LockscreenCredential mUserPassword;
         private FingerprintManager mFingerprintManager;
         private FaceManager mFaceManager;
@@ -253,6 +256,9 @@ public class ChooseLockGeneric extends SettingsActivity {
             mExtraLockScreenTitleResId = intent.getIntExtra(EXTRA_KEY_CHOOSE_LOCK_SCREEN_TITLE, -1);
             mExtraLockScreenDescriptionResId =
                     intent.getIntExtra(EXTRA_KEY_CHOOSE_LOCK_SCREEN_DESCRIPTION, -1);
+            
+            mPrimaryCredential = intent.getBooleanExtra(
+                    ChooseLockSettingsHelper.EXTRA_KEY_PRIMARY_CREDENTIAL, true);
 
             mRequestedMinComplexity = intent.getIntExtra(
                     EXTRA_KEY_REQUESTED_MIN_COMPLEXITY, PASSWORD_COMPLEXITY_NONE);
@@ -722,12 +728,12 @@ public class ChooseLockGeneric extends SettingsActivity {
         private String getKeyForCurrent() {
             final int credentialOwner = UserManager.get(getContext())
                     .getCredentialOwnerProfile(mUserId);
-            if (mLockPatternUtils.isLockScreenDisabled(credentialOwner)) {
+            if (mLockPatternUtils.isLockScreenDisabled(credentialOwner, mPrimaryCredential)) {
                 return ScreenLockType.NONE.preferenceKey;
             }
             ScreenLockType lock =
                     ScreenLockType.fromQuality(
-                            mLockPatternUtils.getKeyguardStoredPasswordQuality(credentialOwner));
+                            mLockPatternUtils.getKeyguardStoredPasswordQuality(credentialOwner, mPrimaryCredential));
             return lock != null ? lock.preferenceKey : null;
         }
 
@@ -823,6 +829,9 @@ public class ChooseLockGeneric extends SettingsActivity {
                     intent.putExtra(EXTRA_KEY_REQUEST_WRITE_REPAIR_MODE_PW, true);
                 }
                 intent.putExtra(EXTRA_CHOOSE_LOCK_GENERIC_EXTRAS, getIntent().getExtras());
+                if (!mPrimaryCredential) {
+                    intent.putExtra(ChooseLockSettingsHelper.EXTRA_KEY_PRIMARY_CREDENTIAL, false);
+                }
                 // If the caller requested Gatekeeper Password Handle to be returned, we assume it
                 // came from biometric enrollment. onActivityResult will put the LockSettingsService
                 // into the extras and launch biometric enrollment. This should be cleaned up,
@@ -842,7 +851,7 @@ public class ChooseLockGeneric extends SettingsActivity {
                     // No need to call setLockCredential if the user currently doesn't
                     // have a password
                     mLockPatternUtils.setLockCredential(
-                            LockscreenCredential.createNone(), mUserPassword, mUserId);
+                            LockscreenCredential.createNone(mPrimaryCredential), mUserPassword, mUserId);
                 }
                 mLockPatternUtils.setLockScreenDisabled(disabled, mUserId);
                 getActivity().setResult(Activity.RESULT_OK);

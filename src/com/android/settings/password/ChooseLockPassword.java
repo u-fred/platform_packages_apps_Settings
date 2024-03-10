@@ -231,6 +231,9 @@ public class ChooseLockPassword extends SettingsActivity {
 
         private static final int MIN_AUTO_PIN_REQUIREMENT_LENGTH = 6;
 
+        // Whether we are setting a primary or secondary credential.
+        private boolean mPrimaryCredential;
+        // This is always the primary credential, even if we are setting secondary credential.
         private LockscreenCredential mCurrentCredential;
         private LockscreenCredential mChosenPassword;
         private boolean mRequestGatekeeperPassword;
@@ -461,6 +464,9 @@ public class ChooseLockPassword extends SettingsActivity {
             mForFace = intent.getBooleanExtra(ChooseLockSettingsHelper.EXTRA_KEY_FOR_FACE, false);
             mForBiometrics = intent.getBooleanExtra(
                     ChooseLockSettingsHelper.EXTRA_KEY_FOR_BIOMETRICS, false);
+
+            mPrimaryCredential = intent.getBooleanExtra(
+                    ChooseLockSettingsHelper.EXTRA_KEY_PRIMARY_CREDENTIAL, true);
 
             mPasswordType = intent.getIntExtra(
                     LockPatternUtils.PASSWORD_TYPE_KEY, PASSWORD_QUALITY_NUMERIC);
@@ -772,7 +778,7 @@ public class ChooseLockPassword extends SettingsActivity {
                 return;
             }
             mChosenPassword = mIsAlphaMode ? LockscreenCredential.createPassword(passwordText)
-                    : LockscreenCredential.createPin(passwordText);
+                    : LockscreenCredential.createPin(passwordText, mPrimaryCredential);
             if (mUiStage == Stage.Introduction) {
                 if (validatePassword(mChosenPassword)) {
                     mFirstPassword = mChosenPassword;
@@ -947,6 +953,8 @@ public class ChooseLockPassword extends SettingsActivity {
 
             LockscreenCredential password = mIsAlphaMode
                     ? LockscreenCredential.createPassword(mPasswordEntry.getText())
+                    // TODO: Add mPrimaryCredential to this call. Might need to create the method
+                    //  because was originally using createPinOrNone.
                     : LockscreenCredential.createPin(mPasswordEntry.getText());
             final int length = password.size();
             if (mUiStage == Stage.Introduction) {
