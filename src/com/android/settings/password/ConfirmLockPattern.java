@@ -272,7 +272,7 @@ public class ConfirmLockPattern extends ConfirmDeviceCredentialBaseActivity {
             super.onResume();
 
             // if the user is currently locked out, enforce it.
-            long deadline = mLockPatternUtils.getLockoutAttemptDeadline(mEffectiveUserId);
+            long deadline = mLockPatternUtils.getLockoutAttemptDeadline(mEffectiveUserId, true);
             if (deadline != 0) {
                 mCredentialCheckResultTracker.clearResult();
                 handleAttemptLockout(deadline);
@@ -379,7 +379,8 @@ public class ConfirmLockPattern extends ConfirmDeviceCredentialBaseActivity {
 
                     mErrorTextView.setText("");
                     updateErrorMessage(
-                            mLockPatternUtils.getCurrentFailedPasswordAttempts(mEffectiveUserId));
+                            mLockPatternUtils.getCurrentFailedPasswordAttempts(mEffectiveUserId,
+                                    true));
 
                     mLockPatternView.setEnabled(true);
                     mLockPatternView.enableInput();
@@ -556,13 +557,16 @@ public class ConfirmLockPattern extends ConfirmDeviceCredentialBaseActivity {
                                         ChooseLockSettingsHelper.EXTRA_KEY_CHALLENGE_TOKEN,
                                         response.getGatekeeperHAT());
                             }
+                            // TODO: Review this. Adding to make consistent with
+                            //  ConfirmLockPassword.
+                            intent.putExtra(ChooseLockSettingsHelper.EXTRA_KEY_PASSWORD, pattern);
                         }
                         mCredentialCheckResultTracker.setResult(matched, intent, timeoutMs,
                                 localEffectiveUserId);
                 };
                 mPendingLockCheck = (localEffectiveUserId == localUserId)
                         ? LockPatternChecker.verifyCredential(
-                                mLockPatternUtils, pattern, localUserId, flags,
+                                mLockPatternUtils, pattern, true, localUserId, flags,
                                 onVerifyCallback)
                         : LockPatternChecker.verifyTiedProfileChallenge(
                                 mLockPatternUtils, pattern, localUserId, flags,
@@ -581,6 +585,7 @@ public class ConfirmLockPattern extends ConfirmDeviceCredentialBaseActivity {
                 mPendingLockCheck = LockPatternChecker.checkCredential(
                         mLockPatternUtils,
                         pattern,
+                        true,
                         localEffectiveUserId,
                         new LockPatternChecker.OnCheckCallback() {
                             @Override
@@ -603,7 +608,7 @@ public class ConfirmLockPattern extends ConfirmDeviceCredentialBaseActivity {
             if (matched) {
                 if (newResult) {
                     ConfirmDeviceCredentialUtils.reportSuccessfulAttempt(mLockPatternUtils,
-                            mUserManager, mDevicePolicyManager, mEffectiveUserId,
+                            mUserManager, mDevicePolicyManager, mEffectiveUserId, true,
                             /* isStrongAuth */ true);
                 }
                 startDisappearAnimation(intent);
@@ -612,7 +617,7 @@ public class ConfirmLockPattern extends ConfirmDeviceCredentialBaseActivity {
                 if (timeoutMs > 0) {
                     refreshLockScreen();
                     long deadline = mLockPatternUtils.setLockoutAttemptDeadline(
-                            effectiveUserId, timeoutMs);
+                            effectiveUserId, true, timeoutMs);
                     handleAttemptLockout(deadline);
                 } else {
                     updateStage(Stage.NeedToUnlockWrong);
@@ -643,6 +648,7 @@ public class ConfirmLockPattern extends ConfirmDeviceCredentialBaseActivity {
                                 mLockPatternUtils,
                                 mRemoteLockscreenValidationFragment.getLockscreenCredential(),
                                 /* currentCredential= */ null,
+                                true,
                                 mEffectiveUserId);
                     } else {
                         mCredentialCheckResultTracker.setResult(/* matched= */ true, new Intent(),

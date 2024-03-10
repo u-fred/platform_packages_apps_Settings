@@ -20,6 +20,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -86,7 +87,7 @@ public class ChangeScreenLockPreferenceControllerTest {
                 .thenReturn(mDevicePolicyManager);
         final SettingsPreferenceFragment host = mock(SettingsPreferenceFragment.class);
         when(host.getMetricsCategory()).thenReturn(METRICS_CATEGORY);
-        mController = new ChangeScreenLockPreferenceController(mContext, host);
+        mController = new ChangeScreenLockPreferenceController(mContext, host, true);
     }
 
     @Test
@@ -103,7 +104,7 @@ public class ChangeScreenLockPreferenceControllerTest {
     @Test
     public void updateState_notSecureDisableKeyguard_shouldNotShowGear() {
         when(mLockPatternUtils.isSecure(anyInt())).thenReturn(false);
-        when(mLockPatternUtils.isLockScreenDisabled(anyInt())).thenReturn(true);
+        when(mLockPatternUtils.isLockScreenDisabled(anyInt(), eq(true))).thenReturn(true);
         mockGearPreferenceAndViewHolder();
 
         showPreference();
@@ -114,7 +115,7 @@ public class ChangeScreenLockPreferenceControllerTest {
     @Test
     public void updateState_notSecureDisableKeyguard_summaryShouldShowOff() {
         when(mLockPatternUtils.isSecure(anyInt())).thenReturn(false);
-        when(mLockPatternUtils.isLockScreenDisabled(anyInt())).thenReturn(true);
+        when(mLockPatternUtils.isLockScreenDisabled(anyInt(), eq(true))).thenReturn(true);
         mockGearPreferenceAndViewHolder();
 
         showPreference();
@@ -126,7 +127,7 @@ public class ChangeScreenLockPreferenceControllerTest {
     @Test
     public void updateState_notSecureWithSwipeKeyguard_shouldNotShowGear() {
         when(mLockPatternUtils.isSecure(anyInt())).thenReturn(false);
-        when(mLockPatternUtils.isLockScreenDisabled(anyInt())).thenReturn(false);
+        when(mLockPatternUtils.isLockScreenDisabled(anyInt(), eq(true))).thenReturn(false);
         mockGearPreferenceAndViewHolder();
 
         showPreference();
@@ -137,7 +138,7 @@ public class ChangeScreenLockPreferenceControllerTest {
     @Test
     public void updateState_notSecureWithSwipeKeyguard_summaryShouldShowSwipe() {
         when(mLockPatternUtils.isSecure(anyInt())).thenReturn(false);
-        when(mLockPatternUtils.isLockScreenDisabled(anyInt())).thenReturn(false);
+        when(mLockPatternUtils.isLockScreenDisabled(anyInt(), eq(true))).thenReturn(false);
         mockGearPreferenceAndViewHolder();
 
         showPreference();
@@ -149,9 +150,9 @@ public class ChangeScreenLockPreferenceControllerTest {
     @Test
     public void updateState_secureWithPinKeyguard_shouldShowGear() {
         when(mLockPatternUtils.isSecure(anyInt())).thenReturn(true);
-        when(mLockPatternUtils.isLockScreenDisabled(anyInt())).thenReturn(false);
+        when(mLockPatternUtils.isLockScreenDisabled(anyInt(), eq(true))).thenReturn(false);
         doReturn(DevicePolicyManager.PASSWORD_QUALITY_NUMERIC_COMPLEX).when(mLockPatternUtils)
-                .getKeyguardStoredPasswordQuality(anyInt());
+                .getKeyguardStoredPasswordQuality(anyInt(), eq(true));
         mockGearPreferenceAndViewHolder();
 
         showPreference();
@@ -162,9 +163,9 @@ public class ChangeScreenLockPreferenceControllerTest {
     @Test
     public void updateState_secureWithPinKeyguard_summaryShouldShowPin() {
         when(mLockPatternUtils.isSecure(anyInt())).thenReturn(true);
-        when(mLockPatternUtils.isLockScreenDisabled(anyInt())).thenReturn(false);
+        when(mLockPatternUtils.isLockScreenDisabled(anyInt(), eq(true))).thenReturn(false);
         doReturn(DevicePolicyManager.PASSWORD_QUALITY_NUMERIC_COMPLEX).when(mLockPatternUtils)
-                .getKeyguardStoredPasswordQuality(anyInt());
+                .getKeyguardStoredPasswordQuality(anyInt(), eq(true));
 
         mockGearPreferenceAndViewHolder();
 
@@ -177,9 +178,9 @@ public class ChangeScreenLockPreferenceControllerTest {
     @Test
     public void updateState_secureWithPasswordKeyguard_shouldShowGear() {
         when(mLockPatternUtils.isSecure(anyInt())).thenReturn(true);
-        when(mLockPatternUtils.isLockScreenDisabled(anyInt())).thenReturn(false);
+        when(mLockPatternUtils.isLockScreenDisabled(anyInt(), eq(true))).thenReturn(false);
         doReturn(DevicePolicyManager.PASSWORD_QUALITY_COMPLEX).when(mLockPatternUtils)
-                .getKeyguardStoredPasswordQuality(anyInt());
+                .getKeyguardStoredPasswordQuality(anyInt(), eq(true));
         mockGearPreferenceAndViewHolder();
 
         showPreference();
@@ -190,9 +191,9 @@ public class ChangeScreenLockPreferenceControllerTest {
     @Test
     public void updateState_secureWithPasswordKeyguard_summaryShouldShowPassword() {
         when(mLockPatternUtils.isSecure(anyInt())).thenReturn(true);
-        when(mLockPatternUtils.isLockScreenDisabled(anyInt())).thenReturn(false);
+        when(mLockPatternUtils.isLockScreenDisabled(anyInt(), eq(true))).thenReturn(false);
         doReturn(DevicePolicyManager.PASSWORD_QUALITY_COMPLEX).when(mLockPatternUtils)
-                .getKeyguardStoredPasswordQuality(anyInt());
+                .getKeyguardStoredPasswordQuality(anyInt(), eq(true));
         mockGearPreferenceAndViewHolder();
 
         showPreference();
@@ -204,9 +205,9 @@ public class ChangeScreenLockPreferenceControllerTest {
     @Test
     public void updateState_secureWithPatternKeyguard_shouldShowGear() {
         when(mLockPatternUtils.isSecure(anyInt())).thenReturn(true);
-        when(mLockPatternUtils.isLockScreenDisabled(anyInt())).thenReturn(false);
+        when(mLockPatternUtils.isLockScreenDisabled(anyInt(), eq(true))).thenReturn(false);
         doReturn(DevicePolicyManager.PASSWORD_QUALITY_SOMETHING).when(mLockPatternUtils)
-                .getKeyguardStoredPasswordQuality(anyInt());
+                .getKeyguardStoredPasswordQuality(anyInt(), eq(true));
         mockGearPreferenceAndViewHolder();
 
         showPreference();
@@ -217,9 +218,9 @@ public class ChangeScreenLockPreferenceControllerTest {
     @Test
     public void updateState_secureWithPatternKeyguard_summaryShouldShowPattern() {
         when(mLockPatternUtils.isSecure(anyInt())).thenReturn(true);
-        when(mLockPatternUtils.isLockScreenDisabled(anyInt())).thenReturn(false);
+        when(mLockPatternUtils.isLockScreenDisabled(anyInt(), eq(true))).thenReturn(false);
         doReturn(DevicePolicyManager.PASSWORD_QUALITY_SOMETHING).when(mLockPatternUtils)
-                .getKeyguardStoredPasswordQuality(anyInt());
+                .getKeyguardStoredPasswordQuality(anyInt(), eq(true));
         mockGearPreferenceAndViewHolder();
 
         showPreference();

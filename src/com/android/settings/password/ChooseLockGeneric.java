@@ -126,6 +126,8 @@ public class ChooseLockGeneric extends SettingsActivity {
         private static final String KEY_SKIP_BIOMETRICS = "unlock_skip_biometrics";
         private static final String PASSWORD_CONFIRMED = "password_confirmed";
         private static final String WAITING_FOR_CONFIRMATION = "waiting_for_confirmation";
+        private static final String CHOOSE_LOCK_REQUEST_LAUNCHED = "choose_lock_request_launched";
+
         public static final String HIDE_INSECURE_OPTIONS = "hide_insecure_options";
         public static final String TAG_FRP_WARNING_DIALOG = "frp_warning_dialog";
         public static final String KEY_LOCK_SETTINGS_FOOTER ="lock_settings_footer";
@@ -159,12 +161,17 @@ public class ChooseLockGeneric extends SettingsActivity {
         @VisibleForTesting
         static final int SKIP_FINGERPRINT_REQUEST = 104;
 
+        public static final int RESULT_APP_NOT_FOREGROUND = RESULT_FIRST_USER;
+
         private LockPatternUtils mLockPatternUtils;
         private DevicePolicyManager mDpm;
         private boolean mRequestGatekeeperPasswordHandle = false;
         private boolean mPasswordConfirmed = false;
         private boolean mWaitingForConfirmation = false;
         private boolean mWaitingForActivityResult = false;
+        // Whether we are setting a primary or secondary credential.
+        private boolean mPrimaryCredential;
+        // This is always the primary credential, even if we are setting secondary credential.
         private LockscreenCredential mUserPassword;
         private FingerprintManager mFingerprintManager;
         private FaceManager mFaceManager;
@@ -206,6 +213,7 @@ public class ChooseLockGeneric extends SettingsActivity {
         private int mExtraLockScreenTitleResId;
         private int mExtraLockScreenDescriptionResId;
         private boolean mWaitingForBiometricEnrollment = false;
+        private boolean mChooseLockRequestLaunched;
 
         @Override
         public int getMetricsCategory() {
@@ -235,7 +243,8 @@ public class ChooseLockGeneric extends SettingsActivity {
             // Defaults to needing to confirm credentials
             final boolean confirmCredentials = intent
                 .getBooleanExtra(CONFIRM_CREDENTIALS, true);
-            if (activity instanceof ChooseLockGeneric.InternalActivity) {
+            // TODO: Review this.
+            if (intent.hasExtra(ChooseLockSettingsHelper.EXTRA_KEY_PASSWORD)) {
                 mPasswordConfirmed = !confirmCredentials;
                 mUserPassword = intent.getParcelableExtra(
                         ChooseLockSettingsHelper.EXTRA_KEY_PASSWORD);
@@ -259,6 +268,9 @@ public class ChooseLockGeneric extends SettingsActivity {
             mExtraLockScreenDescriptionResId =
                     intent.getIntExtra(EXTRA_KEY_CHOOSE_LOCK_SCREEN_DESCRIPTION, -1);
 
+            mPrimaryCredential = intent.getBooleanExtra(
+                    ChooseLockSettingsHelper.EXTRA_KEY_PRIMARY_CREDENTIAL, true);
+
             mRequestedMinComplexity = intent.getIntExtra(
                     EXTRA_KEY_REQUESTED_MIN_COMPLEXITY, PASSWORD_COMPLEXITY_NONE);
             mOnlyEnforceDevicePasswordRequirement = intent.getBooleanExtra(
@@ -281,6 +293,8 @@ public class ChooseLockGeneric extends SettingsActivity {
                 mWaitingForConfirmation = savedInstanceState.getBoolean(WAITING_FOR_CONFIRMATION);
                 mUserPassword = savedInstanceState.getParcelable(
                         ChooseLockSettingsHelper.EXTRA_KEY_PASSWORD);
+                mChooseLockRequestLaunched = savedInstanceState.getBoolean(
+                        CHOOSE_LOCK_REQUEST_LAUNCHED);
             }
 
             // a) If this is started from other user, use that user id.
@@ -300,6 +314,11 @@ public class ChooseLockGeneric extends SettingsActivity {
                     .setProfileToUnify(mUnificationProfileId)
                     .setHideInsecureScreenLockTypes(alwaysHideInsecureScreenLockTypes()
                             || intent.getBooleanExtra(HIDE_INSECURE_OPTIONS, false))
+                    // TODO: Reminder that we need to unify terminology. There is a secondary screen
+                    //  lock in Keyguard that is unrelated to what we are adding. Might need to
+                    //  remove all referenes to primary/secondary and change to
+                    //  biometricSecondFactor.
+                    .setPrimaryScreenLock(mPrimaryCredential)
                     .build();
 
             // If the complexity is provided by the admin, do not get the caller app's name.
@@ -374,11 +393,21 @@ public class ChooseLockGeneric extends SettingsActivity {
                 // Show customized screen lock title if it is passed as an extra in the intent.
                 getActivity().setTitle(mExtraLockScreenTitleResId);
             } else {
-                updateExistingLock = mLockPatternUtils.isSecure(mUserId);
+                updateExistingLock = mLockPatternUtils.isSecure(mUserId, mPrimaryCredential);
                 if (updateExistingLock) {
-                    getActivity().setTitle(R.string.lock_settings_picker_update_lock_title);
+                    if (mPrimaryCredential) {
+                        getActivity().setTitle(R.string.lock_settings_picker_update_lock_title);
+                    } else {
+                        getActivity().setTitle(
+                                R.string.lock_settings_picker_update_biometric_second_factor_title);
+                    }
                 } else {
-                    getActivity().setTitle(R.string.lock_settings_picker_new_lock_title);
+                    if (mPrimaryCredential) {
+                        getActivity().setTitle(R.string.lock_settings_picker_new_lock_title);
+                    } else {
+                        getActivity().setTitle(
+                                R.string.lock_settings_picker_new_biometric_second_factor_title);
+                    }
                 }
             }
         }
@@ -437,7 +466,8 @@ public class ChooseLockGeneric extends SettingsActivity {
             writePreferenceClickMetric(preference);
 
             final String key = preference.getKey();
-            if (!isUnlockMethodSecure(key) && mLockPatternUtils.isSecure(mUserId)) {
+            if (!isUnlockMethodSecure(key) && mLockPatternUtils.isSecure(mUserId,
+                    mPrimaryCredential)) {
                 // Show the disabling FRP warning only when the user is switching from a secure
                 // unlock method to an insecure one
                 showFactoryResetProtectionWarningDialog(key, GateKeeper.getSecureUserId(mUserId));
@@ -484,8 +514,20 @@ public class ChooseLockGeneric extends SettingsActivity {
                     : null;
                 updatePreferencesOrFinish(false /* isRecreatingActivity */);
             } else if (requestCode == CHOOSE_LOCK_REQUEST) {
-                if (resultCode != RESULT_CANCELED) {
-                    getActivity().setResult(resultCode, data);
+                mChooseLockRequestLaunched = false;
+                if (resultCode ==
+                        ChooseLockPassword.ChooseLockPasswordFragment.RESULT_NOT_FOREGROUND) {
+                    getActivity().setResult(RESULT_APP_NOT_FOREGROUND, data);
+                    finish();
+                } else if (resultCode != RESULT_CANCELED) {
+                    // Existing code expects result to be forwarded, but we much prefer to avoid
+                    // doing this where possible.
+                    if (mPrimaryCredential) {
+                        getActivity().setResult(resultCode, data);
+                    } else {
+                        getActivity().setResult(RESULT_OK, data);
+                    }
+                    finish();
                 } else {
                     // If PASSWORD_TYPE_KEY is set, this activity is used as a trampoline to start
                     // the actual password enrollment. If the result is canceled, which means the
@@ -543,6 +585,7 @@ public class ChooseLockGeneric extends SettingsActivity {
                 outState.putParcelable(ChooseLockSettingsHelper.EXTRA_KEY_PASSWORD,
                         mUserPassword.duplicate());
             }
+            outState.putBoolean(CHOOSE_LOCK_REQUEST_LAUNCHED, mChooseLockRequestLaunched);
         }
 
         @VisibleForTesting
@@ -722,19 +765,23 @@ public class ChooseLockGeneric extends SettingsActivity {
             String currentKey = getKeyForCurrent();
             Preference preference = findPreference(currentKey);
             if (preference != null) {
-                preference.setSummary(R.string.current_screen_lock);
+                if (mPrimaryCredential) {
+                    preference.setSummary(R.string.current_screen_lock);
+                } else {
+                    preference.setSummary(R.string.current_biometric_second_factor);
+                }
             }
         }
 
         private String getKeyForCurrent() {
             final int credentialOwner = UserManager.get(getContext())
                     .getCredentialOwnerProfile(mUserId);
-            if (mLockPatternUtils.isLockScreenDisabled(credentialOwner)) {
+            if (mLockPatternUtils.isLockScreenDisabled(credentialOwner, mPrimaryCredential)) {
                 return ScreenLockType.NONE.preferenceKey;
             }
             ScreenLockType lock =
                     ScreenLockType.fromQuality(
-                            mLockPatternUtils.getKeyguardStoredPasswordQuality(credentialOwner));
+                            mLockPatternUtils.getKeyguardStoredPasswordQuality(credentialOwner, mPrimaryCredential));
             return lock != null ? lock.preferenceKey : null;
         }
 
@@ -831,15 +878,22 @@ public class ChooseLockGeneric extends SettingsActivity {
                     mWaitingForActivityResult = true;
                 }
                 intent.putExtra(EXTRA_CHOOSE_LOCK_GENERIC_EXTRAS, getIntent().getExtras());
+                if (!mPrimaryCredential) {
+                    intent.putExtra(ChooseLockSettingsHelper.EXTRA_KEY_PRIMARY_CREDENTIAL, false);
+                }
                 // If the caller requested Gatekeeper Password Handle to be returned, we assume it
                 // came from biometric enrollment. onActivityResult will put the LockSettingsService
                 // into the extras and launch biometric enrollment. This should be cleaned up,
                 // since requesting a Gatekeeper Password Handle should not imply it came from
                 // biometric setup/settings.
-                startActivityForResult(intent,
-                        mIsSetNewPassword && mRequestGatekeeperPasswordHandle
-                                ? CHOOSE_LOCK_BEFORE_BIOMETRIC_REQUEST
-                                : CHOOSE_LOCK_REQUEST);
+                int request;
+                if (mIsSetNewPassword && mRequestGatekeeperPasswordHandle) {
+                    request = CHOOSE_LOCK_BEFORE_BIOMETRIC_REQUEST;
+                } else {
+                    request = CHOOSE_LOCK_REQUEST;
+                    mChooseLockRequestLaunched = true;
+                }
+                startActivityForResult(intent, request);
                 return;
             }
 
@@ -850,10 +904,19 @@ public class ChooseLockGeneric extends SettingsActivity {
                     // No need to call setLockCredential if the user currently doesn't
                     // have a password
                     mLockPatternUtils.setLockCredential(
-                            LockscreenCredential.createNone(), mUserPassword, mUserId);
+                            LockscreenCredential.createNone(), mUserPassword, mPrimaryCredential,
+                            mUserId);
+                    // Could probably put this in the above block but doing it like this to preserve
+                    // original call order.
+                    if (mPrimaryCredential) {
+                        // TODO: I don't think we should disable for secondary, but review it.
+                        //  Should help us resolve TODO in LockPatternUtils.isLockScreenDisabled.
+                        mLockPatternUtils.setLockScreenDisabled(disabled, mUserId);
+                    }
+
                 }
-                mLockPatternUtils.setLockScreenDisabled(disabled, mUserId);
                 getActivity().setResult(Activity.RESULT_OK);
+                // TODO: Primary only?
                 LockScreenSafetySource.onLockScreenChange(getContext());
                 finish();
             }
@@ -877,11 +940,19 @@ public class ChooseLockGeneric extends SettingsActivity {
             // hasCredential checks to see if user chooses a password for screen lock. If the
             // screen lock is None or Swipe, we do not want to call getActivity().finish().
             // Otherwise, bugs would be caused. (e.g. b/278488549, b/278530059)
-            final boolean hasCredential = mLockPatternUtils.isSecure(mUserId);
+            final boolean hasCredential = mLockPatternUtils.isSecure(mUserId, mPrimaryCredential);
             if (!getActivity().isChangingConfigurations()
                     && !mWaitingForConfirmation && !mWaitingForActivityResult && hasCredential
                     && !mWaitingForBiometricEnrollment) {
-                getActivity().finish();
+                if (mPrimaryCredential && hasCredential) {
+                    getActivity().finish();
+                } else if (!mPrimaryCredential && !mChooseLockRequestLaunched) {
+                    // There's only one candidate Activity to be launched on top of us for secondary
+                    // and it's indicated by mChooseLockRequestLaunched. We want to stay alive if
+                    // this is not launched to inform result listener if app left foreground.
+                    getActivity().setResult(RESULT_APP_NOT_FOREGROUND);
+                    getActivity().finish();
+                }
             }
         }
 
@@ -904,8 +975,11 @@ public class ChooseLockGeneric extends SettingsActivity {
         }
 
         private int getResIdForFactoryResetProtectionWarningTitle() {
-            return mIsManagedProfile ? R.string.unlock_disable_frp_warning_title_profile
-                    : R.string.unlock_disable_frp_warning_title;
+            if (mPrimaryCredential) {
+                return mIsManagedProfile ? R.string.unlock_disable_frp_warning_title_profile
+                        : R.string.unlock_disable_frp_warning_title;
+            }
+            return R.string.unlock_disable_biometric_second_factor_warning_title;
         }
 
         private int getResIdForFactoryResetProtectionWarningMessage(
@@ -924,7 +998,8 @@ public class ChooseLockGeneric extends SettingsActivity {
                 hasFace = false;
             }
 
-            switch (mLockPatternUtils.getKeyguardStoredPasswordQuality(mUserId)) {
+            switch (mLockPatternUtils.getKeyguardStoredPasswordQuality(mUserId,
+                    mPrimaryCredential)) {
                 case DevicePolicyManager.PASSWORD_QUALITY_SOMETHING:
                     if (hasFingerprints && hasFace) {
                         return R.string.unlock_disable_frp_warning_content_pattern_face_fingerprint;
@@ -937,6 +1012,9 @@ public class ChooseLockGeneric extends SettingsActivity {
                     }
                 case DevicePolicyManager.PASSWORD_QUALITY_NUMERIC:
                 case DevicePolicyManager.PASSWORD_QUALITY_NUMERIC_COMPLEX:
+                    if (!mPrimaryCredential) {
+                        return R.string.unlock_disable_biometric_second_factor_warning_content;
+                    }
                     if (hasFingerprints && hasFace) {
                         return hasAppsWithAuthBoundKeys
                                 ?

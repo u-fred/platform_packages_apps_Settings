@@ -179,7 +179,7 @@ class AutoCredentialViewModel(
         get() = !isUnspecifiedPassword && credentialModel.isValidToken
 
     private val isUnspecifiedPassword: Boolean
-        get() = lockPatternUtils.getActivePasswordQuality(userId) == PASSWORD_QUALITY_UNSPECIFIED
+        get() = lockPatternUtils.getActivePasswordQuality(userId, true) == PASSWORD_QUALITY_UNSPECIFIED
 
     /**
      * Handle activity result from ChooseLockGeneric, ConfirmLockPassword, or ConfirmLockPattern

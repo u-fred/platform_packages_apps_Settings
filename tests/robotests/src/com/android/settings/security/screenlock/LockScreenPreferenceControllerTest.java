@@ -27,6 +27,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
@@ -88,7 +89,7 @@ public class LockScreenPreferenceControllerTest {
     @Test
     public void getAvailabilityStatus_notSecure_lockscreenDisabled_AVAILABLE() {
         when(mLockPatternUtils.isSecure(anyInt())).thenReturn(false);
-        when(mLockPatternUtils.isLockScreenDisabled(anyInt())).thenReturn(true);
+        when(mLockPatternUtils.isLockScreenDisabled(anyInt(), eq(true))).thenReturn(true);
 
         assertThat(mController.getAvailabilityStatus()).isEqualTo(AVAILABLE);
     }
@@ -96,7 +97,7 @@ public class LockScreenPreferenceControllerTest {
     @Test
     public void getAvailabilityStatus_notSecure_lockscreenEnabled_AVAILABLE() {
         when(mLockPatternUtils.isSecure(anyInt())).thenReturn(false);
-        when(mLockPatternUtils.isLockScreenDisabled(anyInt())).thenReturn(false);
+        when(mLockPatternUtils.isLockScreenDisabled(anyInt(), eq(true))).thenReturn(false);
 
         assertThat(mController.getAvailabilityStatus()).isEqualTo(AVAILABLE);
     }
@@ -104,7 +105,7 @@ public class LockScreenPreferenceControllerTest {
     @Test
     public void getAvailabilityStatus_secure_hasLockScreen_AVAILABLE() {
         when(mLockPatternUtils.isSecure(anyInt())).thenReturn(true);
-        when(mLockPatternUtils.getKeyguardStoredPasswordQuality(anyInt()))
+        when(mLockPatternUtils.getKeyguardStoredPasswordQuality(anyInt(), eq(true)))
                 .thenReturn(PASSWORD_QUALITY_ALPHABETIC);
 
         assertThat(mController.getAvailabilityStatus()).isEqualTo(AVAILABLE);
@@ -113,7 +114,7 @@ public class LockScreenPreferenceControllerTest {
     @Test
     public void getAvailabilityStatus_secure_noLockScreen_AVAILABLE() {
         when(mLockPatternUtils.isSecure(anyInt())).thenReturn(true);
-        when(mLockPatternUtils.getKeyguardStoredPasswordQuality(anyInt()))
+        when(mLockPatternUtils.getKeyguardStoredPasswordQuality(anyInt(), eq(true)))
                 .thenReturn(PASSWORD_QUALITY_UNSPECIFIED);
 
         assertThat(mController.getAvailabilityStatus()).isEqualTo(AVAILABLE);
@@ -122,7 +123,7 @@ public class LockScreenPreferenceControllerTest {
     @Test
     public void onResume_available_shouldShow() {
         when(mLockPatternUtils.isSecure(anyInt())).thenReturn(true);
-        when(mLockPatternUtils.getKeyguardStoredPasswordQuality(anyInt()))
+        when(mLockPatternUtils.getKeyguardStoredPasswordQuality(anyInt(), eq(true)))
                 .thenReturn(PASSWORD_QUALITY_ALPHABETIC);
 
         mController.displayPreference(mScreen);
@@ -134,7 +135,7 @@ public class LockScreenPreferenceControllerTest {
     @Test
     public void onResume_unavailable_shouldShow() {
         when(mLockPatternUtils.isSecure(anyInt())).thenReturn(true);
-        when(mLockPatternUtils.getKeyguardStoredPasswordQuality(anyInt()))
+        when(mLockPatternUtils.getKeyguardStoredPasswordQuality(anyInt(), eq(true)))
                 .thenReturn(PASSWORD_QUALITY_UNSPECIFIED);
 
         mController.displayPreference(mScreen);

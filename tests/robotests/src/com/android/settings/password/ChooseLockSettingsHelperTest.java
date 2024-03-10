@@ -10,6 +10,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -134,7 +135,7 @@ public class ChooseLockSettingsHelperTest {
         builder.setRequestCode(100)
                 .setForceVerifyPath(true);
         ChooseLockSettingsHelper helper = getChooseLockSettingsHelper(builder);
-        when(helper.mLockPatternUtils.getKeyguardStoredPasswordQuality(anyInt()))
+        when(helper.mLockPatternUtils.getKeyguardStoredPasswordQuality(anyInt(), eq(true)))
                 .thenReturn(DevicePolicyManager.PASSWORD_QUALITY_SOMETHING);
         helper.launch();
 
@@ -154,7 +155,7 @@ public class ChooseLockSettingsHelperTest {
         builder.setRequestCode(100)
                 .setForceVerifyPath(true);
         ChooseLockSettingsHelper helper = getChooseLockSettingsHelper(builder);
-        when(helper.mLockPatternUtils.getKeyguardStoredPasswordQuality(anyInt()))
+        when(helper.mLockPatternUtils.getKeyguardStoredPasswordQuality(anyInt(), eq(true)))
                 .thenReturn(DevicePolicyManager.PASSWORD_QUALITY_NUMERIC);
         helper.launch();
 
@@ -256,7 +257,7 @@ public class ChooseLockSettingsHelperTest {
     private ChooseLockSettingsHelper getChooseLockSettingsHelper(
             ChooseLockSettingsHelper.Builder builder) {
         LockPatternUtils mockLockPatternUtils = mock(LockPatternUtils.class);
-        when(mockLockPatternUtils.getKeyguardStoredPasswordQuality(anyInt()))
+        when(mockLockPatternUtils.getKeyguardStoredPasswordQuality(anyInt(), eq(true)))
                 .thenReturn(DevicePolicyManager.PASSWORD_QUALITY_SOMETHING);
 
         ChooseLockSettingsHelper helper = builder.build();

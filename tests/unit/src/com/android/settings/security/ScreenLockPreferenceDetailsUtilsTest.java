@@ -21,6 +21,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -87,33 +88,33 @@ public class ScreenLockPreferenceDetailsUtilsTest {
         doNothing().when(mContext).startActivity(any());
         when(mUserManager.getProfileIdsWithDisabled(anyInt())).thenReturn(new int[]{});
 
-        final FakeFeatureFactory featureFactory = FakeFeatureFactory.setupForTest();
+        final FakeFeatureFactory featureFactory = FakeFeatureFactory.setupForTest(mContext);
         when(featureFactory.securityFeatureProvider.getLockPatternUtils(mContext))
-                .thenReturn(mLockPatternUtils);
+                 .thenReturn(mLockPatternUtils);
 
-        mScreenLockPreferenceDetailsUtils = new ScreenLockPreferenceDetailsUtils(mContext);
+        mScreenLockPreferenceDetailsUtils = new ScreenLockPreferenceDetailsUtils(mContext, true);
     }
 
     @Test
     public void isAvailable_whenEnabled_shouldReturnTrue() {
         whenConfigShowUnlockSetOrChangeIsEnabled(true);
-
-        assertThat(mScreenLockPreferenceDetailsUtils.isAvailable()).isTrue();
+        int userId = 1;
+        assertThat(mScreenLockPreferenceDetailsUtils.isAvailable(userId)).isTrue();
     }
 
     @Test
     public void isAvailable_whenDisabled_shouldReturnFalse() {
         whenConfigShowUnlockSetOrChangeIsEnabled(false);
-
-        assertThat(mScreenLockPreferenceDetailsUtils.isAvailable()).isFalse();
+        int userId = 1;
+        assertThat(mScreenLockPreferenceDetailsUtils.isAvailable(userId)).isFalse();
     }
 
     @Test
     public void getSummary_unsecureAndDisabledPattern_shouldReturnUnlockModeOff() {
         final String summary = prepareString("unlock_set_unlock_mode_off", "unlockModeOff");
 
-        when(mLockPatternUtils.isSecure(USER_ID)).thenReturn(false);
-        when(mLockPatternUtils.isLockScreenDisabled(anyInt())).thenReturn(true);
+        when(mLockPatternUtils.isSecure(USER_ID, true)).thenReturn(false);
+        when(mLockPatternUtils.isLockScreenDisabled(anyInt(), eq(true))).thenReturn(true);
 
         assertThat(mScreenLockPreferenceDetailsUtils.getSummary(USER_ID)).isEqualTo(summary);
     }
@@ -123,8 +124,8 @@ public class ScreenLockPreferenceDetailsUtilsTest {
         final String summary =
                 prepareString("unlock_set_unlock_mode_none", "unlockModeNone");
 
-        when(mLockPatternUtils.isSecure(USER_ID)).thenReturn(false);
-        when(mLockPatternUtils.isLockScreenDisabled(anyInt())).thenReturn(false);
+        when(mLockPatternUtils.isSecure(USER_ID, true)).thenReturn(false);
+        when(mLockPatternUtils.isLockScreenDisabled(anyInt(), eq(true))).thenReturn(false);
 
         assertThat(mScreenLockPreferenceDetailsUtils.getSummary(USER_ID)).isEqualTo(summary);
     }
@@ -134,8 +135,8 @@ public class ScreenLockPreferenceDetailsUtilsTest {
         final String summary =
                 prepareString("unlock_set_unlock_mode_pattern", "unlockModePattern");
 
-        when(mLockPatternUtils.isSecure(USER_ID)).thenReturn(true);
-        when(mLockPatternUtils.getKeyguardStoredPasswordQuality(USER_ID))
+        when(mLockPatternUtils.isSecure(USER_ID, true)).thenReturn(true);
+        when(mLockPatternUtils.getKeyguardStoredPasswordQuality(USER_ID, true))
                 .thenReturn(DevicePolicyManager.PASSWORD_QUALITY_SOMETHING);
 
         assertThat(mScreenLockPreferenceDetailsUtils.getSummary(USER_ID)).isEqualTo(summary);
@@ -146,8 +147,8 @@ public class ScreenLockPreferenceDetailsUtilsTest {
         final String summary =
                 prepareString("unlock_set_unlock_mode_pin", "unlockModePin");
 
-        when(mLockPatternUtils.isSecure(USER_ID)).thenReturn(true);
-        when(mLockPatternUtils.getKeyguardStoredPasswordQuality(USER_ID))
+        when(mLockPatternUtils.isSecure(USER_ID, true)).thenReturn(true);
+        when(mLockPatternUtils.getKeyguardStoredPasswordQuality(USER_ID, true))
                 .thenReturn(DevicePolicyManager.PASSWORD_QUALITY_NUMERIC);
 
         assertThat(mScreenLockPreferenceDetailsUtils.getSummary(USER_ID)).isEqualTo(summary);
@@ -157,8 +158,8 @@ public class ScreenLockPreferenceDetailsUtilsTest {
     public void getSummary_passwordQualityNumericComplex_shouldUnlockModePin() {
         final String summary = prepareString("unlock_set_unlock_mode_pin", "unlockModePin");
 
-        when(mLockPatternUtils.isSecure(USER_ID)).thenReturn(true);
-        when(mLockPatternUtils.getKeyguardStoredPasswordQuality(USER_ID))
+        when(mLockPatternUtils.isSecure(USER_ID, true)).thenReturn(true);
+        when(mLockPatternUtils.getKeyguardStoredPasswordQuality(USER_ID, true))
                 .thenReturn(DevicePolicyManager.PASSWORD_QUALITY_NUMERIC_COMPLEX);
 
         assertThat(mScreenLockPreferenceDetailsUtils.getSummary(USER_ID)).isEqualTo(summary);
@@ -169,8 +170,8 @@ public class ScreenLockPreferenceDetailsUtilsTest {
         final String summary =
                 prepareString("unlock_set_unlock_mode_password", "unlockModePassword");
 
-        when(mLockPatternUtils.isSecure(USER_ID)).thenReturn(true);
-        when(mLockPatternUtils.getKeyguardStoredPasswordQuality(USER_ID))
+        when(mLockPatternUtils.isSecure(USER_ID, true)).thenReturn(true);
+        when(mLockPatternUtils.getKeyguardStoredPasswordQuality(USER_ID, true))
                 .thenReturn(DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC);
 
         assertThat(mScreenLockPreferenceDetailsUtils.getSummary(USER_ID)).isEqualTo(summary);
@@ -181,8 +182,8 @@ public class ScreenLockPreferenceDetailsUtilsTest {
         final String summary =
                 prepareString("unlock_set_unlock_mode_password", "unlockModePassword");
 
-        when(mLockPatternUtils.isSecure(USER_ID)).thenReturn(true);
-        when(mLockPatternUtils.getKeyguardStoredPasswordQuality(USER_ID))
+        when(mLockPatternUtils.isSecure(USER_ID, true)).thenReturn(true);
+        when(mLockPatternUtils.getKeyguardStoredPasswordQuality(USER_ID, true))
                 .thenReturn(DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC);
 
         assertThat(mScreenLockPreferenceDetailsUtils.getSummary(USER_ID)).isEqualTo(summary);
@@ -193,8 +194,8 @@ public class ScreenLockPreferenceDetailsUtilsTest {
         final String summary =
                 prepareString("unlock_set_unlock_mode_password", "unlockModePassword");
 
-        when(mLockPatternUtils.isSecure(USER_ID)).thenReturn(true);
-        when(mLockPatternUtils.getKeyguardStoredPasswordQuality(USER_ID))
+        when(mLockPatternUtils.isSecure(USER_ID, true)).thenReturn(true);
+        when(mLockPatternUtils.getKeyguardStoredPasswordQuality(USER_ID, true))
                 .thenReturn(DevicePolicyManager.PASSWORD_QUALITY_COMPLEX);
 
         assertThat(mScreenLockPreferenceDetailsUtils.getSummary(USER_ID)).isEqualTo(summary);
@@ -205,8 +206,8 @@ public class ScreenLockPreferenceDetailsUtilsTest {
         final String summary =
                 prepareString("unlock_set_unlock_mode_password", "unlockModePassword");
 
-        when(mLockPatternUtils.isSecure(USER_ID)).thenReturn(true);
-        when(mLockPatternUtils.getKeyguardStoredPasswordQuality(USER_ID))
+        when(mLockPatternUtils.isSecure(USER_ID, true)).thenReturn(true);
+        when(mLockPatternUtils.getKeyguardStoredPasswordQuality(USER_ID, true))
                 .thenReturn(DevicePolicyManager.PASSWORD_QUALITY_MANAGED);
 
         assertThat(mScreenLockPreferenceDetailsUtils.getSummary(USER_ID)).isEqualTo(summary);
@@ -215,8 +216,8 @@ public class ScreenLockPreferenceDetailsUtilsTest {
 
     @Test
     public void getSummary_unsupportedPasswordQuality_shouldReturnNull() {
-        when(mLockPatternUtils.isSecure(USER_ID)).thenReturn(true);
-        when(mLockPatternUtils.getKeyguardStoredPasswordQuality(USER_ID))
+        when(mLockPatternUtils.isSecure(USER_ID, true)).thenReturn(true);
+        when(mLockPatternUtils.getKeyguardStoredPasswordQuality(USER_ID, true))
                 .thenReturn(DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED);
 
         assertNull(mScreenLockPreferenceDetailsUtils.getSummary(USER_ID));
@@ -254,7 +255,7 @@ public class ScreenLockPreferenceDetailsUtilsTest {
 
     @Test
     public void isLockPatternSecure_patternIsSecure_shouldReturnTrue() {
-        when(mLockPatternUtils.isSecure(anyInt())).thenReturn(true);
+        when(mLockPatternUtils.isSecure(anyInt(), eq(true))).thenReturn(true);
 
         assertThat(mScreenLockPreferenceDetailsUtils.isLockPatternSecure()).isTrue();
     }
@@ -268,7 +269,7 @@ public class ScreenLockPreferenceDetailsUtilsTest {
 
     @Test
     public void shouldShowGearMenu_patternIsSecure_shouldReturnTrue() {
-        when(mLockPatternUtils.isSecure(anyInt())).thenReturn(true);
+        when(mLockPatternUtils.isSecure(anyInt(), eq(true))).thenReturn(true);
 
         assertThat(mScreenLockPreferenceDetailsUtils.shouldShowGearMenu()).isTrue();
     }
@@ -282,7 +283,7 @@ public class ScreenLockPreferenceDetailsUtilsTest {
 
     @Test
     public void openScreenLockSettings_shouldSendIntent() {
-        mScreenLockPreferenceDetailsUtils.openScreenLockSettings(SOURCE_METRICS_CATEGORY);
+        mScreenLockPreferenceDetailsUtils.openScreenLockSettings(SOURCE_METRICS_CATEGORY, null, 0);
 
         assertFragmentLaunchRequested(ScreenLockSettings.class.getName());
     }
@@ -300,7 +301,7 @@ public class ScreenLockPreferenceDetailsUtilsTest {
         when(mUserManager.isQuietModeEnabled(any())).thenReturn(false);
 
         assertThat(mScreenLockPreferenceDetailsUtils
-                .openChooseLockGenericFragment(SOURCE_METRICS_CATEGORY)).isTrue();
+                .openChooseLockGenericFragment(SOURCE_METRICS_CATEGORY, null, null, 0)).isTrue();
         assertFragmentLaunchRequested(ChooseLockGeneric.ChooseLockGenericFragment.class.getName());
     }
 

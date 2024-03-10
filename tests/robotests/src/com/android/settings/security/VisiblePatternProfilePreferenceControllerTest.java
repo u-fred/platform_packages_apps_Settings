@@ -97,7 +97,7 @@ public class VisiblePatternProfilePreferenceControllerTest {
     @Test
     public void getAvailabilityStatus_notSecure_DISABLED() {
         when(mLockPatternUtils.isSecure(FAKE_PROFILE_USER_ID)).thenReturn(false);
-        when(mLockPatternUtils.getKeyguardStoredPasswordQuality(FAKE_PROFILE_USER_ID))
+        when(mLockPatternUtils.getKeyguardStoredPasswordQuality(FAKE_PROFILE_USER_ID, true))
                 .thenReturn(PASSWORD_QUALITY_UNSPECIFIED);
 
         assertThat(mController.getAvailabilityStatus()).isEqualTo(DISABLED_FOR_USER);
@@ -106,7 +106,7 @@ public class VisiblePatternProfilePreferenceControllerTest {
     @Test
     public void getAvailabilityStatus_secureWithPassword_DISABLED() {
         when(mLockPatternUtils.isSecure(FAKE_PROFILE_USER_ID)).thenReturn(true);
-        when(mLockPatternUtils.getKeyguardStoredPasswordQuality(FAKE_PROFILE_USER_ID))
+        when(mLockPatternUtils.getKeyguardStoredPasswordQuality(FAKE_PROFILE_USER_ID, true))
                 .thenReturn(PASSWORD_QUALITY_ALPHABETIC);
 
         assertThat(mController.getAvailabilityStatus()).isEqualTo(DISABLED_FOR_USER);
@@ -115,7 +115,7 @@ public class VisiblePatternProfilePreferenceControllerTest {
     @Test
     public void getAvailabilityStatus_secureWithPattern_AVAILABLE() {
         when(mLockPatternUtils.isSecure(FAKE_PROFILE_USER_ID)).thenReturn(true);
-        when(mLockPatternUtils.getKeyguardStoredPasswordQuality(FAKE_PROFILE_USER_ID))
+        when(mLockPatternUtils.getKeyguardStoredPasswordQuality(FAKE_PROFILE_USER_ID, true))
                 .thenReturn(PASSWORD_QUALITY_SOMETHING);
 
         assertThat(mController.getAvailabilityStatus()).isEqualTo(AVAILABLE);

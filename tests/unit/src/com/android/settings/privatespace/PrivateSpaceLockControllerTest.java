@@ -102,7 +102,7 @@ public class PrivateSpaceLockControllerTest {
         doReturn(true)
                 .when(mLockPatternUtils).isSeparateProfileChallengeEnabled(anyInt());
         doReturn(CREDENTIAL_TYPE_PATTERN)
-                .when(mLockPatternUtils).getCredentialTypeForUser(anyInt());
+                .when(mLockPatternUtils).getCredentialTypeForUser(anyInt(), true);
         mSetFlagsRule.enableFlags(Flags.FLAG_ALLOW_PRIVATE_PROFILE);
 
         mPrivateSpaceLockController.updateState(mPreference);
@@ -114,7 +114,7 @@ public class PrivateSpaceLockControllerTest {
     @Test
     public void getSummary_whenProfileLockPin() {
         doReturn(true).when(mLockPatternUtils).isSeparateProfileChallengeEnabled(anyInt());
-        doReturn(CREDENTIAL_TYPE_PIN).when(mLockPatternUtils).getCredentialTypeForUser(anyInt());
+        doReturn(CREDENTIAL_TYPE_PIN).when(mLockPatternUtils).getCredentialTypeForUser(anyInt(), true);
         mSetFlagsRule.enableFlags(Flags.FLAG_ALLOW_PRIVATE_PROFILE);
 
         mPrivateSpaceLockController.updateState(mPreference);
@@ -128,7 +128,7 @@ public class PrivateSpaceLockControllerTest {
         doReturn(true)
                 .when(mLockPatternUtils).isSeparateProfileChallengeEnabled(anyInt());
         doReturn(CREDENTIAL_TYPE_PASSWORD)
-                .when(mLockPatternUtils).getCredentialTypeForUser(anyInt());
+                .when(mLockPatternUtils).getCredentialTypeForUser(anyInt(), true);
         mSetFlagsRule.enableFlags(Flags.FLAG_ALLOW_PRIVATE_PROFILE);
 
         mPrivateSpaceLockController.updateState(mPreference);

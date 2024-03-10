@@ -31,9 +31,9 @@ import static android.provider.Settings.Secure.BIOMETRIC_KEYGUARD_ENABLED;
 // based on src/com/android/settings/biometrics/combination/BiometricSettingsKeyguardPreferenceController.java
 // from android-14.0.0_r1
 public class FingerprintSettingsKeyguardPreferenceController extends TogglePreferenceController {
-    private static final int ON = 1;
-    private static final int OFF = 0;
-    private static final int DEFAULT = ON;
+    public static final int ON = 1;
+    public static final int OFF = 0;
+    public static final int DEFAULT = ON;
 
     private int mUserId;
 

@@ -74,7 +74,7 @@ public class SafetySourceBroadcastReceiver extends BroadcastReceiver {
             SafetyEvent safetyEvent) {
         if (sourceIds.contains(LockScreenSafetySource.SAFETY_SOURCE_ID)) {
             LockScreenSafetySource.setSafetySourceData(context,
-                    new ScreenLockPreferenceDetailsUtils(context), safetyEvent);
+                    new ScreenLockPreferenceDetailsUtils(context, true), safetyEvent);
         }
 
         if (sourceIds.contains(BiometricsSafetySource.SAFETY_SOURCE_ID)) {
@@ -88,7 +88,7 @@ public class SafetySourceBroadcastReceiver extends BroadcastReceiver {
 
     private static void refreshAllSafetySources(Context context, SafetyEvent safetyEvent) {
         LockScreenSafetySource.setSafetySourceData(context,
-                new ScreenLockPreferenceDetailsUtils(context), safetyEvent);
+                new ScreenLockPreferenceDetailsUtils(context, true), safetyEvent);
         BiometricsSafetySource.setSafetySourceData(context, safetyEvent);
         PrivateSpaceSafetySource.setSafetySourceData(context, safetyEvent);
     }

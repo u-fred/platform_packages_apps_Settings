@@ -51,13 +51,14 @@ public class PatternVisiblePreferenceControllerTest {
         MockitoAnnotations.initMocks(this);
         mContext = RuntimeEnvironment.application;
         mController =
-                new PatternVisiblePreferenceController(mContext, TEST_USER_ID, mLockPatternUtils);
+                new PatternVisiblePreferenceController(mContext, TEST_USER_ID, mLockPatternUtils,
+                        true);
         mPreference = new SwitchPreference(mContext);
     }
 
     @Test
     public void isAvailable_lockSetToPattern_shouldReturnTrue() {
-        when(mLockPatternUtils.getCredentialTypeForUser(TEST_USER_ID))
+        when(mLockPatternUtils.getCredentialTypeForUser(TEST_USER_ID, true))
                 .thenReturn(LockPatternUtils.CREDENTIAL_TYPE_PATTERN);
 
         assertThat(mController.isAvailable()).isTrue();
@@ -65,7 +66,7 @@ public class PatternVisiblePreferenceControllerTest {
 
     @Test
     public void isAvailable_lockSetToPin_shouldReturnFalse() {
-        when(mLockPatternUtils.getCredentialTypeForUser(TEST_USER_ID)).thenReturn(
+        when(mLockPatternUtils.getCredentialTypeForUser(TEST_USER_ID, true)).thenReturn(
                 LockPatternUtils.CREDENTIAL_TYPE_PIN);
 
         assertThat(mController.isAvailable()).isFalse();

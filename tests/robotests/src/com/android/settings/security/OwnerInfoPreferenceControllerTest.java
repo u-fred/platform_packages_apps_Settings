@@ -22,6 +22,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -89,7 +90,7 @@ public class OwnerInfoPreferenceControllerTest {
         when(mFragment.getSettingsLifecycle()).thenReturn(mock(Lifecycle.class));
         when(mFragmentManager.beginTransaction()).thenReturn(mFragmentTransaction);
 
-        mController = spy(new OwnerInfoPreferenceController(mContext, mFragment));
+        mController = spy(new OwnerInfoPreferenceController(mContext, mFragment, true));
         when(mScreen.findPreference(mController.getPreferenceKey())).thenReturn(mPreference);
         ReflectionHelpers.setField(mController, "mLockPatternUtils", mLockPatternUtils);
     }
@@ -164,7 +165,7 @@ public class OwnerInfoPreferenceControllerTest {
     @Test
     public void updateEnableState_lockScreenDisabled_shouldDisablePreference() {
         doReturn(false).when(mController).isDeviceOwnerInfoEnabled();
-        doReturn(true).when(mLockPatternUtils).isLockScreenDisabled(anyInt());
+        doReturn(true).when(mLockPatternUtils).isLockScreenDisabled(anyInt(), eq(true));
         mController.displayPreference(mScreen);
 
         mController.updateEnableState();
@@ -175,7 +176,7 @@ public class OwnerInfoPreferenceControllerTest {
     @Test
     public void updateEnableState_lockScreenEnabled_shouldEnablePreference() {
         doReturn(false).when(mController).isDeviceOwnerInfoEnabled();
-        doReturn(false).when(mLockPatternUtils).isLockScreenDisabled(anyInt());
+        doReturn(false).when(mLockPatternUtils).isLockScreenDisabled(anyInt(), eq(true));
         mController.displayPreference(mScreen);
 
         mController.updateEnableState();
@@ -189,7 +190,7 @@ public class OwnerInfoPreferenceControllerTest {
         preference.setKey(KEY_OWNER_INFO);
         when(mScreen.findPreference(mController.getPreferenceKey())).thenReturn(preference);
         doReturn(false).when(mController).isDeviceOwnerInfoEnabled();
-        doReturn(false).when(mLockPatternUtils).isLockScreenDisabled(anyInt());
+        doReturn(false).when(mLockPatternUtils).isLockScreenDisabled(anyInt(), eq(true));
         mController.displayPreference(mScreen);
         mController.updateEnableState();
 

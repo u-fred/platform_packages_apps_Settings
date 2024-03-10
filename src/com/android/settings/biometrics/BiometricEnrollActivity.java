@@ -624,7 +624,7 @@ public class BiometricEnrollActivity extends InstrumentedActivity {
     private boolean userHasPassword(int userId) {
         final UserManager userManager = getSystemService(UserManager.class);
         final int passwordQuality = new LockPatternUtils(this)
-                .getActivePasswordQuality(userManager.getCredentialOwnerProfile(userId));
+                .getActivePasswordQuality(userManager.getCredentialOwnerProfile(userId), true);
         return passwordQuality != DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
     }
 
