@@ -57,6 +57,17 @@
     </PreferenceCategory>
 
     <PreferenceCategory
+        android:key="biometric_strengthen_unlock"
+        android:title="@string/biometric_settings_category_strengthen_unlock">
+
+        <com.android.settings.widget.GearPreference
+            android:key="biometric_second_factor_screen_lock"
+            android:title="@string/biometric_settings_second_factor_screen_lock_title"
+            android:summary="@string/summary_placeholder"
+            settings:keywords="@string/keywords_lockscreen"/>
+    </PreferenceCategory>
+
+    <PreferenceCategory
         android:key="biometric_ways_to_use"
         android:title="@string/biometric_settings_category_use_face_fingerprint">
 
