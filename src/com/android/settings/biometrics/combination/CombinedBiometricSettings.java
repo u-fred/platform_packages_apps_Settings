@@ -33,7 +33,12 @@ import com.android.settings.biometrics.activeunlock.ActiveUnlockDeviceNameListen
 import com.android.settings.biometrics.activeunlock.ActiveUnlockRequireBiometricSetup;
 import com.android.settings.biometrics.activeunlock.ActiveUnlockStatusUtils;
 import com.android.settings.search.BaseSearchIndexProvider;
+import com.android.settings.widget.PreferenceCategoryController;
+import com.android.settingslib.core.AbstractPreferenceController;
 import com.android.settingslib.search.SearchIndexable;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Settings screen for multiple biometrics.
@@ -47,10 +52,26 @@ public class CombinedBiometricSettings extends BiometricsSettingsBase {
     private static final String KEY_USE_IN_APPS = "biometric_settings_biometric_app";
     private static final String KEY_INTRO_PREFERENCE = "biometric_intro";
     private static final String KEY_USE_BIOMETRIC_PREFERENCE = "biometric_ways_to_use";
+    protected static final String KEY_BSU = "biometric_strengthen_unlock";
 
     private ActiveUnlockStatusUtils mActiveUnlockStatusUtils;
     private CombinedBiometricStatusUtils mCombinedBiometricStatusUtils;
     @Nullable private ActiveUnlockDeviceNameListener mActiveUnlockDeviceNameListener;
+
+    @Override
+    protected List<AbstractPreferenceController> createPreferenceControllers(Context context) {
+        final List<AbstractPreferenceController> controllers = new ArrayList<>();
+        final List<AbstractPreferenceController> bsuPreferenceControllers = new ArrayList<>();
+
+        bsuPreferenceControllers.add(
+                new ChangeBiometricSecondFactorScreenLockPreferenceController(context, this));
+
+        controllers.add(new PreferenceCategoryController(context, KEY_BSU)
+                .setChildren(bsuPreferenceControllers));
+        controllers.addAll(bsuPreferenceControllers);
+
+        return controllers;
+    }
 
     @Override
     public void onAttach(Context context) {

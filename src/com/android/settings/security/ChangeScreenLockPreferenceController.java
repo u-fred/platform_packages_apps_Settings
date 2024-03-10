@@ -48,8 +48,8 @@ public class ChangeScreenLockPreferenceController extends AbstractPreferenceCont
 
     protected final int mUserId = UserHandle.myUserId();
     protected final int mProfileChallengeUserId;
-    private final MetricsFeatureProvider mMetricsFeatureProvider;
-    private final ScreenLockPreferenceDetailsUtils mScreenLockPreferenceDetailUtils;
+    protected final MetricsFeatureProvider mMetricsFeatureProvider;
+    protected ScreenLockPreferenceDetailsUtils mScreenLockPreferenceDetailUtils;
 
     protected RestrictedPreference mPreference;
 
