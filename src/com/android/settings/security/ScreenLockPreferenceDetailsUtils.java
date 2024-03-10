@@ -41,11 +41,12 @@ import com.android.settingslib.transition.SettingsTransitionHelper;
  */
 public class ScreenLockPreferenceDetailsUtils {
 
-    private final int mUserId = UserHandle.myUserId();
-    private final Context mContext;
-    private final LockPatternUtils mLockPatternUtils;
-    private final int mProfileChallengeUserId;
-    private final UserManager mUm;
+    protected final int mUserId = UserHandle.myUserId();
+    protected final Context mContext;
+    protected final LockPatternUtils mLockPatternUtils;
+    protected final int mProfileChallengeUserId;
+    protected final UserManager mUm;
+    protected boolean mPrimaryScreenLock;
 
     public ScreenLockPreferenceDetailsUtils(Context context) {
         mContext = context;
@@ -54,6 +55,12 @@ public class ScreenLockPreferenceDetailsUtils {
                 .getSecurityFeatureProvider()
                 .getLockPatternUtils(context);
         mProfileChallengeUserId = Utils.getManagedProfileId(mUm, mUserId);
+        mPrimaryScreenLock = true;
+    }
+
+    public ScreenLockPreferenceDetailsUtils(Context context, boolean primaryScreenLock) {
+        this(context);
+        mPrimaryScreenLock = primaryScreenLock;
     }
 
     /**
@@ -71,6 +78,7 @@ public class ScreenLockPreferenceDetailsUtils {
         return summaryResId != null ? mContext.getResources().getString(summaryResId) : null;
     }
 
+
     /**
      * Returns whether the password quality is managed by device admin.
      */
@@ -85,7 +93,7 @@ public class ScreenLockPreferenceDetailsUtils {
      * Returns whether the lock pattern is secure.
      */
     public boolean isLockPatternSecure() {
-        return mLockPatternUtils.isSecure(mUserId);
+        return mLockPatternUtils.isSecure(mUserId, mPrimaryScreenLock);
     }
 
     /**
@@ -128,6 +136,7 @@ public class ScreenLockPreferenceDetailsUtils {
         return true;
     }
 
+
     /**
      * Returns {@link Intent} to launch an appropriate Settings screen.
      *
@@ -141,7 +150,7 @@ public class ScreenLockPreferenceDetailsUtils {
                 : getChooseLockGenericFragmentIntent(sourceMetricsCategory);
     }
 
-    private Intent getQuietModeDialogIntent() {
+    protected Intent getQuietModeDialogIntent() {
         // TODO(b/35930129): Remove once existing password can be passed into vold directly.
         // Currently we need this logic to ensure that the QUIET_MODE is off for any work
         // profile with unified challenge on FBE-enabled devices. Otherwise, vold would not be
@@ -157,7 +166,7 @@ public class ScreenLockPreferenceDetailsUtils {
         return null;
     }
 
-    private Intent getChooseLockGenericFragmentIntent(int sourceMetricsCategory) {
+    protected Intent getChooseLockGenericFragmentIntent(int sourceMetricsCategory) {
         return new SubSettingLauncher(mContext)
                 .setDestination(ChooseLockGenericFragment.class.getName())
                 .setSourceMetricsCategory(sourceMetricsCategory)
@@ -167,16 +176,16 @@ public class ScreenLockPreferenceDetailsUtils {
 
     @StringRes
     private Integer getSummaryResId(int userId) {
-        if (!mLockPatternUtils.isSecure(userId)) {
+        if (!mLockPatternUtils.isSecure(userId, mPrimaryScreenLock)) {
             if (userId == mProfileChallengeUserId
-                    || mLockPatternUtils.isLockScreenDisabled(userId)) {
+                    || mLockPatternUtils.isLockScreenDisabled(userId, mPrimaryScreenLock)) {
                 return R.string.unlock_set_unlock_mode_off;
             } else {
                 return R.string.unlock_set_unlock_mode_none;
             }
         } else {
             int keyguardStoredPasswordQuality =
-                    mLockPatternUtils.getKeyguardStoredPasswordQuality(userId);
+                    mLockPatternUtils.getKeyguardStoredPasswordQuality(userId, mPrimaryScreenLock);
             switch (keyguardStoredPasswordQuality) {
                 case DevicePolicyManager.PASSWORD_QUALITY_SOMETHING:
                     return R.string.unlock_set_unlock_mode_pattern;
