@@ -23,6 +23,13 @@ public class ChangeBiometricSecondFactorScreenLockPreferenceController
     }
 
     @Override
+    public void updateState(Preference preference) {
+        super.updateState(preference);
+        //mPreference.setEnabled(false);
+        //mPreference.setSummary("Enroll fingerprint to enable");
+    }
+
+    @Override
     public boolean handlePreferenceTreeClick(Preference preference) {
         // TODO: Don't require user to enter primary auth when opening ChooseLockGenericFragment
         //  because they already entered it to access this setting. Will probably need to modify
