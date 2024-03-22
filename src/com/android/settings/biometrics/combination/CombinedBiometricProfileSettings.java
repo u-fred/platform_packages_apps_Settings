@@ -28,6 +28,8 @@ public class CombinedBiometricProfileSettings extends BiometricsSettingsBase {
     private static final String TAG = "BiometricProfileSetting";
     private static final String KEY_FACE_SETTINGS = "biometric_face_settings_profile";
     private static final String KEY_FINGERPRINT_SETTINGS = "biometric_fingerprint_settings_profile";
+    private static final String KEY_BIOMETRIC_SECOND_FACTOR_SCREEN_LOCK =
+            "biometric_second_factor_screen_lock";
     private static final String KEY_UNLOCK_PHONE = "biometric_settings_biometric_keyguard_profile";
     private static final String KEY_USE_IN_APPS = "biometric_settings_biometric_app_profile";
 
@@ -50,6 +52,11 @@ public class CombinedBiometricProfileSettings extends BiometricsSettingsBase {
     @Override
     public String getFingerprintPreferenceKey() {
         return KEY_FINGERPRINT_SETTINGS;
+    }
+
+    // TODO: This was added to implement extension, it needs to be implemented properly for profile.
+    public String getBiometricSecondFactorScreenLockPreferenceKey() {
+        return KEY_BIOMETRIC_SECOND_FACTOR_SCREEN_LOCK;
     }
 
     @Override
