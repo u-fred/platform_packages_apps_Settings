@@ -523,6 +523,11 @@ public class ConfirmLockPassword extends ConfirmDeviceCredentialBaseActivity {
                                 ChooseLockSettingsHelper.EXTRA_KEY_CHALLENGE_TOKEN,
                                 response.getGatekeeperHAT());
                     }
+                    // TODO: Review this. If this isn't acceptable we can do
+                    //  LockPatternChecker.verifyCredential ourselves in FingerprintSettings.
+                    //  Might be better to introduce an additional method
+                    //  ChooseLockSettingsHelper.setReturnGateKeeperPasswordHandleAndCredential.
+                    intent.putExtra(ChooseLockSettingsHelper.EXTRA_KEY_PASSWORD, credential);
                 }
                 mCredentialCheckResultTracker.setResult(matched, intent, timeoutMs,
                         localEffectiveUserId);
