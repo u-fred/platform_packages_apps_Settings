@@ -1492,6 +1492,8 @@
 
     <!-- Title of the dialog shown when the user removes the device lock [CHAR LIMIT=NONE] -->
     <string name="unlock_disable_frp_warning_title">Delete screen lock?</string>
+    <!-- Title of the dialog shown when the user removes the biometric second factor [CHAR LIMIT=NONE] -->
+    <string name="unlock_disable_biometric_second_factor_warning_title">Delete biometric second factor?</string>
     <!-- Title of the dialog shown when the user removes the profile lock [CHAR LIMIT=NONE] -->
     <string name="unlock_disable_frp_warning_title_profile">Remove profile protection?</string>
 

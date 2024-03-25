@@ -439,7 +439,8 @@ public class ChooseLockGeneric extends SettingsActivity {
             writePreferenceClickMetric(preference);
 
             final String key = preference.getKey();
-            if (!isUnlockMethodSecure(key) && mLockPatternUtils.isSecure(mUserId)) {
+            if (!isUnlockMethodSecure(key) && mLockPatternUtils.isSecure(mUserId,
+                    mPrimaryCredential)) {
                 // Show the disabling FRP warning only when the user is switching from a secure
                 // unlock method to an insecure one
                 showFactoryResetProtectionWarningDialog(key);
@@ -851,11 +852,29 @@ public class ChooseLockGeneric extends SettingsActivity {
                 if (mUserPassword != null) {
                     // No need to call setLockCredential if the user currently doesn't
                     // have a password
+
+                    if (mPrimaryCredential) {
+                        // TODO: Should we check that the secondary credential is not none first?
+                        //  It appears to work, but is not something that is allowed with the
+                        //  primary screen lock through the UI so might not be a tested path.
+                        //  mLockPatternUtils.getKeyguardStoredPasswordQuality(mUserId,
+                        //      false) != PASSWORD_QUALITY_UNSPECIFIED
+                        mLockPatternUtils.setLockCredential(
+                                LockscreenCredential.createNone(false), mUserPassword, mUserId);
+                    }
                     mLockPatternUtils.setLockCredential(
                             LockscreenCredential.createNone(mPrimaryCredential), mUserPassword, mUserId);
+                    // Could probably put this in the above block but doing it like this to preserve
+                    // original call order.
+                    if (mPrimaryCredential) {
+                        // TODO: I don't think we should disable for secondary, but review it.
+                        //  Should help us resolve TODO in LockPatternUtils.isLockScreenDisabled.
+                        mLockPatternUtils.setLockScreenDisabled(disabled, mUserId);
+                    }
+
                 }
-                mLockPatternUtils.setLockScreenDisabled(disabled, mUserId);
                 getActivity().setResult(Activity.RESULT_OK);
+                // TODO: Primary only?
                 LockScreenSafetySource.onLockScreenChange(getContext());
                 finish();
             }
@@ -905,8 +924,13 @@ public class ChooseLockGeneric extends SettingsActivity {
         }
 
         private int getResIdForFactoryResetProtectionWarningTitle() {
+            if (mPrimaryCredential) {
+                return mIsManagedProfile ? R.string.unlock_disable_frp_warning_title_profile
+                        : R.string.unlock_disable_frp_warning_title;
+            }
+            // TODO: Update when handling profiles.
             return mIsManagedProfile ? R.string.unlock_disable_frp_warning_title_profile
-                    : R.string.unlock_disable_frp_warning_title;
+                    : R.string.unlock_disable_biometric_second_factor_warning_title;
         }
 
         private int getResIdForFactoryResetProtectionWarningMessage() {
@@ -937,6 +961,9 @@ public class ChooseLockGeneric extends SettingsActivity {
                     }
                 case DevicePolicyManager.PASSWORD_QUALITY_NUMERIC:
                 case DevicePolicyManager.PASSWORD_QUALITY_NUMERIC_COMPLEX:
+                    if (!mPrimaryCredential) {
+                        return R.string.unlock_disable_frp_warning_content_pin;
+                    }
                     if (hasFingerprints && hasFace) {
                         return R.string.unlock_disable_frp_warning_content_pin_face_fingerprint;
                     } else if (hasFingerprints) {
