@@ -257,7 +257,7 @@ public class ChooseLockGeneric extends SettingsActivity {
             mExtraLockScreenTitleResId = intent.getIntExtra(EXTRA_KEY_CHOOSE_LOCK_SCREEN_TITLE, -1);
             mExtraLockScreenDescriptionResId =
                     intent.getIntExtra(EXTRA_KEY_CHOOSE_LOCK_SCREEN_DESCRIPTION, -1);
-            
+
             mPrimaryCredential = intent.getBooleanExtra(
                     ChooseLockSettingsHelper.EXTRA_KEY_PRIMARY_CREDENTIAL, true);
 
@@ -302,6 +302,11 @@ public class ChooseLockGeneric extends SettingsActivity {
                     .setProfileToUnify(mUnificationProfileId)
                     .setHideInsecureScreenLockTypes(alwaysHideInsecureScreenLockTypes()
                             || intent.getBooleanExtra(HIDE_INSECURE_OPTIONS, false))
+                    // TODO: Reminder that we need to unify terminology. There is a secondary screen
+                    //  lock in Keyguard that is unrelated to what we are adding. Might need to
+                    //  remove all referenes to primary/secondary and change to
+                    //  biometricSecondFactor.
+                    .setPrimaryScreenLock(mPrimaryCredential)
                     .build();
 
             // If the complexity is provided by the admin, do not get the caller app's name.
