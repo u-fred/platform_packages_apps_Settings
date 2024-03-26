@@ -357,6 +357,10 @@ public class FingerprintSettings extends SubSettings {
             }
         };
 
+        protected int getUserId() {
+            return mUserId;
+        }
+
         /**
          *
          */

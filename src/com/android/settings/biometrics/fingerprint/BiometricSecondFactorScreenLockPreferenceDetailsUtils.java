@@ -1,7 +1,10 @@
 package com.android.settings.biometrics.fingerprint;
 
+import static android.provider.Settings.Secure.BIOMETRIC_KEYGUARD_ENABLED;
+
 import android.content.Context;
 import android.content.Intent;
+import android.provider.Settings;
 
 import com.android.settings.biometrics.fingerprint.FingerprintSettings.FingerprintSettingsFragment;
 import com.android.settings.password.ChooseLockGeneric;
@@ -31,8 +34,17 @@ public class BiometricSecondFactorScreenLockPreferenceDetailsUtils extends
      */
     @Override
     public boolean isAvailable() {
-        return mHost.mFingerprintKeyguardController.isChecked() && super.isAvailable();
+        // This preference is never available for managed profiles.
+        boolean managedProfile = mHost.getUserId() == mProfileChallengeUserId;
 
+        boolean biometricKeyguardEnabled = Settings.Secure.getIntForUser(
+                mContext.getContentResolver(),
+                BIOMETRIC_KEYGUARD_ENABLED,
+                FingerprintSettingsKeyguardPreferenceController.DEFAULT,
+                mUserId) == FingerprintSettingsKeyguardPreferenceController.ON;
+        //boolean managedProfile = UserManager.get(mContext).isManagedProfile(mHost.getUserId());
+
+        return super.isAvailable() && biometricKeyguardEnabled && !managedProfile;
     }
 
     /**
