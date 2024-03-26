@@ -38,6 +38,7 @@ import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.text.InputFilter;
@@ -258,8 +259,7 @@ public class FingerprintSettings extends SubSettings {
         private List<FingerprintSensorPropertiesInternal> mSensorProperties;
         private boolean mInFingerprintLockout;
         private byte[] mToken;
-        // TODO: protected or private? If private need to set the value on the controller.
-        protected LockscreenCredential mUserPassword;
+        private LockscreenCredential mUserPassword;
         private boolean mLaunchedConfirm;
         private boolean mHasFirstEnrolled = true;
         private Drawable mHighlightDrawable;
@@ -359,6 +359,13 @@ public class FingerprintSettings extends SubSettings {
 
         protected int getUserId() {
             return mUserId;
+        }
+
+        // TODO: Review this. Maybe better to always make this a setter in the target class. This
+        //  must be erased from memory properly.
+        // https://android-review.googlesource.com/q/hashtag:%22ramdump-lskf-leak%22
+        protected LockscreenCredential getUserPassword() {
+            return mUserPassword;
         }
 
         /**
@@ -682,7 +689,7 @@ public class FingerprintSettings extends SubSettings {
             }
         }
 
-        protected FingerprintSettingsKeyguardPreferenceController mFingerprintKeyguardController;
+        private FingerprintSettingsKeyguardPreferenceController mFingerprintKeyguardController;
 
         private void setupFingerprintUnlockCategoryPreferences() {
             mRequireScreenOnToAuthPreference = findPreference(KEY_REQUIRE_SCREEN_ON_TO_AUTH);
@@ -1079,6 +1086,18 @@ public class FingerprintSettings extends SubSettings {
             if (getActivity().isFinishing()) {
                 mFingerprintManager.revokeChallenge(mUserId, mChallenge);
             }
+
+            // TODO: Make sure we are doing this properly. Need to find all locations where the
+            //  credential is stored in memory and zero as early as possible. For example, if
+            //  this is added to an intent anywhere.
+            if (mUserPassword != null) {
+                mUserPassword.zeroize();
+            }
+            new Handler(Looper.myLooper()).postDelayed(() -> {
+                System.gc();
+                System.runFinalization();
+                System.gc();
+            }, 5000);
         }
 
         private Drawable getHighlightDrawable() {

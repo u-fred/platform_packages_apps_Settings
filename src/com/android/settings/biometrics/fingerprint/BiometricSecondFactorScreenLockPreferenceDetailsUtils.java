@@ -54,7 +54,8 @@ public class BiometricSecondFactorScreenLockPreferenceDetailsUtils extends
     protected Intent getChooseLockGenericFragmentIntent(int sourceMetricsCategory) {
         Intent i = super.getChooseLockGenericFragmentIntent(sourceMetricsCategory);
         i.putExtra(ChooseLockSettingsHelper.EXTRA_KEY_PRIMARY_CREDENTIAL, false);
-        i.putExtra(ChooseLockSettingsHelper.EXTRA_KEY_PASSWORD, mHost.mUserPassword);
+        // TODO: Test if user password is not set. Make sure it doesn't happen.
+        i.putExtra(ChooseLockSettingsHelper.EXTRA_KEY_PASSWORD, mHost.getUserPassword());
         i.putExtra(ChooseLockGeneric.CONFIRM_CREDENTIALS, false);
         return i;
     }
