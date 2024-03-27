@@ -248,9 +248,6 @@ public abstract class BiometricsSettingsBase extends DashboardFragment {
                 }
             });
             return true;
-        } else if (getBiometricSecondFactorScreenLockPreferenceKey().equals(key)) {
-            mDoNotFinishActivity = true;
-            return false;
         }
         return false;
     }
@@ -358,12 +355,6 @@ public abstract class BiometricsSettingsBase extends DashboardFragment {
      * Get the preference key of face for passing through credential data to face settings.
      */
     public abstract String getFingerprintPreferenceKey();
-
-    /**
-     * Get the preference key for the biometric second factor screen lock.
-     */
-    // TODO: Rename all things to BiometricSecondFactor.
-    public abstract String getBiometricSecondFactorScreenLockPreferenceKey();
 
     /**
      * @return The preference key of the "Unlock your phone" setting toggle.
