@@ -245,7 +245,7 @@ public class FingerprintSettings extends SubSettings {
         private FingerprintUnlockCategoryController
                 mFingerprintUnlockCategoryPreferenceController;
         private ChangeBiometricSecondFactorPreferenceController
-                mChangeBiometricSecondFactorScreenLockPreferenceController;
+                mChangeBiometricSecondFactorPreferenceController;
         private FingerprintSettingsRequireScreenOnToAuthPreferenceController
                 mRequireScreenOnToAuthPreferenceController;
         private Preference mAddFingerprintPreference;
@@ -253,7 +253,7 @@ public class FingerprintSettings extends SubSettings {
         private PreferenceCategory mFingerprintsEnrolledCategory;
         private PreferenceCategory mFingerprintUnlockCategory;
         private PreferenceCategory mFingerprintUnlockFooter;
-        private GearPreference mBiometricSecondFactorScreenLock;
+        private GearPreference mBiometricSecondFactor;
 
         private FingerprintManager mFingerprintManager;
         private FingerprintUpdater mFingerprintUpdater;
@@ -676,16 +676,16 @@ public class FingerprintSettings extends SubSettings {
             }
         }
 
-        private void updateBiometricSecondFactorScreenLockVisibility() {
+        private void updateBiometricSecondFactorVisibility() {
             final boolean available =
-                    mChangeBiometricSecondFactorScreenLockPreferenceController.isAvailable();
-            if (mBiometricSecondFactorScreenLock.isVisible() != available) {
-                mBiometricSecondFactorScreenLock.setVisible(available);
+                    mChangeBiometricSecondFactorPreferenceController.isAvailable();
+            if (mBiometricSecondFactor.isVisible() != available) {
+                mBiometricSecondFactor.setVisible(available);
                 if (available) {
                     // Without this there will be no summary when preference was initially not
                     // available.
-                    mChangeBiometricSecondFactorScreenLockPreferenceController.updateState(
-                            mBiometricSecondFactorScreenLock);
+                    mChangeBiometricSecondFactorPreferenceController.updateState(
+                            mBiometricSecondFactor);
                 }
             }
         }
@@ -708,15 +708,15 @@ public class FingerprintSettings extends SubSettings {
                 mRequireScreenOnToAuthPreference.setVisible(false);
             }
 
-            mBiometricSecondFactorScreenLock =
+            mBiometricSecondFactor =
                     findPreference(KEY_BIOMETRIC_SECOND_FACTOR);
-            updateBiometricSecondFactorScreenLockVisibility();
+            updateBiometricSecondFactorVisibility();
 
             RestrictedSwitchPreference keyguardFingerprintPref = findPreference(KEY_FINGERPRINT_ENABLE_KEYGUARD_TOGGLE);
             keyguardFingerprintPref.setChecked(mFingerprintKeyguardController.isChecked());
             keyguardFingerprintPref.setOnPreferenceChangeListener((p, value) -> {
                 mFingerprintKeyguardController.setChecked((boolean) value);
-                updateBiometricSecondFactorScreenLockVisibility();
+                updateBiometricSecondFactorVisibility();
                 return true;
             });
         }
@@ -970,7 +970,7 @@ public class FingerprintSettings extends SubSettings {
                     mFingerprintKeyguardController =
                         (FingerprintSettingsKeyguardPreferenceController) controller;
                 } else if (controller.getPreferenceKey() == KEY_BIOMETRIC_SECOND_FACTOR) {
-                    mChangeBiometricSecondFactorScreenLockPreferenceController =
+                    mChangeBiometricSecondFactorPreferenceController =
                             (ChangeBiometricSecondFactorPreferenceController) controller;
                 }
             }
