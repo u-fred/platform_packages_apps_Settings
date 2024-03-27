@@ -381,11 +381,21 @@ public class ChooseLockGeneric extends SettingsActivity {
                 // Show customized screen lock title if it is passed as an extra in the intent.
                 getActivity().setTitle(mExtraLockScreenTitleResId);
             } else {
-                updateExistingLock = mLockPatternUtils.isSecure(mUserId);
+                updateExistingLock = mLockPatternUtils.isSecure(mUserId, mPrimaryCredential);
                 if (updateExistingLock) {
-                    getActivity().setTitle(R.string.lock_settings_picker_update_lock_title);
+                    if (mPrimaryCredential) {
+                        getActivity().setTitle(R.string.lock_settings_picker_update_lock_title);
+                    } else {
+                        getActivity().setTitle(
+                                R.string.lock_settings_picker_update_biometric_second_factor_title);
+                    }
                 } else {
-                    getActivity().setTitle(R.string.lock_settings_picker_new_lock_title);
+                    if (mPrimaryCredential) {
+                        getActivity().setTitle(R.string.lock_settings_picker_new_lock_title);
+                    } else {
+                        getActivity().setTitle(
+                                R.string.lock_settings_picker_new_biometric_second_factor_title);
+                    }
                 }
             }
         }
@@ -728,7 +738,11 @@ public class ChooseLockGeneric extends SettingsActivity {
             String currentKey = getKeyForCurrent();
             Preference preference = findPreference(currentKey);
             if (preference != null) {
-                preference.setSummary(R.string.current_screen_lock);
+                if (mPrimaryCredential) {
+                    preference.setSummary(R.string.current_screen_lock);
+                } else {
+                    preference.setSummary(R.string.current_biometric_second_factor);
+                }
             }
         }
 
@@ -933,9 +947,7 @@ public class ChooseLockGeneric extends SettingsActivity {
                 return mIsManagedProfile ? R.string.unlock_disable_frp_warning_title_profile
                         : R.string.unlock_disable_frp_warning_title;
             }
-            // TODO: Update when handling profiles.
-            return mIsManagedProfile ? R.string.unlock_disable_frp_warning_title_profile
-                    : R.string.unlock_disable_biometric_second_factor_warning_title;
+            return R.string.unlock_disable_biometric_second_factor_warning_title;
         }
 
         private int getResIdForFactoryResetProtectionWarningMessage() {
@@ -967,7 +979,7 @@ public class ChooseLockGeneric extends SettingsActivity {
                 case DevicePolicyManager.PASSWORD_QUALITY_NUMERIC:
                 case DevicePolicyManager.PASSWORD_QUALITY_NUMERIC_COMPLEX:
                     if (!mPrimaryCredential) {
-                        return R.string.unlock_disable_frp_warning_content_pin;
+                        return R.string.unlock_disable_biometric_second_factor_warning_content;
                     }
                     if (hasFingerprints && hasFace) {
                         return R.string.unlock_disable_frp_warning_content_pin_face_fingerprint;
