@@ -7,16 +7,22 @@ import androidx.preference.Preference;
 import com.android.settings.biometrics.fingerprint.FingerprintSettings.FingerprintSettingsFragment;
 import com.android.settings.security.ChangeScreenLockPreferenceController;
 
-public class ChangeBiometricSecondFactorScreenLockPreferenceController
+// TODO: rename to biometricsecondfactor
+// TODO: Delete biometric second factor on deletion of last fingerprint?
+// TODO: all UI strings
+// TODO: credential handling
+
+
+public class ChangeBiometricSecondFactorPreferenceController
         extends ChangeScreenLockPreferenceController {
 
     private static final String KEY_SECONDARY_SCREEN_LOCK = "biometric_second_factor_screen_lock";
 
-    public ChangeBiometricSecondFactorScreenLockPreferenceController(Context context,
+    public ChangeBiometricSecondFactorPreferenceController(Context context,
             FingerprintSettingsFragment host) {
         super(context, host);
         mScreenLockPreferenceDetailUtils = new
-                BiometricSecondFactorScreenLockPreferenceDetailsUtils(context, host);
+                BiometricSecondFactorPreferenceDetailsUtils(context, host);
     }
 
     @Override
@@ -27,4 +33,5 @@ public class ChangeBiometricSecondFactorScreenLockPreferenceController
     public void updateState(Preference preference) {
         updateSummary(preference, mUserId);
     }
+
 }

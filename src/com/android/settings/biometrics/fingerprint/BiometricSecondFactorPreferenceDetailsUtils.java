@@ -11,11 +11,11 @@ import com.android.settings.password.ChooseLockGeneric;
 import com.android.settings.password.ChooseLockSettingsHelper;
 import com.android.settings.security.ScreenLockPreferenceDetailsUtils;
 
-public class BiometricSecondFactorScreenLockPreferenceDetailsUtils extends
+public class BiometricSecondFactorPreferenceDetailsUtils extends
         ScreenLockPreferenceDetailsUtils {
     private FingerprintSettingsFragment mHost;
 
-    public BiometricSecondFactorScreenLockPreferenceDetailsUtils(Context context,
+    public BiometricSecondFactorPreferenceDetailsUtils(Context context,
             FingerprintSettingsFragment host) {
         super(context, false);
         mHost = host;

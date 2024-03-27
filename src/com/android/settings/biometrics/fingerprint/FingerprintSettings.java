@@ -189,7 +189,7 @@ public class FingerprintSettings extends SubSettings {
                     KEY_FINGERPRINTS_ENROLLED_CATEGORY));
             controllers.add(new FingerprintSettingsKeyguardPreferenceController(context,
                     KEY_FINGERPRINT_ENABLE_KEYGUARD_TOGGLE));
-            controllers.add(new ChangeBiometricSecondFactorScreenLockPreferenceController(context,
+            controllers.add(new ChangeBiometricSecondFactorPreferenceController(context,
                     host));
             return controllers;
         }
@@ -243,7 +243,7 @@ public class FingerprintSettings extends SubSettings {
         private List<AbstractPreferenceController> mControllers;
         private FingerprintUnlockCategoryController
                 mFingerprintUnlockCategoryPreferenceController;
-        private ChangeBiometricSecondFactorScreenLockPreferenceController
+        private ChangeBiometricSecondFactorPreferenceController
                 mChangeBiometricSecondFactorScreenLockPreferenceController;
         private FingerprintSettingsRequireScreenOnToAuthPreferenceController
                 mRequireScreenOnToAuthPreferenceController;
@@ -970,7 +970,7 @@ public class FingerprintSettings extends SubSettings {
                         (FingerprintSettingsKeyguardPreferenceController) controller;
                 } else if (controller.getPreferenceKey() == KEY_BIOMETRIC_SECOND_FACTOR_SCREEN_LOCK) {
                     mChangeBiometricSecondFactorScreenLockPreferenceController =
-                            (ChangeBiometricSecondFactorScreenLockPreferenceController) controller;
+                            (ChangeBiometricSecondFactorPreferenceController) controller;
                 }
             }
 
