@@ -48,8 +48,8 @@
             settings:controller="com.android.settings.biometrics.fingerprint.FingerprintSettingsKeyguardPreferenceController" />
 
         <com.android.settings.widget.GearPreference
-            android:key="biometric_second_factor_screen_lock"
-            android:title="@string/biometric_settings_second_factor_screen_lock_title"
+            android:key="biometric_second_factor"
+            android:title="@string/biometric_settings_second_factor_title"
             android:summary="@string/summary_placeholder"
             settings:keywords="@string/keywords_lockscreen"/>
 

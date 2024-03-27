@@ -24,6 +24,7 @@ import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRIN
 import static com.android.settings.Utils.SETTINGS_PACKAGE_NAME;
 import static com.android.settings.biometrics.BiometricEnrollBase.EXTRA_FROM_SETTINGS_SUMMARY;
 import static com.android.settings.biometrics.BiometricEnrollBase.EXTRA_KEY_CHALLENGE;
+import static com.android.settings.biometrics.fingerprint.ChangeBiometricSecondFactorPreferenceController.KEY_BIOMETRIC_SECOND_FACTOR;
 
 import android.app.Activity;
 import android.app.Dialog;
@@ -208,8 +209,8 @@ public class FingerprintSettings extends SubSettings {
         static final String KEY_FINGERPRINT_ADD = "key_fingerprint_add";
         private static final String KEY_FINGERPRINT_ENABLE_KEYGUARD_TOGGLE =
                 "fingerprint_enable_keyguard_toggle";
-        private static final String KEY_BIOMETRIC_SECOND_FACTOR_SCREEN_LOCK =
-                "biometric_second_factor_screen_lock";
+        //private static final String KEY_BIOMETRIC_SECOND_FACTOR_SCREEN_LOCK =
+        //        "biometric_second_factor_screen_lock";
         private static final String KEY_LAUNCHED_CONFIRM = "launched_confirm";
         private static final String KEY_HAS_FIRST_ENROLLED = "has_first_enrolled";
         private static final String KEY_IS_ENROLLING = "is_enrolled";
@@ -708,7 +709,7 @@ public class FingerprintSettings extends SubSettings {
             }
 
             mBiometricSecondFactorScreenLock =
-                    findPreference(KEY_BIOMETRIC_SECOND_FACTOR_SCREEN_LOCK);
+                    findPreference(KEY_BIOMETRIC_SECOND_FACTOR);
             updateBiometricSecondFactorScreenLockVisibility();
 
             RestrictedSwitchPreference keyguardFingerprintPref = findPreference(KEY_FINGERPRINT_ENABLE_KEYGUARD_TOGGLE);
@@ -871,7 +872,7 @@ public class FingerprintSettings extends SubSettings {
                 FingerprintPreference fpref = (FingerprintPreference) pref;
                 final Fingerprint fp = fpref.getFingerprint();
                 showRenameDialog(fp);
-            } else if (KEY_BIOMETRIC_SECOND_FACTOR_SCREEN_LOCK.equals(key)) {
+            } else if (KEY_BIOMETRIC_SECOND_FACTOR.equals(key)) {
                 mLaunchedBiometricSecondFactor = true;
             }
             return super.onPreferenceTreeClick(pref);
@@ -968,7 +969,7 @@ public class FingerprintSettings extends SubSettings {
                 } else if (controller.getPreferenceKey() == KEY_FINGERPRINT_ENABLE_KEYGUARD_TOGGLE) {
                     mFingerprintKeyguardController =
                         (FingerprintSettingsKeyguardPreferenceController) controller;
-                } else if (controller.getPreferenceKey() == KEY_BIOMETRIC_SECOND_FACTOR_SCREEN_LOCK) {
+                } else if (controller.getPreferenceKey() == KEY_BIOMETRIC_SECOND_FACTOR) {
                     mChangeBiometricSecondFactorScreenLockPreferenceController =
                             (ChangeBiometricSecondFactorPreferenceController) controller;
                 }

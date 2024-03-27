@@ -1010,10 +1010,8 @@
     <string name="biometric_settings_intro">When you set up Face Unlock and Fingerprint Unlock, your phone will ask for your fingerprint when you wear a mask or are in a dark area</string>
     <!-- Biometric category title - biometric options for unlocking the device. [CHAR LIMIT=50] -->
     <string name="biometric_settings_category_ways_to_unlock">Ways to unlock</string>
-    <!-- Biometric category title - options for strengthening biometric unlock. [CHAR LIMIT=60] -->
-    <string name="biometric_settings_category_strengthen_unlock">Strengthen biometric unlock</string>
     <!-- Text shown on a preference for creating/changing a biometric second factor screen lock. [CHAR LIMIT=60] -->
-    <string name="biometric_settings_second_factor_screen_lock_title">Second factor screen lock</string>
+    <string name="biometric_settings_second_factor_title">Biometric second factor</string>
     <!-- Text shown on a slider for enabling/disabling use of second factor screen lock with fingerprint. [CHAR LIMIT=60] -->
     <string name="biometric_settings_second_factor_screen_lock_fingerprint_title">Enabled for fingerprint</string>
     <!-- Biometric category title - biometric options for unlocking the device. [CHAR LIMIT=60] -->

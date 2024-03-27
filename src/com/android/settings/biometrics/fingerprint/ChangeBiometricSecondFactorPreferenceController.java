@@ -16,7 +16,9 @@ import com.android.settings.security.ChangeScreenLockPreferenceController;
 public class ChangeBiometricSecondFactorPreferenceController
         extends ChangeScreenLockPreferenceController {
 
-    private static final String KEY_SECONDARY_SCREEN_LOCK = "biometric_second_factor_screen_lock";
+    // We would prefer to pass this through the constructor, but this is how it's done in base
+    // class.
+    public static final String KEY_BIOMETRIC_SECOND_FACTOR = "biometric_second_factor";
 
     public ChangeBiometricSecondFactorPreferenceController(Context context,
             FingerprintSettingsFragment host) {
@@ -26,7 +28,7 @@ public class ChangeBiometricSecondFactorPreferenceController
     }
 
     @Override
-    public String getPreferenceKey() { return KEY_SECONDARY_SCREEN_LOCK; }
+    public String getPreferenceKey() { return KEY_BIOMETRIC_SECOND_FACTOR; }
 
 
     @Override
