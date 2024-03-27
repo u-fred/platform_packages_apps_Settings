@@ -7,11 +7,7 @@ import androidx.preference.Preference;
 import com.android.settings.biometrics.fingerprint.FingerprintSettings.FingerprintSettingsFragment;
 import com.android.settings.security.ChangeScreenLockPreferenceController;
 
-// TODO: rename to biometricsecondfactor
 // TODO: Delete biometric second factor on deletion of last fingerprint?
-// TODO: all UI strings
-// TODO: credential handling
-
 
 public class ChangeBiometricSecondFactorPreferenceController
         extends ChangeScreenLockPreferenceController {

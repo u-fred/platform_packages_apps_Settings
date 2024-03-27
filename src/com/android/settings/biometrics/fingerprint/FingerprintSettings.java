@@ -365,13 +365,8 @@ public class FingerprintSettings extends SubSettings {
         // TODO: Review this. Maybe better to always make this a setter in the target class. This
         //  must be erased from memory properly.
         // https://android-review.googlesource.com/q/hashtag:%22ramdump-lskf-leak%22
-        protected LockscreenCredential getUserPassword() {
-            return mUserPassword;
-        }
+        protected LockscreenCredential getUserPassword() { return mUserPassword; }
 
-        /**
-         *
-         */
         protected void handleError(int errMsgId, CharSequence msg) {
             switch (errMsgId) {
                 case FingerprintManager.FINGERPRINT_ERROR_CANCELED:
