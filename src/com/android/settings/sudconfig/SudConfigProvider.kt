@@ -19,7 +19,10 @@ class SudConfigProvider : NonRelationalProvider() {
             R.dimen.setup_design_card_view_intrinsic_height,
             R.dimen.setup_design_card_view_intrinsic_width,
             R.bool.setup_compat_light_navigation_bar,
-            R.bool.setup_compat_light_status_bar
+            R.bool.setup_compat_light_status_bar,
+            R.color.setup_compat_footer_primary_button_bg_color,
+            R.dimen.setup_compat_footer_button_radius,
+            R.fraction.setup_compat_footer_button_ripple_alpha
         )
     }
 
