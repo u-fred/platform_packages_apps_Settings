@@ -965,7 +965,8 @@ public class ChooseLockGeneric extends SettingsActivity {
                 hasFace = false;
             }
 
-            switch (mLockPatternUtils.getKeyguardStoredPasswordQuality(mUserId)) {
+            switch (mLockPatternUtils.getKeyguardStoredPasswordQuality(mUserId,
+                    mPrimaryCredential)) {
                 case DevicePolicyManager.PASSWORD_QUALITY_SOMETHING:
                     if (hasFingerprints && hasFace) {
                         return R.string.unlock_disable_frp_warning_content_pattern_face_fingerprint;
