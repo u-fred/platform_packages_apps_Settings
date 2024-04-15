@@ -14,7 +14,7 @@ import com.android.settings.SettingsActivity;
 import com.android.settings.SetupWizardUtils;
 import com.google.android.setupdesign.util.ThemeHelper;
 
-public class InternetSetupActivity extends SettingsActivity implements ButtonBarHandler {
+public class InternetSetupActivity extends SettingsActivity {
 
     protected static final String EXTRA_PREFS_SET_SKIP_TEXT = "extra_prefs_set_skip_text";
 
