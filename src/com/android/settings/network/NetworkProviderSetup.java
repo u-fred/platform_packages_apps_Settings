@@ -32,6 +32,7 @@ public class NetworkProviderSetup extends NetworkProviderSettings {
      */
     private boolean isSetupWizardModeWifi;
     private FooterButton nextButton;
+    private FooterButton skipButton;
 
     @Override
     public void onCreate(Bundle icicle) {
@@ -72,11 +73,13 @@ public class NetworkProviderSetup extends NetworkProviderSettings {
             button.setText(buttonText);
         }
         mixin.setSecondaryButton(button);
+        skipButton = button;
     }
 
     @Override
     void changeNextButtonState(boolean enabled) {
         nextButton.setEnabled(enabled);
+        skipButton.setVisibility(enabled ? View.GONE : View.VISIBLE);
     }
 
     @Override
