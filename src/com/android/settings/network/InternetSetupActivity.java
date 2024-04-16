@@ -12,11 +12,10 @@ import com.android.settings.ButtonBarHandler;
 import com.android.settings.R;
 import com.android.settings.SettingsActivity;
 import com.android.settings.SetupWizardUtils;
+
 import com.google.android.setupdesign.util.ThemeHelper;
 
 public class InternetSetupActivity extends SettingsActivity {
-
-    protected static final String EXTRA_PREFS_SET_SKIP_TEXT = "extra_prefs_set_skip_text";
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -27,11 +26,8 @@ public class InternetSetupActivity extends SettingsActivity {
 
     @Override
     protected void createUiFromIntent(Bundle savedState, Intent intent) {
+        intent.putExtra("extra_prefs_show_button_bar", false);
         super.createUiFromIntent(savedState, intent);
-        String buttonText = intent.getStringExtra(EXTRA_PREFS_SET_SKIP_TEXT);
-        if (!TextUtils.isEmpty(buttonText)) {
-            ((TextView) findViewById(R.id.skip_button)).setText(buttonText);
-        }
     }
 
     @Override

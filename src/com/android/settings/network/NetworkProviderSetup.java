@@ -2,6 +2,7 @@ package com.android.settings.network;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,6 +12,9 @@ import androidx.preference.Preference;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.settings.R;
+
+import com.google.android.setupcompat.template.FooterBarMixin;
+import com.google.android.setupcompat.template.FooterButton;
 import com.google.android.setupdesign.GlifPreferenceLayout;
 
 /**
@@ -21,11 +25,13 @@ public class NetworkProviderSetup extends NetworkProviderSettings {
     public static final String EXTRA_SETUP_WIZARD_TITLE = "setup_wizard_title";
     public static final String EXTRA_SETUP_WIZARD_DESCRIPTION = "setup_wizard_description";
     private static final String PREF_KEY_CONNECTED_ETHERNET_NETWORK = "connected_ethernet_network";
+    private static final String EXTRA_PREFS_SET_SKIP_TEXT = "extra_prefs_set_skip_text";
 
     /**
      * Don't show media other than wifi, even if they might be available.
      */
     private boolean isSetupWizardModeWifi;
+    private FooterButton nextButton;
 
     @Override
     public void onCreate(Bundle icicle) {
@@ -48,11 +54,34 @@ public class NetworkProviderSetup extends NetworkProviderSettings {
             layout.setHeaderText(intent.getStringExtra(EXTRA_SETUP_WIZARD_TITLE));
             layout.setDescriptionText(intent.getStringExtra(EXTRA_SETUP_WIZARD_DESCRIPTION));
         }
+        FooterBarMixin mixin = layout.getMixin(FooterBarMixin.class);
+        FooterButton button = new FooterButton.Builder(getActivity())
+                .setButtonType(FooterButton.ButtonType.NEXT)
+                .setTheme(com.google.android.setupdesign.R.style.SudGlifButton_Primary)
+                .setText(R.string.next_label)
+                .build();
+        mixin.setPrimaryButton(button);
+        nextButton = button;
+        button = new FooterButton.Builder(getActivity())
+                .setButtonType(FooterButton.ButtonType.SKIP)
+                .setTheme(com.google.android.setupdesign.R.style.SudGlifButton_Secondary)
+                .setText(R.string.skip_label)
+                .build();
+        String buttonText = getIntent().getStringExtra(EXTRA_PREFS_SET_SKIP_TEXT);
+        if (!TextUtils.isEmpty(buttonText)) {
+            button.setText(buttonText);
+        }
+        mixin.setSecondaryButton(button);
+    }
+
+    @Override
+    void changeNextButtonState(boolean enabled) {
+        nextButton.setEnabled(enabled);
     }
 
     @Override
     public RecyclerView onCreateRecyclerView(LayoutInflater inflater, ViewGroup parent,
-                                             Bundle savedInstanceState) {
+            Bundle savedInstanceState) {
         GlifPreferenceLayout layout = (GlifPreferenceLayout) parent;
         return layout.onCreateRecyclerView(inflater, parent, savedInstanceState);
     }
