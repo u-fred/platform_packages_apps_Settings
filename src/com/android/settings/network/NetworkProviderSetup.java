@@ -56,12 +56,15 @@ public class NetworkProviderSetup extends NetworkProviderSettings {
             layout.setDescriptionText(intent.getStringExtra(EXTRA_SETUP_WIZARD_DESCRIPTION));
         }
         FooterBarMixin mixin = layout.getMixin(FooterBarMixin.class);
+        // setup next button
         nextButton = new FooterButton.Builder(activity)
                 .setButtonType(FooterButton.ButtonType.NEXT)
                 .setTheme(com.google.android.setupdesign.R.style.SudGlifButton_Primary)
                 .setText(R.string.next_label)
                 .build();
         mixin.setPrimaryButton(nextButton);
+        nextButton.setOnClickListener(v -> finish());
+        // setup skip button
         skipButton = new FooterButton.Builder(activity)
                 .setButtonType(FooterButton.ButtonType.SKIP)
                 .setTheme(com.google.android.setupdesign.R.style.SudGlifButton_Secondary)
@@ -72,6 +75,15 @@ public class NetworkProviderSetup extends NetworkProviderSettings {
             skipButton.setText(buttonText);
         }
         mixin.setSecondaryButton(skipButton);
+        skipButton.setOnClickListener(v -> finish());
+    }
+
+    @Override
+    public void finish() {
+        Activity activity = getActivity();
+        if (activity == null) return;
+        activity.setResult(Activity.RESULT_OK);
+        activity.finish();
     }
 
     @Override
