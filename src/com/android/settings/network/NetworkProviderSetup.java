@@ -1,5 +1,6 @@
 package com.android.settings.network;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -44,36 +45,33 @@ public class NetworkProviderSetup extends NetworkProviderSettings {
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        if (getActivity() == null) {
-            return;
-        }
+        Activity activity = getActivity();
+        if (activity == null) return;
         GlifPreferenceLayout layout = (GlifPreferenceLayout) view;
         layout.setDividerInsets(Integer.MAX_VALUE, 0);
         if (isSetupWizardModeWifi) {
-            layout.setIcon(getContext().getDrawable(R.drawable.baseline_wifi_glif));
-            Intent intent = getActivity().getIntent();
+            layout.setIcon(activity.getDrawable(R.drawable.baseline_wifi_glif));
+            Intent intent = activity.getIntent();
             layout.setHeaderText(intent.getStringExtra(EXTRA_SETUP_WIZARD_TITLE));
             layout.setDescriptionText(intent.getStringExtra(EXTRA_SETUP_WIZARD_DESCRIPTION));
         }
         FooterBarMixin mixin = layout.getMixin(FooterBarMixin.class);
-        FooterButton button = new FooterButton.Builder(getActivity())
+        nextButton = new FooterButton.Builder(activity)
                 .setButtonType(FooterButton.ButtonType.NEXT)
                 .setTheme(com.google.android.setupdesign.R.style.SudGlifButton_Primary)
                 .setText(R.string.next_label)
                 .build();
-        mixin.setPrimaryButton(button);
-        nextButton = button;
-        button = new FooterButton.Builder(getActivity())
+        mixin.setPrimaryButton(nextButton);
+        skipButton = new FooterButton.Builder(activity)
                 .setButtonType(FooterButton.ButtonType.SKIP)
                 .setTheme(com.google.android.setupdesign.R.style.SudGlifButton_Secondary)
                 .setText(R.string.skip_label)
                 .build();
         String buttonText = getIntent().getStringExtra(EXTRA_PREFS_SET_SKIP_TEXT);
         if (!TextUtils.isEmpty(buttonText)) {
-            button.setText(buttonText);
+            skipButton.setText(buttonText);
         }
-        mixin.setSecondaryButton(button);
-        skipButton = button;
+        mixin.setSecondaryButton(skipButton);
     }
 
     @Override
