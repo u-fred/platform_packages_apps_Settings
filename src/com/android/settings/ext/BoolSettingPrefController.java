@@ -43,7 +43,7 @@ public class BoolSettingPrefController extends AbstractTogglePrefController
     }
 
     @Override
-    public final boolean setChecked(boolean isChecked) {
+    public boolean setChecked(boolean isChecked) {
         return setting.put(mContext, isChecked);
     }
 
