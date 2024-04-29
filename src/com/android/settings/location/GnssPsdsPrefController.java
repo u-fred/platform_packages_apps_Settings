@@ -1,6 +1,7 @@
 package com.android.settings.location;
 
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.ext.settings.ExtSettings;
 import android.ext.settings.GnssConstants;
 
@@ -12,14 +13,20 @@ import com.android.settings.ext.RadioButtonPickerFragment2;
 
 public class GnssPsdsPrefController extends IntSettingPrefController {
     private final String psdsType;
+    private final boolean hasGpsFeature;
 
     public GnssPsdsPrefController(Context ctx, String key) {
         super(ctx, key, ExtSettings.getGnssPsdsSetting(ctx));
         psdsType = ctx.getString(com.android.internal.R.string.config_gnssPsdsType);
+        hasGpsFeature = ctx.getPackageManager().hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS);
     }
 
     @Override
     public int getAvailabilityStatus() {
+        if (!hasGpsFeature) {
+            return UNSUPPORTED_ON_DEVICE;
+        }
+
         int result = super.getAvailabilityStatus();
         if (result == AVAILABLE) {
             if (psdsType.isEmpty()) {
