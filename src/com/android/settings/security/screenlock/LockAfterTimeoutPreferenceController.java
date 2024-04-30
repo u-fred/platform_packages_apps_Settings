@@ -47,20 +47,22 @@ public class LockAfterTimeoutPreferenceController extends AbstractPreferenceCont
     private final LockPatternUtils mLockPatternUtils;
     private final TrustAgentManager mTrustAgentManager;
     private final DevicePolicyManager mDPM;
+    private final boolean mIsForPrimaryScreenLock;
 
     public LockAfterTimeoutPreferenceController(Context context, int userId,
-            LockPatternUtils lockPatternUtils) {
+            LockPatternUtils lockPatternUtils, boolean isForPrimaryScreenLock) {
         super(context);
         mUserId = userId;
         mLockPatternUtils = lockPatternUtils;
         mDPM = (DevicePolicyManager) context.getSystemService(Context.DEVICE_POLICY_SERVICE);
         mTrustAgentManager = FeatureFactory.getFeatureFactory()
                 .getSecurityFeatureProvider().getTrustAgentManager();
+        mIsForPrimaryScreenLock = isForPrimaryScreenLock;
     }
 
     @Override
     public boolean isAvailable() {
-        if (!mLockPatternUtils.isSecure(mUserId)) {
+        if (!mLockPatternUtils.isSecure(mUserId) || !mIsForPrimaryScreenLock) {
             return false;
         }
         switch (mLockPatternUtils.getKeyguardStoredPasswordQuality(mUserId)) {

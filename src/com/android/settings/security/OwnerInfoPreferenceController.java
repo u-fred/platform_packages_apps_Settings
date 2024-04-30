@@ -44,19 +44,22 @@ public class OwnerInfoPreferenceController extends AbstractPreferenceController
     private final LockPatternUtils mLockPatternUtils;
     private final ObservablePreferenceFragment mParent;
     private RestrictedPreference mOwnerInfoPref;
+    private final boolean mIsForPrimaryScreenLock;
 
     // Container fragment should implement this in order to show the correct summary
     public interface OwnerInfoCallback {
         void onOwnerInfoUpdated();
     }
 
-    public OwnerInfoPreferenceController(Context context, ObservablePreferenceFragment parent) {
+    public OwnerInfoPreferenceController(Context context, ObservablePreferenceFragment parent,
+            boolean isForPrimaryScreenLock) {
         super(context);
         mParent = parent;
         mLockPatternUtils = new LockPatternUtils(context);
         if (parent != null) {
             parent.getSettingsLifecycle().addObserver(this);
         }
+        mIsForPrimaryScreenLock = isForPrimaryScreenLock;
     }
 
     @Override
@@ -72,7 +75,7 @@ public class OwnerInfoPreferenceController extends AbstractPreferenceController
 
     @Override
     public boolean isAvailable() {
-        return true;
+        return mIsForPrimaryScreenLock;
     }
 
     @Override

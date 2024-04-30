@@ -38,19 +38,21 @@ public class PowerButtonInstantLockPreferenceController extends AbstractPreferen
     private final int mUserId;
     private final LockPatternUtils mLockPatternUtils;
     private final TrustAgentManager mTrustAgentManager;
+    private final boolean mIsForPrimaryScreenLock;
 
     public PowerButtonInstantLockPreferenceController(Context context, int userId,
-            LockPatternUtils lockPatternUtils) {
+            LockPatternUtils lockPatternUtils, boolean isForPrimaryScreenLock) {
         super(context);
         mUserId = userId;
         mLockPatternUtils = lockPatternUtils;
         mTrustAgentManager = FeatureFactory.getFeatureFactory()
                 .getSecurityFeatureProvider().getTrustAgentManager();
+        mIsForPrimaryScreenLock = isForPrimaryScreenLock;
     }
 
     @Override
     public boolean isAvailable() {
-        if (!mLockPatternUtils.isSecure(mUserId)) {
+        if (!mLockPatternUtils.isSecure(mUserId) || !mIsForPrimaryScreenLock) {
             return false;
         }
         switch (mLockPatternUtils.getKeyguardStoredPasswordQuality(mUserId)) {

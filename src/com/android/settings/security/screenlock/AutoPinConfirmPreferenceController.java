@@ -41,14 +41,17 @@ public class AutoPinConfirmPreferenceController extends AbstractPreferenceContro
     private final int mUserId;
     private final LockPatternUtils mLockPatternUtils;
     private final ObservablePreferenceFragment mParentFragment;
+    private final boolean mIsForPrimaryScreenLock;
 
     public AutoPinConfirmPreferenceController(Context context, int userId,
             LockPatternUtils lockPatternUtils,
-            ObservablePreferenceFragment parentFragment) {
+            ObservablePreferenceFragment parentFragment,
+            boolean isForPrimaryScreenLock) {
         super(context);
         mUserId = userId;
         mLockPatternUtils = lockPatternUtils;
         mParentFragment = parentFragment;
+        mIsForPrimaryScreenLock = isForPrimaryScreenLock;
     }
 
     @Override
@@ -64,8 +67,8 @@ public class AutoPinConfirmPreferenceController extends AbstractPreferenceContro
 
     @Override
     public boolean isAvailable() {
-        return LockPatternUtils.isAutoPinConfirmFeatureAvailable() && isPinLock()
-                && isPinLengthEligibleForAutoConfirmation();
+        return LockPatternUtils.isAutoPinConfirmFeatureAvailable(mIsForPrimaryScreenLock) &&
+                isPinLock() && isPinLengthEligibleForAutoConfirmation();
     }
 
     @Override
@@ -74,23 +77,26 @@ public class AutoPinConfirmPreferenceController extends AbstractPreferenceContro
     }
 
     private boolean isPinLock() {
-        return mLockPatternUtils.getCredentialTypeForUser(mUserId)
+        return mLockPatternUtils.getCredentialTypeForUser(mUserId, mIsForPrimaryScreenLock)
                 == LockPatternUtils.CREDENTIAL_TYPE_PIN;
     }
 
     private boolean isPinLengthEligibleForAutoConfirmation() {
-        return mLockPatternUtils.getPinLength(mUserId) >= MIN_AUTO_PIN_REQUIREMENT_LENGTH;
+        return mLockPatternUtils.getPinLength(mUserId, mIsForPrimaryScreenLock) >=
+                MIN_AUTO_PIN_REQUIREMENT_LENGTH;
     }
 
     private boolean getPinAutoConfirmSettingState() {
-        return mLockPatternUtils.isAutoPinConfirmEnabled(mUserId);
+        return mLockPatternUtils.isAutoPinConfirmEnabled(mUserId, mIsForPrimaryScreenLock);
     }
 
     private void setPinAutoConfirmSettingState(boolean state) {
-        mLockPatternUtils.setAutoPinConfirm(state, mUserId);
+        mLockPatternUtils.setAutoPinConfirm(state, mUserId, mIsForPrimaryScreenLock);
     }
 
     private void launchPinConfirmActivity(boolean newState) {
+        // TODO: Probably don't need this for secondary (we've already verified primary and
+        //  secondary in order to access the setting).
         new ChooseLockSettingsHelper.Builder(mParentFragment.getActivity(), mParentFragment)
                 .setUserId(mUserId)
                 .setRequestCode(newState

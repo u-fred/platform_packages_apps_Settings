@@ -27,6 +27,7 @@ import androidx.annotation.Nullable;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.settings.R;
 import com.android.settings.dashboard.DashboardFragment;
+import com.android.settings.password.ChooseLockSettingsHelper;
 import com.android.settings.search.BaseSearchIndexProvider;
 import com.android.settings.security.OwnerInfoPreferenceController;
 import com.android.settingslib.core.AbstractPreferenceController;
@@ -47,6 +48,14 @@ public class ScreenLockSettings extends DashboardFragment
     static final int AUTO_PIN_SETTING_DISABLING_REQUEST_CODE = 112;
 
     private LockPatternUtils mLockPatternUtils;
+    private boolean mIsForPrimaryScreenLock;
+
+    @Override
+    public void onAttach(Context context) {
+        mIsForPrimaryScreenLock = getIntent().getBooleanExtra(
+                ChooseLockSettingsHelper.EXTRA_KEY_PRIMARY_CREDENTIAL, true);
+        super.onAttach(context);
+    }
 
     @Override
     public int getMetricsCategory() {
@@ -66,7 +75,8 @@ public class ScreenLockSettings extends DashboardFragment
     @Override
     protected List<AbstractPreferenceController> createPreferenceControllers(Context context) {
         mLockPatternUtils = new LockPatternUtils(context);
-        return buildPreferenceControllers(context, this /* parent */, mLockPatternUtils);
+        return buildPreferenceControllers(context, this /* parent */, mLockPatternUtils,
+                mIsForPrimaryScreenLock);
     }
 
     @Override
@@ -75,20 +85,21 @@ public class ScreenLockSettings extends DashboardFragment
     }
 
     private static List<AbstractPreferenceController> buildPreferenceControllers(Context context,
-            DashboardFragment parent, LockPatternUtils lockPatternUtils) {
+            DashboardFragment parent, LockPatternUtils lockPatternUtils,
+            boolean isForPrimaryScreenLock) {
 
         final List<AbstractPreferenceController> controllers = new ArrayList<>();
         controllers.add(new PatternVisiblePreferenceController(
-                context, MY_USER_ID, lockPatternUtils));
+                context, MY_USER_ID, lockPatternUtils, isForPrimaryScreenLock));
         controllers.add(new PinPrivacyPreferenceController(
-                context, MY_USER_ID, lockPatternUtils));
+                context, MY_USER_ID, lockPatternUtils, isForPrimaryScreenLock));
         controllers.add(new PowerButtonInstantLockPreferenceController(
-                context, MY_USER_ID, lockPatternUtils));
+                context, MY_USER_ID, lockPatternUtils, isForPrimaryScreenLock));
         controllers.add(new LockAfterTimeoutPreferenceController(
-                context, MY_USER_ID, lockPatternUtils));
+                context, MY_USER_ID, lockPatternUtils, isForPrimaryScreenLock));
         controllers.add(new AutoPinConfirmPreferenceController(
-                context, MY_USER_ID, lockPatternUtils, parent));
-        controllers.add(new OwnerInfoPreferenceController(context, parent));
+                context, MY_USER_ID, lockPatternUtils, parent, isForPrimaryScreenLock));
+        controllers.add(new OwnerInfoPreferenceController(context, parent, isForPrimaryScreenLock));
         return controllers;
     }
 
@@ -99,12 +110,14 @@ public class ScreenLockSettings extends DashboardFragment
                 public List<AbstractPreferenceController> createPreferenceControllers(
                         Context context) {
                     return buildPreferenceControllers(context, null /* parent */,
-                            new LockPatternUtils(context));
+                            new LockPatternUtils(context), true);
                 }
             };
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        // TODO: If we don't want to enable auto-confirm PIN for secondary, must wrap this in
+        //  if (primary).
         if (requestCode == AUTO_PIN_SETTING_ENABLING_REQUEST_CODE) {
             if (resultCode == Activity.RESULT_OK) {
                 onAutoPinConfirmSettingChange(/* newState= */ true);
@@ -118,10 +131,10 @@ public class ScreenLockSettings extends DashboardFragment
 
     private void onAutoPinConfirmSettingChange(boolean newState) {
         // update the auto pin confirm setting.
-        mLockPatternUtils.setAutoPinConfirm(newState, MY_USER_ID);
+        mLockPatternUtils.setAutoPinConfirm(newState, MY_USER_ID, mIsForPrimaryScreenLock);
         // store the pin length info to disk; If it fails, reset the setting to prev state.
-        if (!mLockPatternUtils.refreshStoredPinLength(MY_USER_ID)) {
-            mLockPatternUtils.setAutoPinConfirm(!newState, MY_USER_ID);
+        if (!mLockPatternUtils.refreshStoredPinLength(MY_USER_ID, mIsForPrimaryScreenLock)) {
+            mLockPatternUtils.setAutoPinConfirm(!newState, MY_USER_ID, mIsForPrimaryScreenLock);
         }
     }
 }

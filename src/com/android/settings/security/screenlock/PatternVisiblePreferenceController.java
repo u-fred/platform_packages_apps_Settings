@@ -32,12 +32,14 @@ public class PatternVisiblePreferenceController extends AbstractPreferenceContro
 
     private final int mUserId;
     private final LockPatternUtils mLockPatternUtils;
+    private final boolean mIsForPrimaryScreenLock;
 
     public PatternVisiblePreferenceController(Context context, int userId,
-            LockPatternUtils lockPatternUtils) {
+            LockPatternUtils lockPatternUtils, boolean isForPrimaryScreenLock) {
         super(context);
         mUserId = userId;
         mLockPatternUtils = lockPatternUtils;
+        mIsForPrimaryScreenLock = isForPrimaryScreenLock;
     }
 
     @Override
@@ -57,12 +59,13 @@ public class PatternVisiblePreferenceController extends AbstractPreferenceContro
     }
 
     private boolean isPatternLock() {
-        return mLockPatternUtils.getCredentialTypeForUser(mUserId)
+        return mLockPatternUtils.getCredentialTypeForUser(mUserId, mIsForPrimaryScreenLock)
                 == LockPatternUtils.CREDENTIAL_TYPE_PATTERN;
     }
 
     @Override
     public boolean onPreferenceChange(Preference preference, Object newValue) {
+        // Secondary will never be available so don't need to update this to support secondary.
         mLockPatternUtils.setVisiblePatternEnabled((Boolean) newValue, mUserId);
         return true;
     }
