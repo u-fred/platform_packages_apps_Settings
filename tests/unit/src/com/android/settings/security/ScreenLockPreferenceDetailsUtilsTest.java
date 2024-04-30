@@ -91,21 +91,21 @@ public class ScreenLockPreferenceDetailsUtilsTest {
         when(featureFactory.securityFeatureProvider.getLockPatternUtils(mContext))
                 .thenReturn(mLockPatternUtils);
 
-        mScreenLockPreferenceDetailsUtils = new ScreenLockPreferenceDetailsUtils(mContext);
+        mScreenLockPreferenceDetailsUtils = new ScreenLockPreferenceDetailsUtils(mContext, true);
     }
 
     @Test
     public void isAvailable_whenEnabled_shouldReturnTrue() {
         whenConfigShowUnlockSetOrChangeIsEnabled(true);
 
-        assertThat(mScreenLockPreferenceDetailsUtils.isAvailable()).isTrue();
+        assertThat(mScreenLockPreferenceDetailsUtils.isAvailable(false)).isTrue();
     }
 
     @Test
     public void isAvailable_whenDisabled_shouldReturnFalse() {
         whenConfigShowUnlockSetOrChangeIsEnabled(false);
 
-        assertThat(mScreenLockPreferenceDetailsUtils.isAvailable()).isFalse();
+        assertThat(mScreenLockPreferenceDetailsUtils.isAvailable(false)).isFalse();
     }
 
     @Test

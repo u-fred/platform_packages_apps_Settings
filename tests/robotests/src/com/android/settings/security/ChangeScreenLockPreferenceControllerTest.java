@@ -86,7 +86,7 @@ public class ChangeScreenLockPreferenceControllerTest {
                 .thenReturn(mDevicePolicyManager);
         final SettingsPreferenceFragment host = mock(SettingsPreferenceFragment.class);
         when(host.getMetricsCategory()).thenReturn(METRICS_CATEGORY);
-        mController = new ChangeScreenLockPreferenceController(mContext, host);
+        mController = new ChangeScreenLockPreferenceController(mContext, host, true);
     }
 
     @Test

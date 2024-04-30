@@ -62,7 +62,7 @@ public final class LockScreenSafetySource {
             return; // LockScreen source only supports primary profile.
         }
 
-        if (!screenLockPreferenceDetailsUtils.isAvailable()) {
+        if (!screenLockPreferenceDetailsUtils.isAvailable(false)) {
             SafetyCenterManagerWrapper.get()
                     .setSafetySourceData(
                             context, SAFETY_SOURCE_ID, /* safetySourceData= */ null, safetyEvent);
@@ -117,7 +117,7 @@ public final class LockScreenSafetySource {
     public static void onLockScreenChange(Context context) {
         setSafetySourceData(
                 context,
-                new ScreenLockPreferenceDetailsUtils(context),
+                new ScreenLockPreferenceDetailsUtils(context, true),
                 new SafetyEvent.Builder(SAFETY_EVENT_TYPE_SOURCE_STATE_CHANGED).build());
 
         // Also send refreshed safety center data for biometrics, since changing lockscreen settings

@@ -104,7 +104,8 @@ public class SecuritySettings extends DashboardFragment {
                 context, lifecycle));
         securityPreferenceControllers.add(new CombinedBiometricStatusPreferenceController(
                 context, lifecycle));
-        securityPreferenceControllers.add(new ChangeScreenLockPreferenceController(context, host));
+        securityPreferenceControllers.add(new ChangeScreenLockPreferenceController(context, host,
+                true));
         controllers.add(new PreferenceCategoryController(context, SECURITY_CATEGORY)
                 .setChildren(securityPreferenceControllers));
         controllers.addAll(securityPreferenceControllers);

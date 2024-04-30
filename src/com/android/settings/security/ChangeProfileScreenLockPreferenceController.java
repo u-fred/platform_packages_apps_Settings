@@ -46,7 +46,7 @@ public class ChangeProfileScreenLockPreferenceController extends
 
     public ChangeProfileScreenLockPreferenceController(Context context,
             SettingsPreferenceFragment host, String key) {
-        super(context, host);
+        super(context, host, true);
         this.mPreferenceKey = key;
     }
 

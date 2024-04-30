@@ -16,22 +16,31 @@
 
 package com.android.settings.security;
 
+import static android.provider.Settings.Secure.BIOMETRIC_KEYGUARD_ENABLED;
+
 import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.StorageManager;
+import android.provider.Settings;
 
+import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 
 import com.android.internal.app.UnlaunchableAppActivity;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.internal.widget.LockscreenCredential;
 import com.android.settings.R;
 import com.android.settings.Utils;
+import com.android.settings.biometrics.fingerprint.FingerprintSettingsKeyguardPreferenceController;
 import com.android.settings.core.SubSettingLauncher;
 import com.android.settings.overlay.FeatureFactory;
+import com.android.settings.password.ChooseLockGeneric;
 import com.android.settings.password.ChooseLockGeneric.ChooseLockGenericFragment;
+import com.android.settings.password.ChooseLockSettingsHelper;
 import com.android.settings.security.screenlock.ScreenLockSettings;
 import com.android.settingslib.RestrictedLockUtils;
 import com.android.settingslib.transition.SettingsTransitionHelper;
@@ -46,28 +55,37 @@ public class ScreenLockPreferenceDetailsUtils {
     protected final LockPatternUtils mLockPatternUtils;
     protected final int mProfileChallengeUserId;
     protected final UserManager mUm;
-    protected boolean mPrimaryScreenLock;
+    protected boolean mIsForPrimaryScreenLock;
 
-    public ScreenLockPreferenceDetailsUtils(Context context) {
+    public ScreenLockPreferenceDetailsUtils(Context context, boolean isForPrimaryScreenLock) {
         mContext = context;
         mUm = context.getSystemService(UserManager.class);
         mLockPatternUtils = FeatureFactory.getFeatureFactory()
                 .getSecurityFeatureProvider()
                 .getLockPatternUtils(context);
         mProfileChallengeUserId = Utils.getManagedProfileId(mUm, mUserId);
-        mPrimaryScreenLock = true;
-    }
-
-    public ScreenLockPreferenceDetailsUtils(Context context, boolean primaryScreenLock) {
-        this(context);
-        mPrimaryScreenLock = primaryScreenLock;
+        mIsForPrimaryScreenLock = isForPrimaryScreenLock;
     }
 
     /**
      * Returns whether the screen lock settings entity should be shown.
      */
-    public boolean isAvailable() {
-        return mContext.getResources().getBoolean(R.bool.config_show_unlock_set_or_change);
+    public boolean isAvailable(boolean managedProfile) {
+        if (!mContext.getResources().getBoolean(R.bool.config_show_unlock_set_or_change)) {
+            return false;
+        }
+
+        if (mIsForPrimaryScreenLock) {
+            return true;
+        } else {
+            // TODO: Call this method in FingerprintSettingsKeyguardPreferenceController possibly
+            //  via FingerprintSettings.
+            return !managedProfile && Settings.Secure.getIntForUser(
+                    mContext.getContentResolver(),
+                    BIOMETRIC_KEYGUARD_ENABLED,
+                    FingerprintSettingsKeyguardPreferenceController.DEFAULT,
+                    mUserId) == FingerprintSettingsKeyguardPreferenceController.ON;
+        }
     }
 
     /**
@@ -83,6 +101,9 @@ public class ScreenLockPreferenceDetailsUtils {
      * Returns whether the password quality is managed by device admin.
      */
     public boolean isPasswordQualityManaged(int userId, RestrictedLockUtils.EnforcedAdmin admin) {
+        if (!mIsForPrimaryScreenLock) {
+            return false;
+        }
         final DevicePolicyManager dpm = (DevicePolicyManager) mContext
                 .getSystemService(Context.DEVICE_POLICY_SERVICE);
         return admin != null && dpm.getPasswordQuality(admin.component, userId)
@@ -93,7 +114,7 @@ public class ScreenLockPreferenceDetailsUtils {
      * Returns whether the lock pattern is secure.
      */
     public boolean isLockPatternSecure() {
-        return mLockPatternUtils.isSecure(mUserId, mPrimaryScreenLock);
+        return mLockPatternUtils.isSecure(mUserId, mIsForPrimaryScreenLock);
     }
 
     /**
@@ -114,9 +135,14 @@ public class ScreenLockPreferenceDetailsUtils {
      * Returns {@link Intent} to launch the {@link ScreenLockSettings}.
      */
     public Intent getLaunchScreenLockSettingsIntent(int sourceMetricsCategory) {
+        Bundle extras = new Bundle();
+        if (!mIsForPrimaryScreenLock) {
+            extras.putBoolean(ChooseLockSettingsHelper.EXTRA_KEY_PRIMARY_CREDENTIAL, false);
+        }
         return new SubSettingLauncher(mContext)
                 .setDestination(ScreenLockSettings.class.getName())
                 .setSourceMetricsCategory(sourceMetricsCategory)
+                .setExtras(extras)
                 .toIntent();
     }
 
@@ -126,13 +152,14 @@ public class ScreenLockPreferenceDetailsUtils {
      *
      * @return true if the {@link ChooseLockGenericFragment} is launching.
      */
-    public boolean openChooseLockGenericFragment(int sourceMetricsCategory) {
+    public boolean openChooseLockGenericFragment(int sourceMetricsCategory,
+            @Nullable LockscreenCredential password) {
         final Intent quietModeDialogIntent = getQuietModeDialogIntent();
         if (quietModeDialogIntent != null) {
             mContext.startActivity(quietModeDialogIntent);
             return false;
         }
-        mContext.startActivity(getChooseLockGenericFragmentIntent(sourceMetricsCategory));
+        mContext.startActivity(getChooseLockGenericFragmentIntent(sourceMetricsCategory, password));
         return true;
     }
 
@@ -147,7 +174,7 @@ public class ScreenLockPreferenceDetailsUtils {
     public Intent getLaunchChooseLockGenericFragmentIntent(int sourceMetricsCategory) {
         final Intent quietModeDialogIntent = getQuietModeDialogIntent();
         return quietModeDialogIntent != null ? quietModeDialogIntent
-                : getChooseLockGenericFragmentIntent(sourceMetricsCategory);
+                : getChooseLockGenericFragmentIntent(sourceMetricsCategory, null);
     }
 
     protected Intent getQuietModeDialogIntent() {
@@ -166,26 +193,40 @@ public class ScreenLockPreferenceDetailsUtils {
         return null;
     }
 
-    protected Intent getChooseLockGenericFragmentIntent(int sourceMetricsCategory) {
+    protected Intent getChooseLockGenericFragmentIntent(int sourceMetricsCategory,
+            @Nullable LockscreenCredential password) {
+        Bundle extras = new Bundle();
+        if (!mIsForPrimaryScreenLock) {
+            extras.putBoolean(ChooseLockSettingsHelper.EXTRA_KEY_PRIMARY_CREDENTIAL, false);
+        }
+        if (password != null) {
+            // TODO: Test if user password is not set. Make sure it doesn't happen.
+            extras.putObject(ChooseLockSettingsHelper.EXTRA_KEY_PASSWORD, password);
+            // TODO: Why need this if we also have password?
+            extras.putBoolean(ChooseLockGeneric.CONFIRM_CREDENTIALS, false);
+        }
+
         return new SubSettingLauncher(mContext)
                 .setDestination(ChooseLockGenericFragment.class.getName())
                 .setSourceMetricsCategory(sourceMetricsCategory)
                 .setTransitionType(SettingsTransitionHelper.TransitionType.TRANSITION_SLIDE)
+                .setExtras(extras)
                 .toIntent();
     }
 
     @StringRes
     private Integer getSummaryResId(int userId) {
-        if (!mLockPatternUtils.isSecure(userId, mPrimaryScreenLock)) {
+        // TODO: Look at base commit when updating this.
+        if (!mLockPatternUtils.isSecure(userId, mIsForPrimaryScreenLock)) {
             if (userId == mProfileChallengeUserId
-                    || mLockPatternUtils.isLockScreenDisabled(userId, mPrimaryScreenLock)) {
+                    || mLockPatternUtils.isLockScreenDisabled(userId, mIsForPrimaryScreenLock)) {
                 return R.string.unlock_set_unlock_mode_off;
             } else {
                 return R.string.unlock_set_unlock_mode_none;
             }
         } else {
             int keyguardStoredPasswordQuality =
-                    mLockPatternUtils.getKeyguardStoredPasswordQuality(userId, mPrimaryScreenLock);
+                    mLockPatternUtils.getKeyguardStoredPasswordQuality(userId, mIsForPrimaryScreenLock);
             switch (keyguardStoredPasswordQuality) {
                 case DevicePolicyManager.PASSWORD_QUALITY_SOMETHING:
                     return R.string.unlock_set_unlock_mode_pattern;
