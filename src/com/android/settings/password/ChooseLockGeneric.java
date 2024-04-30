@@ -871,18 +871,9 @@ public class ChooseLockGeneric extends SettingsActivity {
                 if (mUserPassword != null) {
                     // No need to call setLockCredential if the user currently doesn't
                     // have a password
-
-                    if (mPrimaryCredential) {
-                        // TODO: Should we check that the secondary credential is not none first?
-                        //  It appears to work, but is not something that is allowed with the
-                        //  primary screen lock through the UI so might not be a tested path.
-                        //  mLockPatternUtils.getKeyguardStoredPasswordQuality(mUserId,
-                        //      false) != PASSWORD_QUALITY_UNSPECIFIED
-                        mLockPatternUtils.setLockCredential(
-                                LockscreenCredential.createNone(false), mUserPassword, mUserId);
-                    }
                     mLockPatternUtils.setLockCredential(
-                            LockscreenCredential.createNone(mPrimaryCredential), mUserPassword, mUserId);
+                            LockscreenCredential.createNone(mPrimaryCredential), mUserPassword,
+                            mUserId);
                     // Could probably put this in the above block but doing it like this to preserve
                     // original call order.
                     if (mPrimaryCredential) {
