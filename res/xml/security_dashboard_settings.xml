@@ -76,12 +76,6 @@
             android:summary="@string/allow_automatic_per_app_epcm_summary"
             settings:boolSettingField="android.ext.settings.ExtSettings ALLOW_DISABLING_HARDENING_VIA_APP_COMPAT_CONFIG" />
 
-        <SwitchPreferenceCompat
-            android:key="memtag_in_vendor_processes"
-            android:title="@string/memtag_in_vendor_processes_title"
-            android:summary="@string/memtag_in_vendor_processes_summary"
-            settings:controller="com.android.settings.security.VendorMemtagPrefController" />
-
         <Preference
             android:key="force_app_memtag"
             android:title="@string/memtag_in_3p_apps_title"

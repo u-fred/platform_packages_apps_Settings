@@ -160,9 +160,4 @@ Native code debugging (ptrace) slightly weakens the app sandbox. Some apps (most
     <string name="usbc_port_charging_only_when_locked_afu_summary">Doesn’t apply to connections that were made before locking or first unlock</string>
     <string name="usbc_port_on_title">On</string>
 
-    <string name="memtag_in_vendor_processes_title">Memory tagging in vendor processes</string>
-    <string name="memtag_in_vendor_processes_summary">Improves security, but might make the device less stable</string>
-    <string name="memtag_in_vendor_processes_dialog_message">Device has to be restarted to apply the new value of this setting.</string>
-    <string name="memtag_in_vendor_processes_dialog_btn">Restart</string>
-
 </resources>
