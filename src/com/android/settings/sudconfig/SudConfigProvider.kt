@@ -2,6 +2,7 @@ package com.android.settings.sudconfig
 
 import android.os.Build
 import android.os.Bundle
+import android.os.SystemProperties
 import android.provider.Settings
 import android.text.TextUtils
 import android.util.Log
@@ -26,7 +27,11 @@ class SudConfigProvider : NonRelationalProvider() {
         )
     }
 
+    private lateinit var defaultThemeString: String
+
     override fun onCreate(): Boolean {
+        defaultThemeString = SystemProperties.get("setupwizard.theme")
+        if (TextUtils.isEmpty(defaultThemeString)) defaultThemeString = "glif_v4_light"
         return true
     }
 
@@ -34,7 +39,7 @@ class SudConfigProvider : NonRelationalProvider() {
         Log.d(TAG, "method: $method, caller: $callingPackage")
         val bundle = Bundle()
         when (method) {
-            "suwDefaultThemeString" -> bundle.putString(method, "glif_v4_light")
+            "suwDefaultThemeString" -> bundle.putString(method, defaultThemeString)
 
             "applyGlifThemeControlledTransition",
             "isDynamicColorEnabled",
