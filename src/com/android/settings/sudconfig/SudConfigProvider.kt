@@ -2,11 +2,11 @@ package com.android.settings.sudconfig
 
 import android.os.Build
 import android.os.Bundle
-import android.os.SystemProperties
 import android.provider.Settings
 import android.text.TextUtils
 import android.util.Log
 import com.android.settings.R;
+import java.util.Optional
 
 /**
  * Provides system-wide config for setup wizard screens.
@@ -30,8 +30,11 @@ class SudConfigProvider : NonRelationalProvider() {
     private lateinit var defaultThemeString: String
 
     override fun onCreate(): Boolean {
-        defaultThemeString = SystemProperties.get("setupwizard.theme")
-        if (TextUtils.isEmpty(defaultThemeString)) defaultThemeString = "glif_v4_light"
+        // returns value of setupwizard.theme sysprop
+        val theme: Optional<String> = android.sysprop.SetupWizardProperties.theme()
+        // setupwizard.theme should always be set to prevent inconsistencies in setupdesign UIs
+        check(theme.isPresent) { "missing setupwizard.theme sysprop" }
+        defaultThemeString = theme.get()
         return true
     }
 
