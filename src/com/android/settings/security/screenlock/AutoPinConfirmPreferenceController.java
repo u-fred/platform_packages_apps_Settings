@@ -67,7 +67,7 @@ public class AutoPinConfirmPreferenceController extends AbstractPreferenceContro
 
     @Override
     public boolean isAvailable() {
-        return LockPatternUtils.isAutoPinConfirmFeatureAvailable(mIsForPrimaryScreenLock) &&
+        return LockPatternUtils.isAutoPinConfirmFeatureAvailable() &&
                 isPinLock() && isPinLengthEligibleForAutoConfirmation();
     }
 

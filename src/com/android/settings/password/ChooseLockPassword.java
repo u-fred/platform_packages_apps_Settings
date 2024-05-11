@@ -897,7 +897,7 @@ public class ChooseLockPassword extends SettingsActivity {
                                 mIsAlphaMode
                                         ? R.string.lockpassword_password_too_short
                                         : R.string.lockpassword_pin_too_short);
-                        if (LockPatternUtils.isAutoPinConfirmFeatureAvailable(mPrimaryCredential)
+                        if (LockPatternUtils.isAutoPinConfirmFeatureAvailable()
                                 && !mIsAlphaMode
                                 && error.requirement < MIN_AUTO_PIN_REQUIREMENT_LENGTH) {
                             Map<String, Object> arguments = new HashMap<>();
@@ -1002,7 +1002,7 @@ public class ChooseLockPassword extends SettingsActivity {
         }
 
         private void setAutoPinConfirmOption(boolean enabled, int length) {
-            if (!LockPatternUtils.isAutoPinConfirmFeatureAvailable(mPrimaryCredential)
+            if (!LockPatternUtils.isAutoPinConfirmFeatureAvailable()
                     || mAutoPinConfirmOption == null) {
                 return;
             }
