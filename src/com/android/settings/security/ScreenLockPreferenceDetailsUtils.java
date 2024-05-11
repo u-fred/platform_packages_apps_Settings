@@ -34,6 +34,7 @@ import com.android.internal.app.UnlaunchableAppActivity;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockscreenCredential;
 import com.android.settings.R;
+import com.android.settings.SettingsPreferenceFragment;
 import com.android.settings.Utils;
 import com.android.settings.biometrics.fingerprint.FingerprintSettingsKeyguardPreferenceController;
 import com.android.settings.core.SubSettingLauncher;
@@ -55,7 +56,7 @@ public class ScreenLockPreferenceDetailsUtils {
     protected final LockPatternUtils mLockPatternUtils;
     protected final int mProfileChallengeUserId;
     protected final UserManager mUm;
-    protected boolean mIsForPrimaryScreenLock;
+    protected final boolean mIsForPrimaryScreenLock;
 
     public ScreenLockPreferenceDetailsUtils(Context context, boolean isForPrimaryScreenLock) {
         mContext = context;
@@ -70,17 +71,15 @@ public class ScreenLockPreferenceDetailsUtils {
     /**
      * Returns whether the screen lock settings entity should be shown.
      */
-    public boolean isAvailable(boolean managedProfile) {
+    public boolean isAvailable(int userId) {
         if (!mContext.getResources().getBoolean(R.bool.config_show_unlock_set_or_change)) {
             return false;
-        }
-
-        if (mIsForPrimaryScreenLock) {
+        } else if (mIsForPrimaryScreenLock) {
             return true;
+        } else if (UserManager.get(mContext).isManagedProfile(userId)) {
+           return false;
         } else {
-            // TODO: Call this method in FingerprintSettingsKeyguardPreferenceController possibly
-            //  via FingerprintSettings.
-            return !managedProfile && Settings.Secure.getIntForUser(
+            return Settings.Secure.getIntForUser(
                     mContext.getContentResolver(),
                     BIOMETRIC_KEYGUARD_ENABLED,
                     FingerprintSettingsKeyguardPreferenceController.DEFAULT,
@@ -127,8 +126,14 @@ public class ScreenLockPreferenceDetailsUtils {
     /**
      * Launches the {@link ScreenLockSettings}.
      */
-    public void openScreenLockSettings(int sourceMetricsCategory) {
-        mContext.startActivity(getLaunchScreenLockSettingsIntent(sourceMetricsCategory));
+    public void openScreenLockSettings(int sourceMetricsCategory,
+            @Nullable SettingsPreferenceFragment resultListener, int requestCode) {
+        if (resultListener == null) {
+            mContext.startActivity(getLaunchScreenLockSettingsIntent(sourceMetricsCategory));
+        } else {
+            resultListener.startActivityForResult(
+                    getLaunchScreenLockSettingsIntent(sourceMetricsCategory), requestCode);
+        }
     }
 
     /**
@@ -137,7 +142,9 @@ public class ScreenLockPreferenceDetailsUtils {
     public Intent getLaunchScreenLockSettingsIntent(int sourceMetricsCategory) {
         Bundle extras = new Bundle();
         if (!mIsForPrimaryScreenLock) {
+            // TODO: Should these constants be defined in this class?
             extras.putBoolean(ChooseLockSettingsHelper.EXTRA_KEY_PRIMARY_CREDENTIAL, false);
+            extras.putBoolean(ChooseLockSettingsHelper.EXTRA_KEY_FOREGROUND_ONLY, true);
         }
         return new SubSettingLauncher(mContext)
                 .setDestination(ScreenLockSettings.class.getName())
@@ -153,13 +160,23 @@ public class ScreenLockPreferenceDetailsUtils {
      * @return true if the {@link ChooseLockGenericFragment} is launching.
      */
     public boolean openChooseLockGenericFragment(int sourceMetricsCategory,
-            @Nullable LockscreenCredential password) {
+            @Nullable LockscreenCredential password,
+            @Nullable SettingsPreferenceFragment resultListener,
+            int requestCode) {
+        // TODO: Review this.
         final Intent quietModeDialogIntent = getQuietModeDialogIntent();
         if (quietModeDialogIntent != null) {
             mContext.startActivity(quietModeDialogIntent);
             return false;
         }
-        mContext.startActivity(getChooseLockGenericFragmentIntent(sourceMetricsCategory, password));
+
+        Intent chooseLockGenericIntent = getChooseLockGenericFragmentIntent(
+                sourceMetricsCategory, password);
+        if (resultListener == null) {
+            mContext.startActivity(chooseLockGenericIntent);
+        } else {
+            resultListener.startActivityForResult(chooseLockGenericIntent, requestCode);
+        }
         return true;
     }
 
@@ -171,6 +188,7 @@ public class ScreenLockPreferenceDetailsUtils {
      * to disable the Quiet Mode, otherwise returns {@link Intent} to launch
      * {@link ChooseLockGenericFragment}.
      */
+    // TODO: Test quiet mode.
     public Intent getLaunchChooseLockGenericFragmentIntent(int sourceMetricsCategory) {
         final Intent quietModeDialogIntent = getQuietModeDialogIntent();
         return quietModeDialogIntent != null ? quietModeDialogIntent
@@ -218,6 +236,8 @@ public class ScreenLockPreferenceDetailsUtils {
     private Integer getSummaryResId(int userId) {
         // TODO: Look at base commit when updating this.
         if (!mLockPatternUtils.isSecure(userId, mIsForPrimaryScreenLock)) {
+            // TODO: This might be bad logic. Consider that in some cases mUserId will itself be
+            // a managaed profile user.
             if (userId == mProfileChallengeUserId
                     || mLockPatternUtils.isLockScreenDisabled(userId, mIsForPrimaryScreenLock)) {
                 return R.string.unlock_set_unlock_mode_off;

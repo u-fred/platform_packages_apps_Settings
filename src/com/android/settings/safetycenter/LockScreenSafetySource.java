@@ -62,7 +62,7 @@ public final class LockScreenSafetySource {
             return; // LockScreen source only supports primary profile.
         }
 
-        if (!screenLockPreferenceDetailsUtils.isAvailable(false)) {
+        if (!screenLockPreferenceDetailsUtils.isAvailable(context.getUserId())) {
             SafetyCenterManagerWrapper.get()
                     .setSafetySourceData(
                             context, SAFETY_SOURCE_ID, /* safetySourceData= */ null, safetyEvent);

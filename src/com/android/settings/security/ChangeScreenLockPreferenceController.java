@@ -16,11 +16,15 @@
 
 package com.android.settings.security;
 
+import static com.android.settings.biometrics.fingerprint.FingerprintSettings.FingerprintSettingsFragment.BIOMETRIC_SECOND_FACTOR_SETTINGS_REQUEST;
+import static com.android.settings.biometrics.fingerprint.FingerprintSettings.FingerprintSettingsFragment.CHOOSE_BIOMETRIC_SECOND_FACTOR_REQUEST;
+
 import android.content.Context;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.text.TextUtils;
 
+import androidx.annotation.Nullable;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceScreen;
 
@@ -28,7 +32,6 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockscreenCredential;
 import com.android.settings.SettingsPreferenceFragment;
 import com.android.settings.Utils;
-import com.android.settings.biometrics.fingerprint.FingerprintSettings.FingerprintSettingsFragment;
 import com.android.settings.core.PreferenceControllerMixin;
 import com.android.settings.dashboard.DashboardFragment;
 import com.android.settings.overlay.FeatureFactory;
@@ -50,11 +53,13 @@ public class ChangeScreenLockPreferenceController extends AbstractPreferenceCont
 
     protected final int mUserId = UserHandle.myUserId();
     protected final int mProfileChallengeUserId;
+    private int mEffectiveUserId;
     protected final MetricsFeatureProvider mMetricsFeatureProvider;
     protected ScreenLockPreferenceDetailsUtils mScreenLockPreferenceDetailUtils;
 
     protected RestrictedPreference mPreference;
     private boolean mIsForPrimaryScreenLock;
+    @Nullable private LockscreenCredential mUserPassword;
 
     public ChangeScreenLockPreferenceController(Context context, SettingsPreferenceFragment host,
                 boolean isForPrimaryScreenLock) {
@@ -68,20 +73,21 @@ public class ChangeScreenLockPreferenceController extends AbstractPreferenceCont
         mMetricsFeatureProvider = FeatureFactory.getFeatureFactory().getMetricsFeatureProvider();
         mIsForPrimaryScreenLock = isForPrimaryScreenLock;
         mScreenLockPreferenceDetailUtils = new ScreenLockPreferenceDetailsUtils(context,
-                mIsForPrimaryScreenLock);
+                isForPrimaryScreenLock);
+        mEffectiveUserId = mUserId;
+    }
+
+    public void setUserPassword(LockscreenCredential password) {
+        mUserPassword = password;
+    }
+
+    public void setEffectiveUserId(int userId) {
+         mEffectiveUserId = userId;
     }
 
     @Override
     public boolean isAvailable() {
-        boolean managedProfile = false;
-        if (mHost instanceof FingerprintSettingsFragment) {
-            // TODO: Look at ChangeProfileScreenLockPreferenceController for determining if managed
-            //  profile.
-            managedProfile = ((FingerprintSettingsFragment)mHost).getUserId() ==
-                    mProfileChallengeUserId;
-        }
-        return mScreenLockPreferenceDetailUtils.isAvailable(managedProfile);
-
+        return mScreenLockPreferenceDetailUtils.isAvailable(mEffectiveUserId);
     }
 
     @Override
@@ -106,7 +112,12 @@ public class ChangeScreenLockPreferenceController extends AbstractPreferenceCont
 
         if (mPreference != null && mPreference instanceof GearPreference) {
             if (mScreenLockPreferenceDetailUtils.shouldShowGearMenu()) {
-                ((GearPreference) mPreference).setOnGearClickListener(this);
+                if (mHost instanceof GearPreference.OnGearClickListener) {
+                    ((GearPreference) mPreference).setOnGearClickListener(
+                            (GearPreference.OnGearClickListener)mHost);
+                } else {
+                    ((GearPreference) mPreference).setOnGearClickListener(this);
+                }
             } else {
                 ((GearPreference) mPreference).setOnGearClickListener(null);
             }
@@ -128,18 +139,16 @@ public class ChangeScreenLockPreferenceController extends AbstractPreferenceCont
     @Override
     public void onGearClick(GearPreference p) {
         if (TextUtils.equals(p.getKey(), getPreferenceKey())) {
-            if (mHost instanceof FingerprintSettingsFragment) {
-                ((FingerprintSettingsFragment)mHost).setLaunchedBiometricSecondFactor(true);
-                // TODO: Could call getPinLength and only launch confirm if it's not available.
-                //  Issue is this makes the UI inconsistent. Verifying secondary PIN always isn't
-                //  a big issue.
-                //((FingerprintSettingsFragment)mHost).launchChooseOrConfirmLock();
-                //return;
-            }
-
             mMetricsFeatureProvider.logClickedPreference(p,
                     p.getExtras().getInt(DashboardFragment.CATEGORY));
-            mScreenLockPreferenceDetailUtils.openScreenLockSettings(mHost.getMetricsCategory());
+            if (mIsForPrimaryScreenLock) {
+                mScreenLockPreferenceDetailUtils.openScreenLockSettings(mHost.getMetricsCategory(),
+                        null, 0);
+            } else {
+                mScreenLockPreferenceDetailUtils.openScreenLockSettings(mHost.getMetricsCategory(),
+                        mHost, BIOMETRIC_SECOND_FACTOR_SETTINGS_REQUEST);
+            }
+
         }
     }
 
@@ -149,12 +158,15 @@ public class ChangeScreenLockPreferenceController extends AbstractPreferenceCont
             return super.handlePreferenceTreeClick(preference);
         }
 
-        LockscreenCredential password = null;
-        if (mHost instanceof FingerprintSettingsFragment) {
-            password = ((FingerprintSettingsFragment) mHost).getUserPassword();
+        if (mIsForPrimaryScreenLock) {
+            return mScreenLockPreferenceDetailUtils.openChooseLockGenericFragment(
+                    mHost.getMetricsCategory(), null, null, 0);
+        } else {
+            return mScreenLockPreferenceDetailUtils.openChooseLockGenericFragment(
+                    mHost.getMetricsCategory(), mUserPassword, mHost,
+                    CHOOSE_BIOMETRIC_SECOND_FACTOR_REQUEST);
         }
-        return mScreenLockPreferenceDetailUtils.openChooseLockGenericFragment(
-                mHost.getMetricsCategory(), password);
+
     }
 
     protected void updateSummary(Preference preference, int userId) {
