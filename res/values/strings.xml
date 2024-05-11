@@ -3656,6 +3656,8 @@
     <string name="lockpassword_confirm_your_work_pattern_header">Enter your work pattern</string>
     <!-- Header on password confirm screen [CHAR LIMIT=40] -->
     <string name="lockpassword_confirm_your_pin_header">Re-enter your PIN</string>
+    <!-- Header on biometric second factor confirm screen [CHAR LIMIT=40] -->
+    <string name="lockpassword_confirm_your_biometric_second_factor_header">Re-enter your biometric PIN</string>
     <!-- Header on work profile password confirm screen [CHAR LIMIT=40] -->
     <string name="lockpassword_reenter_your_profile_pin_header">Re-enter your work PIN</string>
     <!-- Header on password confirm screen for the work profile [CHAR LIMIT=40] -->
@@ -3702,6 +3704,9 @@
     <!-- Message to be used to explain the users that they need to enter their PIN to continue a
          particular operation. [CHAR LIMIT=70]-->
     <string name="lockpassword_confirm_your_pin_generic">Enter your PIN to continue</string>
+    <!-- Message to be used to explain the users that they need to enter their biometric second
+         factor PIN to continue a particular operation. [CHAR LIMIT=70]-->
+    <string name="lockpassword_confirm_your_biometric_second_factor_generic">Enter your biometric PIN to continue</string>
     <!-- Message to be used to explain the users that they need to enter their password to continue a
          particular operation. [CHAR LIMIT=70]-->
     <string name="lockpassword_confirm_your_password_generic">Enter your password to continue</string>

@@ -120,7 +120,7 @@ public class ConfirmDeviceCredentialActivity extends FragmentActivity {
             final boolean isStrongAuth = result.getAuthenticationType()
                     == BiometricPrompt.AUTHENTICATION_RESULT_TYPE_DEVICE_CREDENTIAL;
             ConfirmDeviceCredentialUtils.reportSuccessfulAttempt(mLockPatternUtils, mUserManager,
-                    mDevicePolicyManager, mUserId, isStrongAuth);
+                    mDevicePolicyManager, mUserId, true, isStrongAuth);
             ConfirmDeviceCredentialUtils.checkForPendingIntent(
                     ConfirmDeviceCredentialActivity.this);
 

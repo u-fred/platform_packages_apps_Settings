@@ -605,7 +605,7 @@ public class ConfirmLockPattern extends ConfirmDeviceCredentialBaseActivity {
             if (matched) {
                 if (newResult) {
                     ConfirmDeviceCredentialUtils.reportSuccessfulAttempt(mLockPatternUtils,
-                            mUserManager, mDevicePolicyManager, mEffectiveUserId,
+                            mUserManager, mDevicePolicyManager, mEffectiveUserId, true,
                             /* isStrongAuth */ true);
                 }
                 startDisappearAnimation(intent);
