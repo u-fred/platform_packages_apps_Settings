@@ -36,27 +36,34 @@ import com.android.settingslib.core.lifecycle.ObservablePreferenceFragment;
 public class AutoPinConfirmPreferenceController extends AbstractPreferenceController implements
         PreferenceControllerMixin, Preference.OnPreferenceChangeListener {
 
-    private static final String PREF_KEY_PIN_AUTO_CONFIRM = "auto_pin_confirm";
+    public static final String PREF_KEY_PIN_AUTO_CONFIRM = "auto_pin_confirm";
 
     private final int mUserId;
     private final LockPatternUtils mLockPatternUtils;
     private final ObservablePreferenceFragment mParentFragment;
     private final boolean mIsForPrimaryScreenLock;
+    private final AutoPinConfirmSettingChangeCallback mCallback;
 
     public AutoPinConfirmPreferenceController(Context context, int userId,
             LockPatternUtils lockPatternUtils,
             ObservablePreferenceFragment parentFragment,
-            boolean isForPrimaryScreenLock) {
+            boolean isForPrimaryScreenLock,
+            AutoPinConfirmSettingChangeCallback callback) {
         super(context);
         mUserId = userId;
         mLockPatternUtils = lockPatternUtils;
         mParentFragment = parentFragment;
         mIsForPrimaryScreenLock = isForPrimaryScreenLock;
+        mCallback = callback;
     }
 
     @Override
     public boolean onPreferenceChange(Preference preference, Object newValue) {
-        launchPinConfirmActivity((boolean) newValue);
+        if (mIsForPrimaryScreenLock) {
+            launchPinConfirmActivity((boolean) newValue);
+        } else if (mCallback != null) {
+            mCallback.call((boolean) newValue);
+        }
         return true;
     }
 
@@ -95,8 +102,6 @@ public class AutoPinConfirmPreferenceController extends AbstractPreferenceContro
     }
 
     private void launchPinConfirmActivity(boolean newState) {
-        // TODO: Probably don't need this for secondary (we've already verified primary and
-        //  secondary in order to access the setting).
         new ChooseLockSettingsHelper.Builder(mParentFragment.getActivity(), mParentFragment)
                 .setUserId(mUserId)
                 .setRequestCode(newState
@@ -108,5 +113,9 @@ public class AutoPinConfirmPreferenceController extends AbstractPreferenceContro
                         : mContext.getString(R.string.auto_confirm_off_pin_verify_description))
                 .setReturnCredentials(true)
                 .show();
+    }
+
+    public interface AutoPinConfirmSettingChangeCallback {
+        void call(boolean newState);
     }
 }
