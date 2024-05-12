@@ -756,11 +756,11 @@ public class ChooseLockPassword extends SettingsActivity {
          * @return whether password satisfies all the requirements.
          */
         @VisibleForTesting
-        boolean validatePassword(LockscreenCredential credential) {
+        boolean validatePassword(LockscreenCredential credential, boolean primary) {
             mValidationErrors = PasswordMetrics.validateCredential(mMinMetrics, mMinComplexity,
                     credential);
             if (mValidationErrors.isEmpty() && mLockPatternUtils.checkPasswordHistory(
-                        credential.getCredential(), getPasswordHistoryHashFactor(), mUserId)) {
+                        credential.getCredential(), getPasswordHistoryHashFactor(), mUserId, primary)) {
                 mValidationErrors =
                         Collections.singletonList(new PasswordValidationError(RECENTLY_USED));
             }
@@ -775,7 +775,7 @@ public class ChooseLockPassword extends SettingsActivity {
             if (mPasswordHistoryHashFactor == null) {
                 mPasswordHistoryHashFactor = mLockPatternUtils.getPasswordHistoryHashFactor(
                         mCurrentCredential != null ? mCurrentCredential
-                                : LockscreenCredential.createNone(), mUserId);
+                                : LockscreenCredential.createNone(true), mUserId);
             }
             return mPasswordHistoryHashFactor;
         }
@@ -790,7 +790,7 @@ public class ChooseLockPassword extends SettingsActivity {
             mChosenPassword = mIsAlphaMode ? LockscreenCredential.createPassword(passwordText)
                     : LockscreenCredential.createPin(passwordText, mPrimaryCredential);
             if (mUiStage == Stage.Introduction) {
-                if (validatePassword(mChosenPassword)) {
+                if (validatePassword(mChosenPassword, mPrimaryCredential)) {
                     mFirstPassword = mChosenPassword;
                     mPasswordEntry.setText("");
                     updateStage(Stage.NeedToConfirm);
@@ -965,11 +965,11 @@ public class ChooseLockPassword extends SettingsActivity {
                     ? LockscreenCredential.createPassword(mPasswordEntry.getText())
                     // TODO: Add mPrimaryCredential to this call. Might need to create the method
                     //  because was originally using createPinOrNone.
-                    : LockscreenCredential.createPin(mPasswordEntry.getText());
+                    : LockscreenCredential.createPin(mPasswordEntry.getText(), mPrimaryCredential);
             final int length = password.size();
             if (mUiStage == Stage.Introduction) {
                 mPasswordRestrictionView.setVisibility(View.VISIBLE);
-                final boolean passwordCompliant = validatePassword(password);
+                final boolean passwordCompliant = validatePassword(password, mPrimaryCredential);
                 String[] messages = convertErrorCodeToMessages();
                 // Update the fulfillment of requirements.
                 mPasswordRequirementAdapter.setRequirements(messages);
