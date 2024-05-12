@@ -81,6 +81,7 @@ import com.android.settings.password.ChooseLockGeneric;
 import com.android.settings.password.ChooseLockSettingsHelper;
 import com.android.settings.search.BaseSearchIndexProvider;
 import com.android.settings.security.ChangeScreenLockPreferenceController;
+import com.android.settings.security.screenlock.ScreenLockSettings;
 import com.android.settings.widget.GearPreference;
 import com.android.settingslib.HelpUtils;
 import com.android.settingslib.RestrictedLockUtils;
@@ -158,7 +159,8 @@ public class FingerprintSettings extends SubSettings {
      */
     @SearchIndexable
     public static class FingerprintSettingsFragment extends DashboardFragment
-            implements OnPreferenceChangeListener, FingerprintPreference.OnDeleteClickListener {
+            implements OnPreferenceChangeListener, FingerprintPreference.OnDeleteClickListener,
+            GearPreference.OnGearClickListener {
 
         public static final BaseSearchIndexProvider SEARCH_INDEX_DATA_PROVIDER =
                 new BaseSearchIndexProvider(R.xml.security_settings_fingerprint) {
@@ -212,8 +214,10 @@ public class FingerprintSettings extends SubSettings {
         private static final String KEY_LAUNCHED_CONFIRM = "launched_confirm";
         private static final String KEY_HAS_FIRST_ENROLLED = "has_first_enrolled";
         private static final String KEY_IS_ENROLLING = "is_enrolled";
-        private static final String KEY_LAUNCHED_BIOMETRIC_SECOND_FACTOR =
-                "launched_biometric_second_factor";
+        private static final String KEY_LAUNCHED_CHOOSE_BIOMETRIC_SECOND_FACTOR =
+                "launched_choose_biometric_second_factor";
+        private static final String KEY_LAUNCHED_BIOMETRIC_SECOND_FACTOR_SETTINGS =
+                "launched_biometric_second_factor_settings";
         @VisibleForTesting
         static final String KEY_REQUIRE_SCREEN_ON_TO_AUTH =
                 "security_settings_require_screen_on_to_auth";
@@ -233,6 +237,10 @@ public class FingerprintSettings extends SubSettings {
         private static final int CONFIRM_REQUEST = 101;
         @VisibleForTesting
         static final int CHOOSE_LOCK_GENERIC_REQUEST = 102;
+        // This is used when starting ChooseLockGeneric, but CHOOSE_LOCK_GENERIC_REQUEST is used for
+        // primary.
+        public static final int CHOOSE_BIOMETRIC_SECOND_FACTOR_REQUEST = 103;
+        public static final int BIOMETRIC_SECOND_FACTOR_SETTINGS_REQUEST = 104;
         @VisibleForTesting
         static final int ADD_FINGERPRINT_REQUEST = 10;
         private static final int AUTO_ADD_FIRST_FINGERPRINT_REQUEST = 11;
@@ -258,6 +266,7 @@ public class FingerprintSettings extends SubSettings {
         private List<FingerprintSensorPropertiesInternal> mSensorProperties;
         private boolean mInFingerprintLockout;
         private byte[] mToken;
+        // TODO: https://android-review.googlesource.com/q/hashtag:%22ramdump-lskf-leak%22
         private LockscreenCredential mUserPassword;
         private boolean mLaunchedConfirm;
         private boolean mHasFirstEnrolled = true;
@@ -265,8 +274,8 @@ public class FingerprintSettings extends SubSettings {
         private int mUserId;
         private final List<FooterColumn> mFooterColumns = new ArrayList<>();
         private boolean mIsEnrolling;
-        private boolean mLaunchedBiometricSecondFactor;
-
+        private boolean mLaunchedChooseBiometricSecondFactor;
+        private boolean mLaunchedBiometricSecondFactorSettings;
         private long mChallenge;
 
         private static final String TAG_AUTHENTICATE_SIDECAR = "authenticate_sidecar";
@@ -356,18 +365,14 @@ public class FingerprintSettings extends SubSettings {
             }
         };
 
-        public void setLaunchedBiometricSecondFactor(boolean launched) {
-            mLaunchedBiometricSecondFactor = launched;
+        @Override
+        public void onGearClick(GearPreference p) {
+            if (TextUtils.equals(p.getKey(),
+                    mChangeBiometricSecondFactorPreferenceController.getPreferenceKey())) {
+                mLaunchedBiometricSecondFactorSettings = true;
+                mChangeBiometricSecondFactorPreferenceController.onGearClick(p);
+            }
         }
-
-        public int getUserId() {
-            return mUserId;
-        }
-
-        // TODO: Review this. Maybe better to always make this a setter in the target class. This
-        //  must be erased from memory properly.
-        // https://android-review.googlesource.com/q/hashtag:%22ramdump-lskf-leak%22
-        public LockscreenCredential getUserPassword() { return mUserPassword; }
 
         protected void handleError(int errMsgId, CharSequence msg) {
             switch (errMsgId) {
@@ -479,11 +484,15 @@ public class FingerprintSettings extends SubSettings {
                 mIsEnrolling = savedInstanceState.getBoolean(KEY_IS_ENROLLING, mIsEnrolling);
                 mHasFirstEnrolled = savedInstanceState.getBoolean(KEY_HAS_FIRST_ENROLLED,
                         mHasFirstEnrolled);
-                mLaunchedBiometricSecondFactor = savedInstanceState.getBoolean(
-                        KEY_LAUNCHED_BIOMETRIC_SECOND_FACTOR, mLaunchedBiometricSecondFactor);
-                // TODO: Review this.
+                mLaunchedChooseBiometricSecondFactor = savedInstanceState.getBoolean(
+                        KEY_LAUNCHED_CHOOSE_BIOMETRIC_SECOND_FACTOR);
+                mLaunchedBiometricSecondFactorSettings = savedInstanceState.getBoolean(
+                        KEY_LAUNCHED_BIOMETRIC_SECOND_FACTOR_SETTINGS);
                 mUserPassword = savedInstanceState.getParcelable(
                         ChooseLockSettingsHelper.EXTRA_KEY_PASSWORD);
+                if (mChangeBiometricSecondFactorPreferenceController != null) {
+                    mChangeBiometricSecondFactorPreferenceController.setUserPassword(mUserPassword);
+                }
             }
 
             // (mLaunchedConfirm or mIsEnrolling) means that we are waiting an activity result.
@@ -605,6 +614,8 @@ public class FingerprintSettings extends SubSettings {
                     ((FingerprintUnlockCategoryController) controller).setUserId(mUserId);
                 } else if (controller instanceof FingerprintSettingsKeyguardPreferenceController c) {
                     c.setUserId(mUserId);
+                } else if (controller instanceof ChangeScreenLockPreferenceController c) {
+                    c.setEffectiveUserId(mUserId);
                 }
             }
 
@@ -783,7 +794,6 @@ public class FingerprintSettings extends SubSettings {
             if (mRemovalSidecar != null) {
                 mRemovalSidecar.setListener(mRemovalListener);
             }
-            mLaunchedBiometricSecondFactor = false;
         }
 
         private void updatePreferences() {
@@ -808,7 +818,8 @@ public class FingerprintSettings extends SubSettings {
         public void onStop() {
             super.onStop();
             if (!getActivity().isChangingConfigurations() && !mLaunchedConfirm && !mIsEnrolling &&
-                    !mLaunchedBiometricSecondFactor) {
+                    !mLaunchedChooseBiometricSecondFactor &&
+                    !mLaunchedBiometricSecondFactorSettings) {
                 setResult(RESULT_TIMEOUT);
                 getActivity().finish();
             }
@@ -832,8 +843,10 @@ public class FingerprintSettings extends SubSettings {
             outState.putSerializable("mFingerprintsRenaming", mFingerprintsRenaming);
             outState.putBoolean(KEY_IS_ENROLLING, mIsEnrolling);
             outState.putBoolean(KEY_HAS_FIRST_ENROLLED, mHasFirstEnrolled);
-            outState.putBoolean(KEY_LAUNCHED_BIOMETRIC_SECOND_FACTOR,
-                    mLaunchedBiometricSecondFactor);
+            outState.putBoolean(KEY_LAUNCHED_CHOOSE_BIOMETRIC_SECOND_FACTOR,
+                    mLaunchedChooseBiometricSecondFactor);
+            outState.putBoolean(KEY_LAUNCHED_BIOMETRIC_SECOND_FACTOR_SETTINGS,
+                    mLaunchedBiometricSecondFactorSettings);
             outState.putParcelable(ChooseLockSettingsHelper.EXTRA_KEY_PASSWORD, mUserPassword);
         }
 
@@ -871,7 +884,7 @@ public class FingerprintSettings extends SubSettings {
                 final Fingerprint fp = fpref.getFingerprint();
                 showRenameDialog(fp);
             } else if (KEY_UNLOCK_SET_OR_CHANGE.equals(key)) {
-                mLaunchedBiometricSecondFactor = true;
+                mLaunchedChooseBiometricSecondFactor = true;
             }
             return super.onPreferenceTreeClick(pref);
         }
@@ -979,15 +992,34 @@ public class FingerprintSettings extends SubSettings {
         @Override
         public void onActivityResult(int requestCode, int resultCode, Intent data) {
             super.onActivityResult(requestCode, resultCode, data);
-            if (requestCode == CONFIRM_REQUEST || requestCode == CHOOSE_LOCK_GENERIC_REQUEST) {
+            if (requestCode == CHOOSE_BIOMETRIC_SECOND_FACTOR_REQUEST) {
+                mLaunchedChooseBiometricSecondFactor = false;
+                // This technique of relying on the launched Activity to indicate timeout isn't
+                // perfect, consider if setResult/finish are called in launched Activity and then
+                // app immediately goes to background. It's also used inconsistently throughout
+                // Settings app, such as ChooseLockGeneric using it but ChooseLockPassword not.
+                // I do it here (and throughout the app) to keep everything consistent.
+                if (resultCode ==
+                        ChooseLockGeneric.ChooseLockGenericFragment.RESULT_APP_NOT_FOREGROUND) {
+                    getActivity().setResult(RESULT_TIMEOUT);
+                    getActivity().finish();
+                }
+            } else if (requestCode == BIOMETRIC_SECOND_FACTOR_SETTINGS_REQUEST) {
+                mLaunchedBiometricSecondFactorSettings = false;
+                if (resultCode == ScreenLockSettings.RESULT_NOT_FOREGROUND) {
+                    getActivity().setResult(RESULT_TIMEOUT);
+                    getActivity().finish();
+                }
+            } else if (requestCode == CONFIRM_REQUEST || requestCode == CHOOSE_LOCK_GENERIC_REQUEST) {
 
                 mLaunchedConfirm = false;
                 if (resultCode == RESULT_FINISHED || resultCode == RESULT_OK) {
                     if (BiometricUtils.containsGatekeeperPasswordHandle(data)) {
                         if (data.hasExtra(ChooseLockSettingsHelper.EXTRA_KEY_PASSWORD)) {
-                            // TODO: Do we need to zeroize this ever?
                             mUserPassword = data.getParcelableExtra(
                                     ChooseLockSettingsHelper.EXTRA_KEY_PASSWORD);
+                            mChangeBiometricSecondFactorPreferenceController.setUserPassword(
+                                    mUserPassword);
                         }
 
                         if (!mHasFirstEnrolled && !mIsEnrolling) {
@@ -1084,19 +1116,19 @@ public class FingerprintSettings extends SubSettings {
             super.onDestroy();
             if (getActivity().isFinishing()) {
                 mFingerprintManager.revokeChallenge(mUserId, mChallenge);
-            }
 
-            // TODO: Make sure we are doing this properly. Need to find all locations where the
-            //  credential is stored in memory and zero as early as possible. For example, if
-            //  this is added to an intent anywhere.
-            if (mUserPassword != null) {
-                mUserPassword.zeroize();
+                // TODO: Review alternative of cloning mUserPassword when saving instance state
+                //  and always zero/gc here (this is done in ChooseLockGeneric). Have verified that
+                //  the Bundle in onCreate() receives the exact same object in current case.
+                if (mUserPassword != null) {
+                    mUserPassword.zeroize();
+                }
+                new Handler(Looper.myLooper()).postDelayed(() -> {
+                    System.gc();
+                    System.runFinalization();
+                    System.gc();
+                }, 5000);
             }
-            new Handler(Looper.myLooper()).postDelayed(() -> {
-                System.gc();
-                System.runFinalization();
-                System.gc();
-            }, 5000);
         }
 
         private Drawable getHighlightDrawable() {

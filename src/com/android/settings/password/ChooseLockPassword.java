@@ -275,6 +275,7 @@ public class ChooseLockPassword extends SettingsActivity {
 
         private static final int CONFIRM_EXISTING_REQUEST = 58;
         static final int RESULT_FINISHED = RESULT_FIRST_USER;
+        public static final int RESULT_NOT_FOREGROUND = RESULT_FIRST_USER + 1;
 
         /**
          * Keep track internally of where the user is in choosing a pattern.
@@ -691,6 +692,15 @@ public class ChooseLockPassword extends SettingsActivity {
                 mSaveAndFinishWorker.setListener(null);
             }
             super.onPause();
+        }
+
+        @Override
+        public void onStop() {
+            super.onStop();
+            if (!mPrimaryCredential && !getActivity().isChangingConfigurations()) {
+                getActivity().setResult(RESULT_NOT_FOREGROUND);
+                getActivity().finish();
+            }
         }
 
         @Override
