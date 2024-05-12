@@ -479,7 +479,7 @@ public class ConfirmLockPassword extends ConfirmDeviceCredentialBaseActivity {
             }
             final LockscreenCredential credential = mIsAlpha
                     ? LockscreenCredential.createPassword(passwordText)
-                    : LockscreenCredential.createPin(passwordText, mPrimaryCredential);
+                    : LockscreenCredential.createPin(passwordText);
 
             mPasswordEntryInputDisabler.setInputEnabled(false);
 
@@ -544,7 +544,7 @@ public class ConfirmLockPassword extends ConfirmDeviceCredentialBaseActivity {
             };
             mPendingLockCheck = (localEffectiveUserId == localUserId)
                     ? LockPatternChecker.verifyCredential(mLockPatternUtils, credential,
-                            localUserId, flags, onVerifyCallback)
+                    mPrimaryCredential, localUserId, flags, onVerifyCallback)
                     : LockPatternChecker.verifyTiedProfileChallenge(mLockPatternUtils, credential,
                             localUserId, flags, onVerifyCallback);
         }
@@ -555,6 +555,7 @@ public class ConfirmLockPassword extends ConfirmDeviceCredentialBaseActivity {
             mPendingLockCheck = LockPatternChecker.checkCredential(
                     mLockPatternUtils,
                     credential,
+                    mPrimaryCredential,
                     localEffectiveUserId,
                     new LockPatternChecker.OnCheckCallback() {
                         @Override
@@ -643,6 +644,7 @@ public class ConfirmLockPassword extends ConfirmDeviceCredentialBaseActivity {
                                 mLockPatternUtils,
                                 mRemoteLockscreenValidationFragment.getLockscreenCredential(),
                                 /* currentCredential= */ null,
+                                true,
                                 mEffectiveUserId);
                     } else {
                         mCredentialCheckResultTracker.setResult(/* matched= */ true, new Intent(),

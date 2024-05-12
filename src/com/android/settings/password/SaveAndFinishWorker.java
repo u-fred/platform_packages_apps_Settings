@@ -53,6 +53,7 @@ public class SaveAndFinishWorker extends Fragment {
     private LockscreenCredential mUnificationProfileCredential;
     private LockscreenCredential mChosenCredential;
     private LockscreenCredential mCurrentCredential;
+    private boolean mPrimary;
 
     private boolean mBlocking;
 
@@ -76,7 +77,7 @@ public class SaveAndFinishWorker extends Fragment {
 
     @VisibleForTesting
     void prepare(LockPatternUtils utils, LockscreenCredential chosenCredential,
-            LockscreenCredential currentCredential, int userId) {
+            LockscreenCredential currentCredential, boolean primary, int userId) {
         mUtils = utils;
         mUserId = userId;
         // This will be a no-op for non managed profiles.
@@ -87,11 +88,12 @@ public class SaveAndFinishWorker extends Fragment {
         mChosenCredential = chosenCredential;
         mCurrentCredential = currentCredential != null ? currentCredential
                 : LockscreenCredential.createNone();
+        mPrimary = primary;
     }
 
     public void start(LockPatternUtils utils, LockscreenCredential chosenCredential,
-            LockscreenCredential currentCredential, int userId) {
-        prepare(utils, chosenCredential, currentCredential, userId);
+            LockscreenCredential currentCredential, boolean primary, int userId) {
+        prepare(utils, chosenCredential, currentCredential, primary, userId);
         if (mBlocking) {
             finish(saveAndVerifyInBackground().second);
         } else {
@@ -108,7 +110,8 @@ public class SaveAndFinishWorker extends Fragment {
     Pair<Boolean, Intent> saveAndVerifyInBackground() {
         final int userId = mUserId;
         try {
-            if (!mUtils.setLockCredential(mChosenCredential, mCurrentCredential, userId)) {
+            if (!mUtils.setLockCredential(mChosenCredential, mCurrentCredential, mPrimary,
+                    userId)) {
                 return Pair.create(false, null);
             }
         } catch (RuntimeException e) {
@@ -134,7 +137,7 @@ public class SaveAndFinishWorker extends Fragment {
 
         Intent result = new Intent();
         final VerifyCredentialResponse response = mUtils.verifyCredential(mChosenCredential,
-                userId, flags);
+                mPrimary, userId, flags);
         if (response.isMatched()) {
             if (mRequestGatekeeperPassword && response.containsGatekeeperPasswordHandle()) {
                 result.putExtra(ChooseLockSettingsHelper.EXTRA_KEY_GK_PW_HANDLE,

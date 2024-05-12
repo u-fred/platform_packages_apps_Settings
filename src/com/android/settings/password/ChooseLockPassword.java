@@ -775,7 +775,7 @@ public class ChooseLockPassword extends SettingsActivity {
             if (mPasswordHistoryHashFactor == null) {
                 mPasswordHistoryHashFactor = mLockPatternUtils.getPasswordHistoryHashFactor(
                         mCurrentCredential != null ? mCurrentCredential
-                                : LockscreenCredential.createNone(true), mUserId);
+                                : LockscreenCredential.createNone(), mUserId);
             }
             return mPasswordHistoryHashFactor;
         }
@@ -788,7 +788,7 @@ public class ChooseLockPassword extends SettingsActivity {
                 return;
             }
             mChosenPassword = mIsAlphaMode ? LockscreenCredential.createPassword(passwordText)
-                    : LockscreenCredential.createPin(passwordText, mPrimaryCredential);
+                    : LockscreenCredential.createPin(passwordText);
             if (mUiStage == Stage.Introduction) {
                 if (validatePassword(mChosenPassword, mPrimaryCredential)) {
                     mFirstPassword = mChosenPassword;
@@ -965,7 +965,7 @@ public class ChooseLockPassword extends SettingsActivity {
                     ? LockscreenCredential.createPassword(mPasswordEntry.getText())
                     // TODO: Add mPrimaryCredential to this call. Might need to create the method
                     //  because was originally using createPinOrNone.
-                    : LockscreenCredential.createPin(mPasswordEntry.getText(), mPrimaryCredential);
+                    : LockscreenCredential.createPin(mPasswordEntry.getText());
             final int length = password.size();
             if (mUiStage == Stage.Introduction) {
                 mPasswordRestrictionView.setVisibility(View.VISIBLE);
@@ -1099,7 +1099,7 @@ public class ChooseLockPassword extends SettingsActivity {
                     mUserId, mPrimaryCredential);
 
             mSaveAndFinishWorker.start(mLockPatternUtils,
-                    mChosenPassword, mCurrentCredential, mUserId);
+                    mChosenPassword, mCurrentCredential, mPrimaryCredential, mUserId);
         }
 
         @Override

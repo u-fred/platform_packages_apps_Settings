@@ -564,7 +564,7 @@ public class ConfirmLockPattern extends ConfirmDeviceCredentialBaseActivity {
                 };
                 mPendingLockCheck = (localEffectiveUserId == localUserId)
                         ? LockPatternChecker.verifyCredential(
-                                mLockPatternUtils, pattern, localUserId, flags,
+                                mLockPatternUtils, pattern, true, localUserId, flags,
                                 onVerifyCallback)
                         : LockPatternChecker.verifyTiedProfileChallenge(
                                 mLockPatternUtils, pattern, localUserId, flags,
@@ -583,6 +583,7 @@ public class ConfirmLockPattern extends ConfirmDeviceCredentialBaseActivity {
                 mPendingLockCheck = LockPatternChecker.checkCredential(
                         mLockPatternUtils,
                         pattern,
+                        true,
                         localEffectiveUserId,
                         new LockPatternChecker.OnCheckCallback() {
                             @Override
@@ -645,6 +646,7 @@ public class ConfirmLockPattern extends ConfirmDeviceCredentialBaseActivity {
                                 mLockPatternUtils,
                                 mRemoteLockscreenValidationFragment.getLockscreenCredential(),
                                 /* currentCredential= */ null,
+                                true,
                                 mEffectiveUserId);
                     } else {
                         mCredentialCheckResultTracker.setResult(/* matched= */ true, new Intent(),
