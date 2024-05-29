@@ -822,11 +822,35 @@ public class ChooseLockPassword extends SettingsActivity {
             return false;
         }
 
+    String[] convertErrorCodeToMessages() {
+        return new PasswordValidationErrorConverter(getContext(), mIsAlphaMode, mValidationErrors).convertErrorCodeToMessages();
+    }
+
+    public static class PasswordValidationErrorConverter {
+        private final Context mContext;
+        private final boolean mIsAlphaMode;
+        private final List<PasswordValidationError> mValidationErrors;
+
+        public PasswordValidationErrorConverter(Context context, boolean isAlphaMode,
+                              List<PasswordValidationError> validationErrors) {
+            mContext = context;
+            mIsAlphaMode = isAlphaMode;
+            mValidationErrors = validationErrors;
+        }
+
+        private Context getContext() {
+            return mContext;
+        }
+
+        private String getString(int id) {
+            return mContext.getString(id);
+        }
+
         /**
          * @param errorCode error code returned from password validation.
          * @return an array of messages describing the error, important messages come first.
          */
-        String[] convertErrorCodeToMessages() {
+        public String[] convertErrorCodeToMessages() {
             List<String> messages = new ArrayList<>();
             for (PasswordValidationError error : mValidationErrors) {
                 switch (error.errorCode) {
@@ -913,6 +937,7 @@ public class ChooseLockPassword extends SettingsActivity {
 
             return messages.toArray(new String[0]);
         }
+    }
 
         /**
          * Update the hint based on current Stage and length of password entry
