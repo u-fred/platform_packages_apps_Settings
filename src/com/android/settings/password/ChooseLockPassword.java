@@ -856,11 +856,39 @@ public class ChooseLockPassword extends SettingsActivity {
             return false;
         }
 
+    String[] convertErrorCodeToMessages() {
+        var pvec = new PasswordValidationErrorConverter(getContext(), mIsAlphaMode, mValidationErrors);
+        String[] res = pvec.convertErrorCodeToMessages();
+        mIsErrorTooShort = pvec.mIsErrorTooShort;
+        return res;
+    }
+
+    public static class PasswordValidationErrorConverter {
+        private final Context mContext;
+        private final boolean mIsAlphaMode;
+        private final List<PasswordValidationError> mValidationErrors;
+        public boolean mIsErrorTooShort = true;
+
+        public PasswordValidationErrorConverter(Context context, boolean isAlphaMode,
+                              List<PasswordValidationError> validationErrors) {
+            mContext = context;
+            mIsAlphaMode = isAlphaMode;
+            mValidationErrors = validationErrors;
+        }
+
+        private Context getContext() {
+            return mContext;
+        }
+
+        private String getString(int id) {
+            return mContext.getString(id);
+        }
+
         /**
          * @param errorCode error code returned from password validation.
          * @return an array of messages describing the error, important messages come first.
          */
-        String[] convertErrorCodeToMessages() {
+        public String[] convertErrorCodeToMessages() {
             List<String> messages = new ArrayList<>();
             mIsErrorTooShort = false;
             for (PasswordValidationError error : mValidationErrors) {
@@ -951,6 +979,7 @@ public class ChooseLockPassword extends SettingsActivity {
 
             return messages.toArray(new String[0]);
         }
+    }
 
         /**
          * Update the hint based on current Stage and length of password entry
