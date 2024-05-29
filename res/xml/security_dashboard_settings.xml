@@ -55,6 +55,11 @@
             settings:controller="com.android.settings.security.AutoRebootPrefController" />
 
         <Preference
+            android:key="duress_password"
+            android:title="@string/duress_pwd_pref_title"
+            settings:controller="com.android.settings.security.DuressPasswordPrefController" />
+
+        <Preference
             android:key="deny_new_usb"
             android:title="@string/deny_new_usb_title"
             settings:controller="com.android.settings.security.DenyNewUsbPrefController" />
