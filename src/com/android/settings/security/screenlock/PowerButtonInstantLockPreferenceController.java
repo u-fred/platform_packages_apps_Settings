@@ -55,7 +55,7 @@ public class PowerButtonInstantLockPreferenceController extends AbstractPreferen
         if (!mLockPatternUtils.isSecure(mUserId) || !mIsForPrimaryScreenLock) {
             return false;
         }
-        switch (mLockPatternUtils.getKeyguardStoredPasswordQuality(mUserId)) {
+        switch (mLockPatternUtils.getKeyguardStoredPasswordQuality(mUserId, true)) {
             case DevicePolicyManager.PASSWORD_QUALITY_SOMETHING:
             case DevicePolicyManager.PASSWORD_QUALITY_NUMERIC:
             case DevicePolicyManager.PASSWORD_QUALITY_NUMERIC_COMPLEX:

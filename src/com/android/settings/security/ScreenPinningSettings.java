@@ -132,7 +132,7 @@ public class ScreenPinningSettings extends SettingsPreferenceFragment
     private boolean setScreenLockUsed(boolean isEnabled) {
         LockPatternUtils lockPatternUtils = new LockPatternUtils(getActivity());
         final int passwordQuality = lockPatternUtils
-                .getKeyguardStoredPasswordQuality(UserHandle.myUserId());
+                .getKeyguardStoredPasswordQuality(UserHandle.myUserId(), true);
         if (isEnabled) {
             if (passwordQuality == DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED) {
                 Intent chooseLockIntent = new Intent(DevicePolicyManager.ACTION_SET_NEW_PASSWORD);
@@ -164,7 +164,7 @@ public class ScreenPinningSettings extends SettingsPreferenceFragment
         if (requestCode == CHANGE_LOCK_METHOD_REQUEST) {
             LockPatternUtils lockPatternUtils = new LockPatternUtils(getActivity());
             boolean validPassQuality = lockPatternUtils.getKeyguardStoredPasswordQuality(
-                    UserHandle.myUserId())
+                    UserHandle.myUserId(), true)
                     != DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
             setScreenLockUsed(validPassQuality);
             // Make sure the screen updates.
@@ -176,7 +176,7 @@ public class ScreenPinningSettings extends SettingsPreferenceFragment
 
     private int getCurrentSecurityTitle() {
         int quality = mLockPatternUtils.getKeyguardStoredPasswordQuality(
-                UserHandle.myUserId());
+                UserHandle.myUserId(), true);
         switch (quality) {
             case DevicePolicyManager.PASSWORD_QUALITY_NUMERIC:
             case DevicePolicyManager.PASSWORD_QUALITY_NUMERIC_COMPLEX:

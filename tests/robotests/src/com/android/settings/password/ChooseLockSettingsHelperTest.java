@@ -134,7 +134,7 @@ public class ChooseLockSettingsHelperTest {
         builder.setRequestCode(100)
                 .setForceVerifyPath(true);
         ChooseLockSettingsHelper helper = getChooseLockSettingsHelper(builder);
-        when(helper.mLockPatternUtils.getKeyguardStoredPasswordQuality(anyInt()))
+        when(helper.mLockPatternUtils.getKeyguardStoredPasswordQuality(anyInt(), true))
                 .thenReturn(DevicePolicyManager.PASSWORD_QUALITY_SOMETHING);
         helper.launch();
 
@@ -154,7 +154,7 @@ public class ChooseLockSettingsHelperTest {
         builder.setRequestCode(100)
                 .setForceVerifyPath(true);
         ChooseLockSettingsHelper helper = getChooseLockSettingsHelper(builder);
-        when(helper.mLockPatternUtils.getKeyguardStoredPasswordQuality(anyInt()))
+        when(helper.mLockPatternUtils.getKeyguardStoredPasswordQuality(anyInt(), true))
                 .thenReturn(DevicePolicyManager.PASSWORD_QUALITY_NUMERIC);
         helper.launch();
 
@@ -256,7 +256,7 @@ public class ChooseLockSettingsHelperTest {
     private ChooseLockSettingsHelper getChooseLockSettingsHelper(
             ChooseLockSettingsHelper.Builder builder) {
         LockPatternUtils mockLockPatternUtils = mock(LockPatternUtils.class);
-        when(mockLockPatternUtils.getKeyguardStoredPasswordQuality(anyInt()))
+        when(mockLockPatternUtils.getKeyguardStoredPasswordQuality(anyInt(), true))
                 .thenReturn(DevicePolicyManager.PASSWORD_QUALITY_SOMETHING);
 
         ChooseLockSettingsHelper helper = builder.build();
