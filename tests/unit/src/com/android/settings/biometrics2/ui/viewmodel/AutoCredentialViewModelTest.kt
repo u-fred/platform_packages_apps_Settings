@@ -77,7 +77,7 @@ class AutoCredentialViewModelTest {
     }
 
     private fun setupGenerateChallenge(userId: Int, newSensorId: Int, newChallenge: Long) {
-        whenever(lockPatternUtils.getActivePasswordQuality(userId)).thenReturn(
+        whenever(lockPatternUtils.getActivePasswordQuality(userId, true)).thenReturn(
             DevicePolicyManager.PASSWORD_QUALITY_SOMETHING
         )
         challengeGenerator.userId = userId
@@ -89,7 +89,7 @@ class AutoCredentialViewModelTest {
     fun testCheckCredential_validCredentialCase() = runTest {
         val userId = 99
         viewModel = newAutoCredentialViewModel(newValidTokenCredentialIntentExtras(userId))
-        whenever(lockPatternUtils.getActivePasswordQuality(userId)).thenReturn(
+        whenever(lockPatternUtils.getActivePasswordQuality(userId, true)).thenReturn(
             DevicePolicyManager.PASSWORD_QUALITY_SOMETHING
         )
 
@@ -111,7 +111,7 @@ class AutoCredentialViewModelTest {
     fun testCheckCredential_needToChooseLock() = runTest {
         val userId = 100
         viewModel = newAutoCredentialViewModel(newOnlySensorValidCredentialIntentExtras(userId))
-        whenever(lockPatternUtils.getActivePasswordQuality(userId)).thenReturn(
+        whenever(lockPatternUtils.getActivePasswordQuality(userId, true)).thenReturn(
             DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED
         )
 
@@ -134,7 +134,7 @@ class AutoCredentialViewModelTest {
         val userId = 101
         viewModel =
             newAutoCredentialViewModel(newOnlySensorValidCredentialIntentExtras(userId))
-        whenever(lockPatternUtils.getActivePasswordQuality(userId)).thenReturn(
+        whenever(lockPatternUtils.getActivePasswordQuality(userId, true)).thenReturn(
             DevicePolicyManager.PASSWORD_QUALITY_SOMETHING
         )
 
@@ -157,7 +157,7 @@ class AutoCredentialViewModelTest {
         val userId = 102
         viewModel =
             newAutoCredentialViewModel(newOnlySensorValidCredentialIntentExtras(userId))
-        whenever(lockPatternUtils.getActivePasswordQuality(userId)).thenReturn(
+        whenever(lockPatternUtils.getActivePasswordQuality(userId, true)).thenReturn(
             DevicePolicyManager.PASSWORD_QUALITY_NUMERIC
         )
 
@@ -180,7 +180,7 @@ class AutoCredentialViewModelTest {
         val userId = 103
         viewModel =
             newAutoCredentialViewModel(newOnlySensorValidCredentialIntentExtras(userId))
-        whenever(lockPatternUtils.getActivePasswordQuality(userId)).thenReturn(
+        whenever(lockPatternUtils.getActivePasswordQuality(userId, true)).thenReturn(
             DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC
         )
 
@@ -204,7 +204,7 @@ class AutoCredentialViewModelTest {
         val gkPwHandle = 1111L
         viewModel =
             newAutoCredentialViewModel(newGkPwHandleCredentialIntentExtras(userId, gkPwHandle))
-        whenever(lockPatternUtils.getActivePasswordQuality(userId)).thenReturn(
+        whenever(lockPatternUtils.getActivePasswordQuality(userId, true)).thenReturn(
             DevicePolicyManager.PASSWORD_QUALITY_SOMETHING
         )
         val newSensorId = 10
@@ -258,7 +258,7 @@ class AutoCredentialViewModelTest {
             val gkPwHandle = 1111L
             viewModel =
                 newAutoCredentialViewModel(newGkPwHandleCredentialIntentExtras(userId, gkPwHandle))
-            whenever(lockPatternUtils.getActivePasswordQuality(userId)).thenReturn(
+            whenever(lockPatternUtils.getActivePasswordQuality(userId, true)).thenReturn(
                 DevicePolicyManager.PASSWORD_QUALITY_SOMETHING
             )
             val newSensorId = 10
@@ -394,7 +394,7 @@ class AutoCredentialViewModelTest {
         val userId = 108
         viewModel =
             newAutoCredentialViewModel(newOnlySensorValidCredentialIntentExtras(userId))
-        whenever(lockPatternUtils.getActivePasswordQuality(userId)).thenReturn(
+        whenever(lockPatternUtils.getActivePasswordQuality(userId, true)).thenReturn(
             DevicePolicyManager.PASSWORD_QUALITY_SOMETHING
         )
         val gkPwHandle = 6666L
@@ -439,7 +439,7 @@ class AutoCredentialViewModelTest {
         val userId = 109
         viewModel =
             newAutoCredentialViewModel(newOnlySensorValidCredentialIntentExtras(userId))
-        whenever(lockPatternUtils.getActivePasswordQuality(userId)).thenReturn(
+        whenever(lockPatternUtils.getActivePasswordQuality(userId, true)).thenReturn(
             DevicePolicyManager.PASSWORD_QUALITY_SOMETHING
         )
         val gkPwHandle = 5555L

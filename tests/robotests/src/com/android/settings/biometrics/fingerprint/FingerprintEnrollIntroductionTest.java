@@ -134,7 +134,7 @@ public class FingerprintEnrollIntroductionTest {
         mFingerprintEnrollIntroduction.mNewChallenge = EXPECTED_CHALLENGE;
 
         final int userId = intent.getIntExtra(EXTRA_USER_ID, 0);
-        when(mLockPatternUtils.getActivePasswordQuality(userId))
+        when(mLockPatternUtils.getActivePasswordQuality(userId, true))
                 .thenReturn(PASSWORD_QUALITY_SOMETHING);
 
         mController.create();
