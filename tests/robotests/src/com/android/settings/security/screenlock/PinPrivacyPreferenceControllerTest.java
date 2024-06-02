@@ -62,7 +62,7 @@ public class PinPrivacyPreferenceControllerTest {
 
     @Test
     public void isAvailable_lockSetToPin_shouldReturnTrue() {
-        when(mLockPatternUtils.getCredentialTypeForUser(TEST_USER_ID)).thenReturn(
+        when(mLockPatternUtils.getCredentialTypeForUser(TEST_USER_ID, true)).thenReturn(
                 CREDENTIAL_TYPE_PIN);
         assertThat(mController.isAvailable()).isTrue();
     }
@@ -70,14 +70,14 @@ public class PinPrivacyPreferenceControllerTest {
     @Ignore("b/313612259")
     @Test
     public void isAvailable_lockSetToPinOrPw_shouldReturnTrue() {
-        when(mLockPatternUtils.getCredentialTypeForUser(TEST_USER_ID)).thenReturn(
+        when(mLockPatternUtils.getCredentialTypeForUser(TEST_USER_ID, true)).thenReturn(
                 CREDENTIAL_TYPE_PASSWORD_OR_PIN);
         assertThat(mController.isAvailable()).isTrue();
     }
 
     @Test
     public void isAvailable_lockSetToOther_shouldReturnFalse() {
-        when(mLockPatternUtils.getCredentialTypeForUser(TEST_USER_ID)).thenReturn(
+        when(mLockPatternUtils.getCredentialTypeForUser(TEST_USER_ID, true)).thenReturn(
                 CREDENTIAL_TYPE_PATTERN);
         assertThat(mController.isAvailable()).isFalse();
     }
