@@ -125,7 +125,7 @@ public class LockscreenDashboardFragmentTest {
     @Test
     public void isPageSearchable_notLocked_shouldBeSearchable() {
         when(mLockPatternUtils.isSecure(anyInt())).thenReturn(false);
-        when(mLockPatternUtils.isLockScreenDisabled(anyInt())).thenReturn(true);
+        when(mLockPatternUtils.isLockScreenDisabled(anyInt(), true)).thenReturn(true);
 
         assertThat(LockscreenDashboardFragment.SEARCH_INDEX_DATA_PROVIDER
                 .getNonIndexableKeys(mContext))
