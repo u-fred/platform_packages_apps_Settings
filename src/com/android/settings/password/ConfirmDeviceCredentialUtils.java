@@ -67,7 +67,7 @@ public class ConfirmDeviceCredentialUtils {
     public static void reportSuccessfulAttempt(LockPatternUtils utils, UserManager userManager,
             DevicePolicyManager dpm, int userId, boolean primary, boolean isStrongAuth) {
         if (isStrongAuth) {
-            utils.reportSuccessfulPasswordAttempt(userId, primary);
+            utils.reportSuccessfulPasswordAttempt(userId, primary, false);
         } else {
             dpm.reportSuccessfulBiometricAttempt(userId);
         }
