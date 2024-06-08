@@ -45,7 +45,7 @@ public class AutoPinConfirmPreferenceControllerTest {
     @Parameter public boolean mPrimary;
     @Parameters
     public static Collection<Boolean> parameters() {
-        return Arrays.asList(true);
+        return Arrays.asList(true, false);
     }
     private static final Integer TEST_USER_ID = 1;
     @Mock
