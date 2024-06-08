@@ -74,7 +74,7 @@ public class LockAfterTimeoutPreferenceControllerTest {
                 .thenReturn(mTrustAgentManager);
 
         mController = new LockAfterTimeoutPreferenceController(
-                mContext, TEST_USER_ID, mLockPatternUtils);
+                mContext, TEST_USER_ID, mLockPatternUtils, true);
     }
 
     @Test
