@@ -51,7 +51,8 @@ public class PatternVisiblePreferenceControllerTest {
         MockitoAnnotations.initMocks(this);
         mContext = RuntimeEnvironment.application;
         mController =
-                new PatternVisiblePreferenceController(mContext, TEST_USER_ID, mLockPatternUtils);
+                new PatternVisiblePreferenceController(mContext, TEST_USER_ID, mLockPatternUtils,
+                        true);
         mPreference = new SwitchPreference(mContext);
     }
 
