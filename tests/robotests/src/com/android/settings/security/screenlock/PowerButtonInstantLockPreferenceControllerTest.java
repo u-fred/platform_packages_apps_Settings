@@ -64,7 +64,7 @@ public class PowerButtonInstantLockPreferenceControllerTest {
 
         mPreference = new SwitchPreference(mContext);
         mController = new PowerButtonInstantLockPreferenceController(
-                mContext, TEST_USER_ID, mLockPatternUtils);
+                mContext, TEST_USER_ID, mLockPatternUtils, true);
     }
 
     @Test
