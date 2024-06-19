@@ -271,7 +271,7 @@ public class ConfirmLockPattern extends ConfirmDeviceCredentialBaseActivity {
             super.onResume();
 
             // if the user is currently locked out, enforce it.
-            long deadline = mLockPatternUtils.getLockoutAttemptDeadline(mEffectiveUserId);
+            long deadline = mLockPatternUtils.getLockoutAttemptDeadline(mEffectiveUserId, true);
             if (deadline != 0) {
                 mCredentialCheckResultTracker.clearResult();
                 handleAttemptLockout(deadline);
@@ -616,7 +616,7 @@ public class ConfirmLockPattern extends ConfirmDeviceCredentialBaseActivity {
                 if (timeoutMs > 0) {
                     refreshLockScreen();
                     long deadline = mLockPatternUtils.setLockoutAttemptDeadline(
-                            effectiveUserId, timeoutMs);
+                            effectiveUserId, true, timeoutMs);
                     handleAttemptLockout(deadline);
                 } else {
                     updateStage(Stage.NeedToUnlockWrong);
