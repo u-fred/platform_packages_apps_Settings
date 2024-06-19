@@ -31,6 +31,7 @@ import static com.google.common.truth.Truth.assertWithMessage;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -46,6 +47,7 @@ import android.hardware.face.FaceManager;
 import android.hardware.face.FaceSensorProperties;
 import android.hardware.face.FaceSensorPropertiesInternal;
 import android.hardware.face.IFaceAuthenticatorsRegisteredCallback;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.view.View;
 import android.widget.TextView;
@@ -165,6 +167,7 @@ public class FaceEnrollIntroductionTest {
 
     @Before
     public void setUp() {
+        SystemProperties.set("setupwizard.theme", "val");
         MockitoAnnotations.initMocks(this);
         ShadowUtils.setFaceManager(mFaceManager);
         mUserManager = ShadowUserManager.getShadow();
@@ -196,7 +199,7 @@ public class FaceEnrollIntroductionTest {
         when(mContext.getApplicationContext()).thenReturn(mContext);
         when(mContext.getSystemService(Context.FACE_SERVICE)).thenReturn(mFaceManager);
         when(mContext.getSystemService(Context.USER_SERVICE)).thenReturn(mUserManager);
-        when(mLockPatternUtils.getActivePasswordQuality(Mockito.anyInt(), true)).thenReturn(
+        when(mLockPatternUtils.getActivePasswordQuality(Mockito.anyInt(), eq(true))).thenReturn(
                 PASSWORD_QUALITY_NUMERIC);
 
         mController.create();
@@ -219,7 +222,7 @@ public class FaceEnrollIntroductionTest {
         when(mSpyActivity.getPostureGuidanceIntent()).thenReturn(testIntent);
         when(mContext.getSystemService(Context.FACE_SERVICE)).thenReturn(mFaceManager);
         when(mContext.getSystemService(Context.USER_SERVICE)).thenReturn(mUserManager);
-        when(mLockPatternUtils.getActivePasswordQuality(Mockito.anyInt(), true)).thenReturn(
+        when(mLockPatternUtils.getActivePasswordQuality(Mockito.anyInt(), eq(true))).thenReturn(
                 PASSWORD_QUALITY_NUMERIC);
 
         mController.create();
