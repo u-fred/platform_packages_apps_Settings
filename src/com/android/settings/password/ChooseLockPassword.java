@@ -1079,6 +1079,7 @@ public class ChooseLockPassword extends SettingsActivity {
                     .setListener(this)
                     .setRequestGatekeeperPasswordHandle(mRequestGatekeeperPassword)
                     .setRequestWriteRepairModePassword(mRequestWriteRepairModePassword);
+                    // TODO: Add .setPrimary.
 
             getFragmentManager().beginTransaction().add(mSaveAndFinishWorker,
                     FRAGMENT_TAG_SAVE_AND_FINISH).commit();
