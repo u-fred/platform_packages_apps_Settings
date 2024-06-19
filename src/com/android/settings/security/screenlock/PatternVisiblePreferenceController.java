@@ -59,6 +59,7 @@ public class PatternVisiblePreferenceController extends AbstractPreferenceContro
     }
 
     private boolean isPatternLock() {
+        // TODO: Make sure user supports second factor if secondary.
         return mLockPatternUtils.getCredentialTypeForUser(mUserId, mIsForPrimaryScreenLock)
                 == LockPatternUtils.CREDENTIAL_TYPE_PATTERN;
     }
