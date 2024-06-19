@@ -18,7 +18,6 @@ package com.android.settings.password;
 
 import static android.app.admin.DevicePolicyManager.PASSWORD_COMPLEXITY_NONE;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
-
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_NONE;
 
 import android.app.admin.DevicePolicyManager.PasswordComplexity;
@@ -207,6 +206,7 @@ public class ChooseLockGenericController {
      * requirements. The lock's visibility ({@link #isScreenLockVisible}) is not considered here.
      */
     public boolean isScreenLockEnabled(ScreenLockType type) {
+        // TODO: Secondary?
         return !mLockPatternUtils.isCredentialsDisabledForUser(mUserId)
                 && type.maxQuality >= upgradeQuality(PASSWORD_QUALITY_UNSPECIFIED);
     }
