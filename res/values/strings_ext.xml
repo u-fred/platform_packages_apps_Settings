@@ -202,4 +202,9 @@ Duress PIN works the same way duress password does."</string>
     <string name="duress_pwd_delete_error">Duress PIN and password were not deleted.\n\nDetails:\n%1$s</string>
     <string name="duress_pwd_error_dialog_dismiss">Dismiss</string>
 
+    <string name="alt_touchscreen_mode_title">Alternative touchscreen mode</string>
+    <string name="alt_touchscreen_mode_summary">This mode is less susceptible to ghost touches. Don’t enable it unless you are experiencing touchscreen issues.</string>
+    <string name="alt_touchscreen_mode_confirm_message">Confirm that the touchscreen is working. Without confirmation, alternative touchscreen mode will be disabled after several seconds.</string>
+    <string name="alt_touchscreen_mode_confirm_button">Confirm</string>
+
 </resources>
