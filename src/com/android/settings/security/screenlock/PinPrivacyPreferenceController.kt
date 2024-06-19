@@ -38,6 +38,7 @@ class PinPrivacyPreferenceController(
     }
 
     override fun isAvailable(): Boolean {
+        // TODO: Make sure user supports second factor if secondary.
         val credentialType = lockPatternUtils.getCredentialTypeForUser(userId,
                 isForPrimaryScreenLock)
         return credentialType == CREDENTIAL_TYPE_PIN
