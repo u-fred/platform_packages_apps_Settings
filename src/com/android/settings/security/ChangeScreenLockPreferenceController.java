@@ -123,6 +123,7 @@ public class ChangeScreenLockPreferenceController extends AbstractPreferenceCont
             }
         }
 
+        // TODO: Should this be effective user?
         updateSummary(preference, mUserId);
 
         // There is no way to manage biometric second factor password quality.
