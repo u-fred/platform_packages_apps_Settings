@@ -84,6 +84,7 @@ public class AutoPinConfirmPreferenceController extends AbstractPreferenceContro
     }
 
     private boolean isPinLock() {
+        // TODO: Make sure mUserId supports second factor if secondary.
         return mLockPatternUtils.getCredentialTypeForUser(mUserId, mIsForPrimaryScreenLock)
                 == LockPatternUtils.CREDENTIAL_TYPE_PIN;
     }
