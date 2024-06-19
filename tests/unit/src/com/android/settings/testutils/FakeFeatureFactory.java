@@ -104,6 +104,13 @@ public class FakeFeatureFactory extends FeatureFactory {
     /**
      * Call this in {@code @Before} method of the test class to use fake factory.
      */
+    public static FakeFeatureFactory setupForTest(Context context) {
+        FakeFeatureFactory factory = new FakeFeatureFactory();
+        setFactory(context, factory);
+        //setFactory(getAppContext(), factory);
+        return factory;
+    }
+
     public static FakeFeatureFactory setupForTest() {
         FakeFeatureFactory factory = new FakeFeatureFactory();
         setFactory(getAppContext(), factory);
