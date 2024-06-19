@@ -236,8 +236,6 @@ public class ScreenLockPreferenceDetailsUtils {
     private Integer getSummaryResId(int userId) {
         // TODO: Look at base commit when updating this.
         if (!mLockPatternUtils.isSecure(userId, mIsForPrimaryScreenLock)) {
-            // TODO: This might be bad logic. Consider that in some cases mUserId will itself be
-            // a managaed profile user.
             if (userId == mProfileChallengeUserId
                     || mLockPatternUtils.isLockScreenDisabled(userId, mIsForPrimaryScreenLock)) {
                 return R.string.unlock_set_unlock_mode_off;
