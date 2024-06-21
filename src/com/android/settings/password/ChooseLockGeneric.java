@@ -906,14 +906,13 @@ public class ChooseLockGeneric extends SettingsActivity {
                     mLockPatternUtils.setLockCredential(
                             LockscreenCredential.createNone(), mUserPassword, mPrimaryCredential,
                             mUserId);
-                    // Could probably put this in the above block but doing it like this to preserve
-                    // original call order.
-                    if (mPrimaryCredential) {
-                        // TODO: I don't think we should disable for secondary, but review it.
-                        //  Should help us resolve TODO in LockPatternUtils.isLockScreenDisabled.
-                        mLockPatternUtils.setLockScreenDisabled(disabled, mUserId);
-                    }
-
+                }
+                // Could probably put this in the above block but doing it like this to preserve
+                // original call order.
+                if (mPrimaryCredential) {
+                    // TODO: I don't think we should disable for secondary, but review it.
+                    //  Should help us resolve TODO in LockPatternUtils.isLockScreenDisabled.
+                    mLockPatternUtils.setLockScreenDisabled(disabled, mUserId);
                 }
                 getActivity().setResult(Activity.RESULT_OK);
                 // TODO: Primary only?
