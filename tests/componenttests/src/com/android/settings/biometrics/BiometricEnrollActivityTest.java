@@ -147,7 +147,7 @@ public class BiometricEnrollActivityTest {
         setPin();
         final Intent intent = getIntent(true /* useInternal */);
         LockPatternChecker.verifyCredential(new LockPatternUtils(mContext),
-                LockscreenCredential.createPin(TEST_PIN), UserHandle.myUserId(),
+                LockscreenCredential.createPin(TEST_PIN), true, UserHandle.myUserId(),
                 LockPatternUtils.VERIFY_FLAG_REQUEST_GK_PW_HANDLE, (response, timeoutMs) -> {
                     assertThat(response.containsGatekeeperPasswordHandle()).isTrue();
                     intent.putExtra(ChooseLockSettingsHelper.EXTRA_KEY_GK_PW_HANDLE,
