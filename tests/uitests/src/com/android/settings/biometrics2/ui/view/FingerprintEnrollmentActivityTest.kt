@@ -740,7 +740,7 @@ class FingerprintEnrollmentActivityTest {
                 context.startActivity(intent)
             }
         LockPatternChecker.verifyCredential(
-            lockPatternUtils, lockscreenCredential,
+            lockPatternUtils, lockscreenCredential, true,
             userId, LockPatternUtils.VERIFY_FLAG_REQUEST_GK_PW_HANDLE, onVerifyCallback
         )
     }
@@ -757,7 +757,7 @@ class FingerprintEnrollmentActivityTest {
                 context.startActivity(intent)
             }
         LockPatternChecker.verifyCredential(
-            lockPatternUtils, lockscreenCredential,
+            lockPatternUtils, lockscreenCredential, true,
             userId, LockPatternUtils.VERIFY_FLAG_REQUEST_GK_PW_HANDLE, onVerifyCallback
         )
     }
@@ -774,7 +774,7 @@ class FingerprintEnrollmentActivityTest {
                 context.startActivity(intent)
             }
         LockPatternChecker.verifyCredential(
-            lockPatternUtils, lockscreenCredential,
+            lockPatternUtils, lockscreenCredential, true,
             userId, LockPatternUtils.VERIFY_FLAG_REQUEST_GK_PW_HANDLE, onVerifyCallback
         )
     }
