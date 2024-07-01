@@ -243,8 +243,7 @@ public class ChooseLockGeneric extends SettingsActivity {
             // Defaults to needing to confirm credentials
             final boolean confirmCredentials = intent
                 .getBooleanExtra(CONFIRM_CREDENTIALS, true);
-            // TODO: Review this.
-            if (intent.hasExtra(ChooseLockSettingsHelper.EXTRA_KEY_PASSWORD)) {
+            if (activity instanceof ChooseLockGeneric.InternalActivity) {
                 mPasswordConfirmed = !confirmCredentials;
                 mUserPassword = intent.getParcelableExtra(
                         ChooseLockSettingsHelper.EXTRA_KEY_PASSWORD);
