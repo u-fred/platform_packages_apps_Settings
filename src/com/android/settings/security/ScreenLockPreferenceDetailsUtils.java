@@ -217,11 +217,11 @@ public class ScreenLockPreferenceDetailsUtils {
         if (!mIsForPrimaryScreenLock) {
             extras.putBoolean(ChooseLockSettingsHelper.EXTRA_KEY_PRIMARY_CREDENTIAL, false);
         }
+
+        Bundle args = new Bundle();
         if (password != null) {
             // TODO: Test if user password is not set. Make sure it doesn't happen.
-            extras.putObject(ChooseLockSettingsHelper.EXTRA_KEY_PASSWORD, password);
-            // TODO: Why need this if we also have password?
-            extras.putBoolean(ChooseLockGeneric.CONFIRM_CREDENTIALS, false);
+            args.putObject(ChooseLockSettingsHelper.EXTRA_KEY_PASSWORD, password);
         }
 
         return new SubSettingLauncher(mContext)
@@ -229,6 +229,7 @@ public class ScreenLockPreferenceDetailsUtils {
                 .setSourceMetricsCategory(sourceMetricsCategory)
                 .setTransitionType(SettingsTransitionHelper.TransitionType.TRANSITION_SLIDE)
                 .setExtras(extras)
+                .setArguments(args)
                 .toIntent();
     }
 
