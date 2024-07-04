@@ -472,7 +472,8 @@ public class ChooseLockGeneric extends SettingsActivity {
                     mPrimaryCredential)) {
                 // Show the disabling FRP warning only when the user is switching from a secure
                 // unlock method to an insecure one
-                showFactoryResetProtectionWarningDialog(key, GateKeeper.getSecureUserId(mUserId));
+                showFactoryResetProtectionWarningDialog(key, GateKeeper.getSecureUserId(mUserId),
+                        mPrimaryCredential);
                 return true;
             } else if (KEY_SKIP_FINGERPRINT.equals(key) || KEY_SKIP_FACE.equals(key)
                     || KEY_SKIP_BIOMETRICS.equals(key)) {
@@ -1013,6 +1014,7 @@ public class ChooseLockGeneric extends SettingsActivity {
                     }
                 case DevicePolicyManager.PASSWORD_QUALITY_NUMERIC:
                 case DevicePolicyManager.PASSWORD_QUALITY_NUMERIC_COMPLEX:
+                    // Guaranteed to get here if !mPrimaryCredential.
                     if (!mPrimaryCredential) {
                         return R.string.unlock_disable_biometric_second_factor_warning_content;
                     }
@@ -1092,21 +1094,23 @@ public class ChooseLockGeneric extends SettingsActivity {
         }
 
         private void showFactoryResetProtectionWarningDialog(String unlockMethodToSet,
-                long userSecureId) {
+                long userSecureId, boolean primary) {
             // Call Keystore to find out if this user has apps with authentication-bound
             // keys associated with the userSecureId of the LSKF to be removed.
-            boolean appsAffectedByFRPRemovalExist;
-            try {
-                long[] appsAffectedByFRPRemoval =
-                        AndroidKeyStoreMaintenance.getAllAppUidsAffectedBySid(mUserId,
-                                userSecureId);
-                appsAffectedByFRPRemovalExist = appsAffectedByFRPRemoval.length > 0;
-            } catch (KeyStoreException e) {
-                Log.w(TAG, String.format("Failed to get list of apps affected by SID %d removal",
-                        userSecureId), e);
-                // Fail closed: If Settings can't reach Keystore, assume (out of caution) that
-                // there are authentication-bound keys that will be invalidated.
-                appsAffectedByFRPRemovalExist = true;
+            boolean appsAffectedByFRPRemovalExist = false;
+            if (primary) {
+                try {
+                    long[] appsAffectedByFRPRemoval =
+                            AndroidKeyStoreMaintenance.getAllAppUidsAffectedBySid(mUserId,
+                                    userSecureId);
+                    appsAffectedByFRPRemovalExist = appsAffectedByFRPRemoval.length > 0;
+                } catch (KeyStoreException e) {
+                    Log.w(TAG, String.format("Failed to get list of apps affected by SID %d removal",
+                            userSecureId), e);
+                    // Fail closed: If Settings can't reach Keystore, assume (out of caution) that
+                    // there are authentication-bound keys that will be invalidated.
+                    appsAffectedByFRPRemovalExist = true;
+                }
             }
             int title = getResIdForFactoryResetProtectionWarningTitle();
             int message = getResIdForFactoryResetProtectionWarningMessage(
