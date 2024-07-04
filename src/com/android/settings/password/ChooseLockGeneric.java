@@ -946,7 +946,7 @@ public class ChooseLockGeneric extends SettingsActivity {
             // Otherwise, bugs would be caused. (e.g. b/278488549, b/278530059)
             final boolean hasCredential = mLockPatternUtils.isSecure(mUserId, mPrimaryCredential);
             if (!getActivity().isChangingConfigurations()
-                    && !mWaitingForConfirmation && !mWaitingForActivityResult && hasCredential
+                    && !mWaitingForConfirmation && !mWaitingForActivityResult
                     && !mWaitingForBiometricEnrollment) {
                 if (mPrimaryCredential && hasCredential) {
                     getActivity().finish();
