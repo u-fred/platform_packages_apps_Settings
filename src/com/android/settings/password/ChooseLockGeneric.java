@@ -213,6 +213,8 @@ public class ChooseLockGeneric extends SettingsActivity {
         private int mExtraLockScreenTitleResId;
         private int mExtraLockScreenDescriptionResId;
         private boolean mWaitingForBiometricEnrollment = false;
+        // Base code has mWaitingForActivityResult, but this is not used to track every Activity.
+        // Introduce this new variable to avoid breaking anything in base.
         private boolean mChooseLockRequestLaunched;
 
         @Override
@@ -949,9 +951,6 @@ public class ChooseLockGeneric extends SettingsActivity {
                 if (mPrimaryCredential && hasCredential) {
                     getActivity().finish();
                 } else if (!mPrimaryCredential && !mChooseLockRequestLaunched) {
-                    // There's only one candidate Activity to be launched on top of us for secondary
-                    // and it's indicated by mChooseLockRequestLaunched. We want to stay alive if
-                    // this is not launched to inform result listener if app left foreground.
                     getActivity().setResult(RESULT_APP_NOT_FOREGROUND);
                     getActivity().finish();
                 }
