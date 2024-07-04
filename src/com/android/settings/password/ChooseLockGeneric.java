@@ -306,19 +306,22 @@ public class ChooseLockGeneric extends SettingsActivity {
                     arguments,
                     intent.getExtras()).getIdentifier();
             mIsManagedProfile = UserManager.get(getActivity()).isManagedProfile(mUserId);
-            mController = new ChooseLockGenericController.Builder(
-                    getContext(), mUserId, mLockPatternUtils)
-                    .setAppRequestedMinComplexity(mRequestedMinComplexity)
+
+            ChooseLockGenericController.Builder controllerBuilder;
+            if (mPrimaryCredential) {
+                controllerBuilder = new ChooseLockGenericController.Builder(
+                        getContext(), mUserId, mLockPatternUtils);
+            } else {
+                controllerBuilder = new ChooseLockGenericController.Builder(
+                        getContext(), mUserId, null, mLockPatternUtils);
+            }
+            controllerBuilder.setAppRequestedMinComplexity(mRequestedMinComplexity)
                     .setEnforceDevicePasswordRequirementOnly(mOnlyEnforceDevicePasswordRequirement)
                     .setProfileToUnify(mUnificationProfileId)
                     .setHideInsecureScreenLockTypes(alwaysHideInsecureScreenLockTypes()
                             || intent.getBooleanExtra(HIDE_INSECURE_OPTIONS, false))
-                    // TODO: Reminder that we need to unify terminology. There is a secondary screen
-                    //  lock in Keyguard that is unrelated to what we are adding. Might need to
-                    //  remove all referenes to primary/secondary and change to
-                    //  biometricSecondFactor.
-                    .setPrimaryScreenLock(mPrimaryCredential)
-                    .build();
+                    .setPrimaryScreenLock(mPrimaryCredential);
+            mController = controllerBuilder.build();
 
             // If the complexity is provided by the admin, do not get the caller app's name.
             // If the app requires, for example, low complexity, and the admin requires high

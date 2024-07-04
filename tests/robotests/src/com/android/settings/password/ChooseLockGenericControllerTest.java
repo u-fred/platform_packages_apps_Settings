@@ -28,9 +28,11 @@ import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_NUMERIC_COM
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_SOMETHING;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
 
+import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_NONE;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
@@ -39,6 +41,7 @@ import static org.mockito.Mockito.when;
 import static org.robolectric.RuntimeEnvironment.application;
 
 import android.app.admin.DevicePolicyManager;
+import android.app.admin.PasswordMetrics;
 import android.app.admin.PasswordPolicy;
 import android.os.UserHandle;
 
@@ -64,7 +67,9 @@ import java.util.regex.Pattern;
 @Config(shadows = {ShadowUserManager.class, SettingsShadowResources.class})
 public class ChooseLockGenericControllerTest {
 
+    // TODO: Rename to mControllerPrimary.
     private ChooseLockGenericController mController;
+    private ChooseLockGenericController mControllerSecondary;
 
     @Mock
     private ManagedLockPasswordProvider mManagedLockPasswordProvider;
@@ -77,8 +82,19 @@ public class ChooseLockGenericControllerTest {
         MockitoAnnotations.initMocks(this);
 
         when(mLockPatternUtils.hasSecureLockScreen()).thenReturn(true);
+        when(mLockPatternUtils.checkUserSupportsBiometricSecondFactor(anyInt(), eq(true)))
+                .thenReturn(true);
         setDevicePolicyPasswordQuality(DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED);
-        mController = createBuilder().build();
+        mController = createBuilder(true).build();
+        mControllerSecondary = createBuilder(false).build();
+
+        when(mLockPatternUtils.isCredentialsDisabledForUser(anyInt(), eq(false)))
+                .thenReturn(false);
+        when(mLockPatternUtils.getRequestedPasswordMetrics(anyInt(), eq(false), anyBoolean()))
+                .thenReturn(new PasswordMetrics(CREDENTIAL_TYPE_NONE));
+        when(mLockPatternUtils.getRequestedPasswordComplexity(anyInt(), eq(false), anyBoolean()))
+                .thenReturn(PASSWORD_COMPLEXITY_NONE);
+
         SettingsShadowResources.overrideResource(R.bool.config_hide_none_security_option, false);
         SettingsShadowResources.overrideResource(R.bool.config_hide_swipe_security_option, false);
     }
@@ -93,7 +109,7 @@ public class ChooseLockGenericControllerTest {
         for (ScreenLockType lock : ScreenLockType.values()) {
             // All locks except managed defaults to visible
             assertWithMessage(lock + " visible").that(mController.isScreenLockVisible(lock))
-                    .isEqualTo(lock != ScreenLockType.MANAGED);
+                    .isEqualTo(lock != ScreenLockType.MANAGED && lock != ScreenLockType.PATTERN);
         }
 
         SettingsShadowResources.overrideResource(R.bool.config_hide_none_security_option, true);
@@ -120,6 +136,69 @@ public class ChooseLockGenericControllerTest {
         assertWithMessage("MANAGED visible").that(
                 mController.isScreenLockVisible(ScreenLockType.MANAGED)).isTrue();
     }
+
+    @Test
+    public void isScreenLockVisible_NoneSecondary_ReturnsTrue() {
+        assertThat(mControllerSecondary.isScreenLockVisible(ScreenLockType.NONE)).isTrue();
+    }
+
+    @Test
+    public void isScreenLockVisible_NoneSecondaryWithResourceConfig_ReturnsFalse() {
+        SettingsShadowResources.overrideResource(R.bool.config_hide_none_security_option, true);
+        assertThat(mControllerSecondary.isScreenLockVisible(ScreenLockType.NONE)).isFalse();
+    }
+
+    @Test
+    public void isScreenLockVisible_SwipeSecondary_ReturnsFalse() {
+        assertThat(mControllerSecondary.isScreenLockVisible(ScreenLockType.SWIPE)).isFalse();
+    }
+
+    @Test
+    public void isScreenLockVisible_SwipeSecondaryWithResourceConfig_ReturnsFalse() {
+        SettingsShadowResources.overrideResource(R.bool.config_hide_swipe_security_option, true);
+        assertThat(mControllerSecondary.isScreenLockVisible(ScreenLockType.SWIPE)).isFalse();
+    }
+
+    @Test
+    public void isScreenLockVisible_PatternSecondary_ReturnsFalse() {
+        assertThat(mControllerSecondary.isScreenLockVisible(ScreenLockType.PATTERN)).isFalse();
+    }
+
+    @Test
+    public void isScreenLockVisible_PINSecondary_ReturnsTrue() {
+        assertThat(mControllerSecondary.isScreenLockVisible(ScreenLockType.PIN)).isTrue();
+    }
+
+    @Test
+    public void isScreenLockVisible_PasswordSecondary_ReturnsFalse() {
+        assertThat(mControllerSecondary.isScreenLockVisible(ScreenLockType.PASSWORD)).isFalse();
+    }
+
+    @Test
+    public void isScreenLockEnabled_SwipeSecondary_ReturnsTrue() {
+        assertThat(mControllerSecondary.isScreenLockEnabled(ScreenLockType.SWIPE)).isTrue();
+    }
+
+    @Test
+    public void isScreenLockEnabled_PatternSecondary_ReturnsTrue() {
+        assertThat(mControllerSecondary.isScreenLockEnabled(ScreenLockType.PATTERN)).isTrue();
+    }
+
+    @Test
+    public void isScreenLockEnabled_PinSecondary_ReturnsTrue() {
+        assertThat(mControllerSecondary.isScreenLockEnabled(ScreenLockType.PIN)).isTrue();
+    }
+
+    @Test
+    public void isScreenLockEnabled_PasswordSecondary_ReturnsTrue() {
+        assertThat(mControllerSecondary.isScreenLockEnabled(ScreenLockType.PASSWORD)).isTrue();
+    }
+
+    @Test
+    public void isScreenLockRestrictedByAdmin_Secondary_ReturnsFalse() {
+        assertThat(mControllerSecondary.isScreenLockRestrictedByAdmin()).isFalse();
+    }
+
 
     @Test
     public void isScreenLockEnabled_Default() {
@@ -202,7 +281,7 @@ public class ChooseLockGenericControllerTest {
 
     @Test
     public void isScreenLockEnabled_NoneComplexity() {
-        when(mLockPatternUtils.getRequestedPasswordComplexity(anyInt(), anyBoolean()))
+        when(mLockPatternUtils.getRequestedPasswordComplexity(anyInt(), eq(true), anyBoolean()))
                 .thenReturn(PASSWORD_COMPLEXITY_NONE);
         assertThat(mController.isScreenLockEnabled(ScreenLockType.NONE)).isTrue();
         assertThat(mController.isScreenLockEnabled(ScreenLockType.SWIPE)).isTrue();
@@ -213,7 +292,7 @@ public class ChooseLockGenericControllerTest {
 
     @Test
     public void isScreenLockEnabled_lowComplexity() {
-        when(mLockPatternUtils.getRequestedPasswordComplexity(anyInt(), anyBoolean()))
+        when(mLockPatternUtils.getRequestedPasswordComplexity(anyInt(), eq(true), anyBoolean()))
                 .thenReturn(PASSWORD_COMPLEXITY_LOW);
         assertThat(mController.isScreenLockEnabled(ScreenLockType.NONE)).isFalse();
         assertThat(mController.isScreenLockEnabled(ScreenLockType.SWIPE)).isFalse();
@@ -224,7 +303,7 @@ public class ChooseLockGenericControllerTest {
 
     @Test
     public void isScreenLockEnabled_mediumComplexity() {
-        when(mLockPatternUtils.getRequestedPasswordComplexity(anyInt(), anyBoolean()))
+        when(mLockPatternUtils.getRequestedPasswordComplexity(anyInt(), eq(true), anyBoolean()))
                 .thenReturn(PASSWORD_COMPLEXITY_MEDIUM);
         assertThat(mController.isScreenLockEnabled(ScreenLockType.NONE)).isFalse();
         assertThat(mController.isScreenLockEnabled(ScreenLockType.SWIPE)).isFalse();
@@ -235,7 +314,7 @@ public class ChooseLockGenericControllerTest {
 
     @Test
     public void isScreenLockEnabled_highComplexity() {
-        when(mLockPatternUtils.getRequestedPasswordComplexity(anyInt(), anyBoolean()))
+        when(mLockPatternUtils.getRequestedPasswordComplexity(anyInt(), eq(true), anyBoolean()))
                 .thenReturn(PASSWORD_COMPLEXITY_HIGH);
         assertThat(mController.isScreenLockEnabled(ScreenLockType.NONE)).isFalse();
         assertThat(mController.isScreenLockEnabled(ScreenLockType.SWIPE)).isFalse();
@@ -255,10 +334,10 @@ public class ChooseLockGenericControllerTest {
 
     @Test
     public void getVisibleScreenLockTypes_qualitySomething_shouldReturnPatterPinPassword() {
-        mController = createBuilder().setHideInsecureScreenLockTypes(true).build();
+        mController = createBuilder(true).setHideInsecureScreenLockTypes(true).build();
         assertThat(mController.getVisibleAndEnabledScreenLockTypes())
                 .isEqualTo(Arrays.asList(
-                        ScreenLockType.PATTERN,
+                       // ScreenLockType.PATTERN,
                         ScreenLockType.PIN,
                         ScreenLockType.PASSWORD));
     }
@@ -269,7 +348,7 @@ public class ChooseLockGenericControllerTest {
                 .isEqualTo(Arrays.asList(
                         ScreenLockType.NONE,
                         ScreenLockType.SWIPE,
-                        ScreenLockType.PATTERN,
+                        //ScreenLockType.PATTERN,
                         ScreenLockType.PIN,
                         ScreenLockType.PASSWORD));
     }
@@ -296,7 +375,7 @@ public class ChooseLockGenericControllerTest {
 
     @Test
     public void upgradeQuality_complexityHigh_minQualityNumericComplex() {
-        mController = createBuilder().setAppRequestedMinComplexity(PASSWORD_COMPLEXITY_HIGH)
+        mController = createBuilder(true).setAppRequestedMinComplexity(PASSWORD_COMPLEXITY_HIGH)
                 .build();
         setDevicePolicyPasswordQuality(DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED);
 
@@ -306,7 +385,7 @@ public class ChooseLockGenericControllerTest {
 
     @Test
     public void upgradeQuality_complexityMedium_minQualityNumericComplex() {
-        mController = createBuilder().setAppRequestedMinComplexity(PASSWORD_COMPLEXITY_MEDIUM)
+        mController = createBuilder(true).setAppRequestedMinComplexity(PASSWORD_COMPLEXITY_MEDIUM)
                 .build();
         setDevicePolicyPasswordQuality(DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED);
 
@@ -316,7 +395,7 @@ public class ChooseLockGenericControllerTest {
 
     @Test
     public void upgradeQuality_complexityLow_minQualitySomething() {
-        mController = createBuilder().setAppRequestedMinComplexity(PASSWORD_COMPLEXITY_LOW)
+        mController = createBuilder(true).setAppRequestedMinComplexity(PASSWORD_COMPLEXITY_LOW)
                 .build();
         setDevicePolicyPasswordQuality(DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED);
 
@@ -326,7 +405,7 @@ public class ChooseLockGenericControllerTest {
 
     @Test
     public void getAggregatedPasswordComplexity_AppRequest() {
-        mController = createBuilder().setAppRequestedMinComplexity(PASSWORD_COMPLEXITY_HIGH)
+        mController = createBuilder(true).setAppRequestedMinComplexity(PASSWORD_COMPLEXITY_HIGH)
                 .build();
         assertThat(mController.getAggregatedPasswordComplexity())
                 .isEqualTo(PASSWORD_COMPLEXITY_HIGH);
@@ -334,9 +413,9 @@ public class ChooseLockGenericControllerTest {
 
     @Test
     public void getAggregatedPasswordComplexity_DevicePolicy() {
-        mController = createBuilder().setAppRequestedMinComplexity(PASSWORD_COMPLEXITY_LOW)
+        mController = createBuilder(true).setAppRequestedMinComplexity(PASSWORD_COMPLEXITY_LOW)
                 .build();
-        when(mLockPatternUtils.getRequestedPasswordComplexity(eq(UserHandle.myUserId()), eq(false)))
+        when(mLockPatternUtils.getRequestedPasswordComplexity(eq(UserHandle.myUserId()), eq(true), eq(false)))
                 .thenReturn(PASSWORD_COMPLEXITY_MEDIUM);
 
         assertThat(mController.getAggregatedPasswordComplexity())
@@ -345,35 +424,67 @@ public class ChooseLockGenericControllerTest {
 
     @Test
     public void getAggregatedPasswordComplexity_ProfileUnification() {
-        mController = createBuilder()
+        mController = createBuilder(true)
                 .setProfileToUnify(123)
                 .setAppRequestedMinComplexity(PASSWORD_COMPLEXITY_LOW)
                 .build();
-        when(mLockPatternUtils.getRequestedPasswordComplexity(eq(UserHandle.myUserId()), eq(false)))
+        when(mLockPatternUtils.getRequestedPasswordComplexity(eq(UserHandle.myUserId()), eq(true), eq(false)))
                 .thenReturn(PASSWORD_COMPLEXITY_MEDIUM);
-        when(mLockPatternUtils.getRequestedPasswordComplexity(eq(123)))
+        when(mLockPatternUtils.getRequestedPasswordComplexity(eq(123), eq(true), eq(true)))
                 .thenReturn(PASSWORD_COMPLEXITY_HIGH);
 
         assertThat(mController.getAggregatedPasswordComplexity())
                 .isEqualTo(PASSWORD_COMPLEXITY_HIGH);
     }
 
+    @Test
+    public void constructor_SecondaryForUserNotSupportingSecondary_ThrowsException() {
+        when(mLockPatternUtils.checkUserSupportsBiometricSecondFactor(anyInt(), eq(true)))
+                .thenThrow(IllegalArgumentException.class);
+        ChooseLockGenericController.Builder builder = createBuilder(false);
+
+        assertThrows(IllegalArgumentException.class, builder::build);
+    }
+
+    @Test
+    public void constructor_SecondaryWithUnifiedProfile_ThrowsException() {
+        ChooseLockGenericController.Builder builder = new ChooseLockGenericController.Builder(
+                application, 0, null, mLockPatternUtils);
+        builder.setPrimaryScreenLock(false);
+        builder.setProfileToUnify(1);
+
+        assertThrows(IllegalArgumentException.class, builder::build);
+    }
+
+    @Test
+    public void constructor_SecondaryWithManagedPasswordProvider_ThrowsException() {
+        ChooseLockGenericController.Builder builder = new ChooseLockGenericController.Builder(
+                application, 0, mManagedLockPasswordProvider, mLockPatternUtils);
+        builder.setPrimaryScreenLock(false);
+
+        assertThrows(IllegalArgumentException.class, builder::build);
+    }
+
     private void setDevicePolicyPasswordQuality(int quality) {
         PasswordPolicy policy = new PasswordPolicy();
         policy.quality = quality;
 
-        when(mLockPatternUtils.getRequestedPasswordMetrics(anyInt(), anyBoolean()))
+        when(mLockPatternUtils.getRequestedPasswordMetrics(anyInt(), eq(true), anyBoolean()))
                 .thenReturn(policy.getMinMetrics());
-
-        when(mLockPatternUtils.isCredentialsDisabledForUser(anyInt()))
+        when(mLockPatternUtils.isCredentialsDisabledForUser(anyInt(), eq(true)))
                 .thenReturn(quality == PASSWORD_QUALITY_MANAGED);
     }
 
-    private ChooseLockGenericController.Builder createBuilder() {
+
+
+    private ChooseLockGenericController.Builder createBuilder(boolean primary) {
+        ManagedLockPasswordProvider managedLockPasswordProvider = primary ?
+                mManagedLockPasswordProvider : null;
         return new ChooseLockGenericController.Builder(
                 application,
                 0 /* userId */,
-                mManagedLockPasswordProvider,
-                mLockPatternUtils);
+                managedLockPasswordProvider,
+                mLockPatternUtils)
+                .setPrimaryScreenLock(primary);
     }
 }

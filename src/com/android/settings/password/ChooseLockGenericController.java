@@ -65,6 +65,17 @@ public class ChooseLockGenericController {
             boolean hideInsecureScreenLockTypes, int appRequestedMinComplexity,
             boolean devicePasswordRequirementOnly, int unificationProfileId,
             boolean primaryScreenLock) {
+        if (!primaryScreenLock) {
+            lockPatternUtils.checkUserSupportsBiometricSecondFactor(userId, true);
+            if (unificationProfileId != UserHandle.USER_NULL) {
+                throw new IllegalArgumentException(
+                        "unificationProfileId must be USER_NULL when !mPrimaryScreenLock");
+            } else if (managedPasswordProvider != null) {
+                throw new IllegalArgumentException(
+                        "managedPasswordProvider must be null when !mPrimaryScreenLock");
+            }
+        }
+
         mContext = context;
         mUserId = userId;
         mManagedPasswordProvider = managedPasswordProvider;
@@ -172,7 +183,6 @@ public class ChooseLockGenericController {
     /**
      * Returns whether the given screen lock type should be visible in the given context.
      */
-    // TODO: Review when looking at profiles/users.
     public boolean isScreenLockVisible(ScreenLockType type) {
         final boolean managedProfile = mContext.getSystemService(UserManager.class)
                 .isManagedProfile(mUserId);
@@ -182,13 +192,13 @@ public class ChooseLockGenericController {
                     && !mContext.getResources().getBoolean(R.bool.config_hide_none_security_option)
                     && !managedProfile; // Profiles should use unified challenge instead.
             case SWIPE:
-                return !mHideInsecureScreenLockTypes
+                return mPrimaryScreenLock
+                    && !mHideInsecureScreenLockTypes
                     && !mContext.getResources().getBoolean(R.bool.config_hide_swipe_security_option)
-                    && !managedProfile // Swipe doesn't make sense for profiles.
-                    && mPrimaryScreenLock;
+                    && !managedProfile; // Swipe doesn't make sense for profiles.
             case MANAGED:
-                // TODO: Review.
-                return mManagedPasswordProvider.isManagedPasswordChoosable();
+                return mPrimaryScreenLock
+                    && mManagedPasswordProvider.isManagedPasswordChoosable();
             case PATTERN:
                 return false;
             case PIN:
@@ -196,7 +206,8 @@ public class ChooseLockGenericController {
                 // screen feature.
                 return mLockPatternUtils.hasSecureLockScreen();
             case PASSWORD:
-                return mLockPatternUtils.hasSecureLockScreen() && mPrimaryScreenLock;
+                return mPrimaryScreenLock
+                    && mLockPatternUtils.hasSecureLockScreen();
         }
         return true;
     }
@@ -206,8 +217,7 @@ public class ChooseLockGenericController {
      * requirements. The lock's visibility ({@link #isScreenLockVisible}) is not considered here.
      */
     public boolean isScreenLockEnabled(ScreenLockType type) {
-        // TODO: Secondary?
-        return !mLockPatternUtils.isCredentialsDisabledForUser(mUserId)
+        return !mLockPatternUtils.isCredentialsDisabledForUser(mUserId, mPrimaryScreenLock)
                 && type.maxQuality >= upgradeQuality(PASSWORD_QUALITY_UNSPECIFIED);
     }
 
@@ -275,9 +285,11 @@ public class ChooseLockGenericController {
      */
     public PasswordMetrics getAggregatedPasswordMetrics() {
         PasswordMetrics metrics = mLockPatternUtils.getRequestedPasswordMetrics(mUserId,
-                mDevicePasswordRequirementOnly);
+                mPrimaryScreenLock, mDevicePasswordRequirementOnly);
+        // Will only be true if !mPrimaryScreenLock.
         if (mUnificationProfileId != UserHandle.USER_NULL) {
-            metrics.maxWith(mLockPatternUtils.getRequestedPasswordMetrics(mUnificationProfileId));
+            metrics.maxWith(mLockPatternUtils.getRequestedPasswordMetrics(mUnificationProfileId,
+                    true, false));
         }
         return metrics;
     }
@@ -290,10 +302,12 @@ public class ChooseLockGenericController {
     public int getAggregatedPasswordComplexity() {
         int complexity = Math.max(mAppRequestedMinComplexity,
                 mLockPatternUtils.getRequestedPasswordComplexity(
-                        mUserId, mDevicePasswordRequirementOnly));
+                        mUserId, mPrimaryScreenLock, mDevicePasswordRequirementOnly));
+        // Will only be true if !mPrimaryScreenLock.
         if (mUnificationProfileId != UserHandle.USER_NULL) {
             complexity = Math.max(complexity,
-                    mLockPatternUtils.getRequestedPasswordComplexity(mUnificationProfileId));
+                    mLockPatternUtils.getRequestedPasswordComplexity(mUnificationProfileId, true,
+                            true));
         }
         return complexity;
     }
