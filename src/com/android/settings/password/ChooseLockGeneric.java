@@ -269,9 +269,6 @@ public class ChooseLockGeneric extends SettingsActivity {
             mExtraLockScreenDescriptionResId =
                     intent.getIntExtra(EXTRA_KEY_CHOOSE_LOCK_SCREEN_DESCRIPTION, -1);
 
-            mPrimaryCredential = intent.getBooleanExtra(
-                    ChooseLockSettingsHelper.EXTRA_KEY_PRIMARY_CREDENTIAL, true);
-
             mRequestedMinComplexity = intent.getIntExtra(
                     EXTRA_KEY_REQUESTED_MIN_COMPLEXITY, PASSWORD_COMPLEXITY_NONE);
             mOnlyEnforceDevicePasswordRequirement = intent.getBooleanExtra(
@@ -280,6 +277,9 @@ public class ChooseLockGeneric extends SettingsActivity {
             mIsCallingAppAdmin = intent
                     .getBooleanExtra(EXTRA_KEY_IS_CALLING_APP_ADMIN, /* defValue= */ false);
             mUserManager = UserManager.get(activity);
+
+            mPrimaryCredential = intent.getBooleanExtra(
+                    ChooseLockSettingsHelper.EXTRA_KEY_PRIMARY_CREDENTIAL, true);
 
             if (arguments != null) {
                 mUnificationProfileCredential = (LockscreenCredential) arguments.getParcelable(
