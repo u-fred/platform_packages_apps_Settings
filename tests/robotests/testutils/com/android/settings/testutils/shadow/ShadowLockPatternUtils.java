@@ -42,32 +42,43 @@ public class ShadowLockPatternUtils {
 
     private static boolean sDeviceEncryptionEnabled;
     private static Map<Integer, Integer> sUserToActivePasswordQualityMap = new HashMap<>();
+    private static Map<Integer, Integer> sUserToActivePasswordQualityMapSecondary = new HashMap<>();
     private static Map<Integer, Integer> sUserToComplexityMap = new HashMap<>();
+    private static Map<Integer, Integer> sUserToComplexityMapSecondary = new HashMap<>();
     private static Map<Integer, Integer> sUserToProfileComplexityMap = new HashMap<>();
     private static Map<Integer, PasswordMetrics> sUserToMetricsMap = new HashMap<>();
+    private static Map<Integer, PasswordMetrics> sUserToMetricsMapSecondary = new HashMap<>();
     private static Map<Integer, PasswordMetrics> sUserToProfileMetricsMap = new HashMap<>();
     private static Map<Integer, Boolean> sUserToIsSecureMap = new HashMap<>();
+    private static Map<Integer, Boolean> sUserToIsSecureMapSecondary = new HashMap<>();
     private static Map<Integer, Boolean> sUserToVisiblePatternEnabledMap = new HashMap<>();
     private static Map<Integer, Boolean> sUserToBiometricAllowedMap = new HashMap<>();
     private static Map<Integer, Boolean> sUserToLockPatternEnabledMap = new HashMap<>();
     private static Map<Integer, Integer> sKeyguardStoredPasswordQualityMap = new HashMap<>();
+    private static Map<Integer, Integer> sKeyguardStoredPasswordQualityMapSecondary =
+            new HashMap<>();
 
     private static boolean sIsUserOwnsFrpCredential;
 
     @Resetter
     public static void reset() {
         sUserToActivePasswordQualityMap.clear();
+        sUserToActivePasswordQualityMapSecondary.clear();
         sUserToComplexityMap.clear();
+        sUserToComplexityMapSecondary.clear();
         sUserToProfileComplexityMap.clear();
         sUserToMetricsMap.clear();
+        sUserToMetricsMapSecondary.clear();
         sUserToProfileMetricsMap.clear();
         sUserToIsSecureMap.clear();
+        sUserToIsSecureMapSecondary.clear();
         sUserToVisiblePatternEnabledMap.clear();
         sUserToBiometricAllowedMap.clear();
         sUserToLockPatternEnabledMap.clear();
         sDeviceEncryptionEnabled = false;
         sIsUserOwnsFrpCredential = false;
         sKeyguardStoredPasswordQualityMap.clear();
+        sKeyguardStoredPasswordQualityMapSecondary.clear();
     }
 
     @Implementation
@@ -76,21 +87,27 @@ public class ShadowLockPatternUtils {
     }
 
     @Implementation
-    protected boolean isSecure(int userId) {
-        Boolean isSecure = sUserToIsSecureMap.get(userId);
+    protected boolean isSecure(int userId, boolean primary) {
+        Map<Integer, Boolean> isSecureMap = primary ? sUserToIsSecureMap :
+                sUserToIsSecureMapSecondary;
+        Boolean isSecure = isSecureMap.get(userId);
         if (isSecure == null) {
             return true;
         }
         return isSecure;
     }
 
-    public static void setIsSecure(int userId, boolean isSecure) {
-        sUserToIsSecureMap.put(userId, isSecure);
+    public static void setIsSecure(int userId, boolean primary, boolean isSecure) {
+        Map<Integer, Boolean> isSecureMap = primary ? sUserToIsSecureMap :
+                sUserToIsSecureMapSecondary;
+        isSecureMap.put(userId, isSecure);
     }
 
     @Implementation
-    protected int getActivePasswordQuality(int userId) {
-        final Integer activePasswordQuality = sUserToActivePasswordQualityMap.get(userId);
+    protected int getActivePasswordQuality(int userId, boolean primary) {
+        Map<Integer, Integer> activePasswordQualityMap = primary ? sUserToActivePasswordQualityMap :
+                sUserToActivePasswordQualityMapSecondary;
+        final Integer activePasswordQuality = activePasswordQualityMap.get(userId);
         if (activePasswordQuality == null) {
             return DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
         }
@@ -98,8 +115,10 @@ public class ShadowLockPatternUtils {
     }
 
     @Implementation
-    protected int getKeyguardStoredPasswordQuality(int userHandle) {
-        return sKeyguardStoredPasswordQualityMap.getOrDefault(userHandle, /* defaultValue= */ 1);
+    protected int getKeyguardStoredPasswordQuality(int userHandle, boolean primary) {
+        Map<Integer, Integer> passwordQualityMap = primary ? sKeyguardStoredPasswordQualityMap :
+                sKeyguardStoredPasswordQualityMapSecondary;
+        return passwordQualityMap.getOrDefault(userHandle, /* defaultValue= */ 1);
     }
 
     @Implementation
@@ -123,21 +142,25 @@ public class ShadowLockPatternUtils {
     }
 
     @Implementation
-    protected boolean checkPasswordHistory(byte[] passwordToCheck, byte[] hashFactor, int userId) {
+    protected boolean checkPasswordHistory(byte[] passwordToCheck, byte[] hashFactor, int userId,
+            boolean primary) {
         return false;
     }
 
     @Implementation
-    public @DevicePolicyManager.PasswordComplexity int getRequestedPasswordComplexity(int userId) {
+    public @DevicePolicyManager.PasswordComplexity int getRequestedPasswordComplexity(int userId,
+            boolean primary) {
         return getRequestedPasswordComplexity(userId, false);
     }
 
     @Implementation
     @DevicePolicyManager.PasswordComplexity
-    public int getRequestedPasswordComplexity(int userId, boolean deviceWideOnly) {
-        int complexity = sUserToComplexityMap.getOrDefault(userId,
+    public int getRequestedPasswordComplexity(int userId, boolean primary, boolean deviceWideOnly) {
+        Map<Integer, Integer> complexityMap = primary ? sUserToComplexityMap :
+                sUserToComplexityMapSecondary;
+        int complexity = complexityMap.getOrDefault(userId,
                 DevicePolicyManager.PASSWORD_COMPLEXITY_NONE);
-        if (!deviceWideOnly) {
+        if (primary && !deviceWideOnly) {
             complexity = Math.max(complexity, sUserToProfileComplexityMap.getOrDefault(userId,
                     DevicePolicyManager.PASSWORD_COMPLEXITY_NONE));
         }
@@ -183,25 +206,30 @@ public class ShadowLockPatternUtils {
     @Implementation
     public boolean setLockCredential(
             @NonNull LockscreenCredential newCredential,
-            @NonNull LockscreenCredential savedCredential, int userHandle) {
-        setIsSecure(userHandle, true);
+            @NonNull LockscreenCredential savedCredential, boolean primary, int userHandle) {
+        setIsSecure(userHandle, true, primary);
         return true;
     }
 
     @Implementation
     public boolean checkCredential(
-            @NonNull LockscreenCredential credential, int userId,
+            @NonNull LockscreenCredential credential, boolean primary, int userId,
             @Nullable LockPatternUtils.CheckCredentialProgressCallback progressCallback)
             throws LockPatternUtils.RequestThrottledException {
         return true;
     }
 
-    public static void setRequiredPasswordComplexity(int userHandle, int complexity) {
-        sUserToComplexityMap.put(userHandle, complexity);
+    public static void setRequiredPasswordComplexity(int userHandle, boolean primary,
+            int complexity) {
+        Map<Integer, Integer> complexityMap = primary ? sUserToComplexityMap :
+                sUserToComplexityMapSecondary;
+        complexityMap.put(userHandle, complexity);
     }
 
-    public static void setRequiredPasswordComplexity(int complexity) {
-        sUserToComplexityMap.put(UserHandle.myUserId(), complexity);
+    public static void setRequiredPasswordComplexity(int complexity, boolean primary) {
+        Map<Integer, Integer> complexityMap = primary ? sUserToComplexityMap :
+                sUserToComplexityMapSecondary;
+        complexityMap.put(UserHandle.myUserId(), complexity);
     }
 
     public static void setRequiredProfilePasswordComplexity(int complexity) {
@@ -209,30 +237,37 @@ public class ShadowLockPatternUtils {
     }
 
     @Implementation
-    public PasswordMetrics getRequestedPasswordMetrics(int userId, boolean deviceWideOnly) {
-        PasswordMetrics metrics = sUserToMetricsMap.getOrDefault(userId,
+    public PasswordMetrics getRequestedPasswordMetrics(int userId, boolean primary,
+            boolean deviceWideOnly) {
+        Map<Integer, PasswordMetrics> metricsMap = primary ? sUserToMetricsMap :
+                sUserToMetricsMapSecondary;
+        PasswordMetrics metrics = metricsMap.getOrDefault(userId,
                 new PasswordMetrics(LockPatternUtils.CREDENTIAL_TYPE_NONE));
-        if (!deviceWideOnly) {
+        if (primary && !deviceWideOnly) {
             metrics.maxWith(sUserToProfileMetricsMap.getOrDefault(userId,
                     new PasswordMetrics(LockPatternUtils.CREDENTIAL_TYPE_NONE)));
         }
         return metrics;
     }
 
-    public static void setRequestedPasswordMetrics(PasswordMetrics metrics) {
-        sUserToMetricsMap.put(UserHandle.myUserId(), metrics);
+    public static void setRequestedPasswordMetrics(PasswordMetrics metrics, boolean primary) {
+        Map<Integer, PasswordMetrics> metricsMap = primary ? sUserToMetricsMap :
+                sUserToMetricsMapSecondary;
+        metricsMap.put(UserHandle.myUserId(), metrics);
     }
 
     public static void setRequestedProfilePasswordMetrics(PasswordMetrics metrics) {
         sUserToProfileMetricsMap.put(UserHandle.myUserId(), metrics);
     }
 
-    public static void setActivePasswordQuality(int quality) {
+    public static void setActivePasswordQuality(int quality, boolean primary) {
+        Map<Integer, Integer> activePasswordQualityMap = primary ? sUserToActivePasswordQualityMap :
+                sUserToActivePasswordQualityMapSecondary;
         sUserToActivePasswordQualityMap.put(UserHandle.myUserId(), quality);
     }
 
     @Implementation
-    public boolean isLockScreenDisabled(int userId) {
+    public boolean isLockScreenDisabled(int userId, boolean primary) {
         return false;
     }
 
@@ -241,7 +276,9 @@ public class ShadowLockPatternUtils {
         return false;
     }
 
-    public static void setKeyguardStoredPasswordQuality(int quality) {
+    public static void setKeyguardStoredPasswordQuality(int quality, boolean primary) {
+        Map<Integer, Integer> passwordQualityMap = primary ? sKeyguardStoredPasswordQualityMap :
+                sKeyguardStoredPasswordQualityMapSecondary;
         sKeyguardStoredPasswordQualityMap.put(UserHandle.myUserId(), quality);
     }
 }
