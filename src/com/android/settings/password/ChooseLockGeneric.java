@@ -826,7 +826,8 @@ public class ChooseLockGeneric extends SettingsActivity {
                             .setForFace(mForFace)
                             .setForBiometrics(mForBiometrics)
                             .setUserId(mUserId)
-                            .setRequestGatekeeperPasswordHandle(mRequestGatekeeperPasswordHandle);
+                            .setRequestGatekeeperPasswordHandle(mRequestGatekeeperPasswordHandle)
+                            .setIsPrimaryCredential(mPrimaryCredential);
             if (mUserPassword != null) {
                 builder.setPassword(mUserPassword);
             }
@@ -882,9 +883,6 @@ public class ChooseLockGeneric extends SettingsActivity {
                     mWaitingForActivityResult = true;
                 }
                 intent.putExtra(EXTRA_CHOOSE_LOCK_GENERIC_EXTRAS, getIntent().getExtras());
-                if (!mPrimaryCredential) {
-                    intent.putExtra(ChooseLockSettingsHelper.EXTRA_KEY_PRIMARY_CREDENTIAL, false);
-                }
                 // If the caller requested Gatekeeper Password Handle to be returned, we assume it
                 // came from biometric enrollment. onActivityResult will put the LockSettingsService
                 // into the extras and launch biometric enrollment. This should be cleaned up,

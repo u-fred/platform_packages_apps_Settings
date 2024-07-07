@@ -179,6 +179,12 @@ public class ChooseLockPassword extends SettingsActivity {
             return this;
         }
 
+        public IntentBuilder setIsPrimaryCredential(boolean isPrimaryCredential) {
+            mIntent.putExtra(ChooseLockSettingsHelper.EXTRA_KEY_PRIMARY_CREDENTIAL,
+                    isPrimaryCredential);
+            return this;
+        }
+
         /**
          * Configures the launch such that at the end of the password enrollment, one of its
          * managed profile (specified by {@code profileId}) will have its lockscreen unified
@@ -493,9 +499,6 @@ public class ChooseLockPassword extends SettingsActivity {
             mForBiometrics = intent.getBooleanExtra(
                     ChooseLockSettingsHelper.EXTRA_KEY_FOR_BIOMETRICS, false);
 
-            mPrimaryCredential = intent.getBooleanExtra(
-                    ChooseLockSettingsHelper.EXTRA_KEY_PRIMARY_CREDENTIAL, true);
-
             mPasswordType = intent.getIntExtra(
                     LockPatternUtils.PASSWORD_TYPE_KEY, PASSWORD_QUALITY_NUMERIC);
             mUnificationProfileId = intent.getIntExtra(
@@ -506,6 +509,9 @@ public class ChooseLockPassword extends SettingsActivity {
             if (mMinMetrics == null) mMinMetrics = new PasswordMetrics(CREDENTIAL_TYPE_NONE);
 
             mTextChangedHandler = new TextChangedHandler();
+
+            mPrimaryCredential = intent.getBooleanExtra(
+                    ChooseLockSettingsHelper.EXTRA_KEY_PRIMARY_CREDENTIAL, true);
         }
 
         @Override
