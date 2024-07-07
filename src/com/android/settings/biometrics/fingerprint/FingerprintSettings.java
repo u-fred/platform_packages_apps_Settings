@@ -1001,7 +1001,7 @@ public class FingerprintSettings extends SubSettings {
                 // Settings app, such as ChooseLockGeneric using it but ChooseLockPassword not.
                 // I do it here (and throughout the app) to keep everything consistent.
                 if (resultCode ==
-                        ChooseLockGeneric.ChooseLockGenericFragment.RESULT_APP_NOT_FOREGROUND) {
+                        ChooseLockGeneric.ChooseLockGenericFragment.RESULT_TIMEOUT) {
                     getActivity().setResult(RESULT_TIMEOUT);
                     getActivity().finish();
                 }
