@@ -522,7 +522,7 @@ public class ChooseLockGeneric extends SettingsActivity {
             } else if (requestCode == CHOOSE_LOCK_REQUEST) {
                 mWaitingForChooseLockRequest = false;
                 if (resultCode ==
-                        ChooseLockPassword.ChooseLockPasswordFragment.RESULT_APP_NOT_FOREGROUND) {
+                        ChooseLockPassword.ChooseLockPasswordFragment.RESULT_TIMEOUT) {
                     getActivity().setResult(RESULT_TIMEOUT, data);
                 } else if (resultCode != RESULT_CANCELED) {
                     // Existing code expects result to be forwarded, but we much prefer to avoid
