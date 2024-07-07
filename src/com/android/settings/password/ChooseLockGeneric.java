@@ -525,14 +525,11 @@ public class ChooseLockGeneric extends SettingsActivity {
                         ChooseLockPassword.ChooseLockPasswordFragment.RESULT_TIMEOUT) {
                     getActivity().setResult(RESULT_TIMEOUT, data);
                 } else if (resultCode != RESULT_CANCELED) {
-                    // Existing code expects result to be forwarded, but we much prefer to avoid
-                    // doing this where possible.
                     if (mPrimaryCredential) {
                         getActivity().setResult(resultCode, data);
                     } else {
                         getActivity().setResult(RESULT_OK, data);
                     }
-                    finish();
                 } else {
                     // If PASSWORD_TYPE_KEY is set, this activity is used as a trampoline to start
                     // the actual password enrollment. If the result is canceled, which means the
@@ -590,6 +587,7 @@ public class ChooseLockGeneric extends SettingsActivity {
                 outState.putParcelable(ChooseLockSettingsHelper.EXTRA_KEY_PASSWORD,
                         mUserPassword.duplicate());
             }
+            // Saving this is not strictly needed, but it's good to keep state consistent.
             outState.putBoolean(WAITING_FOR_CHOOSE_LOCK_REQUEST, mWaitingForChooseLockRequest);
         }
 
@@ -786,7 +784,8 @@ public class ChooseLockGeneric extends SettingsActivity {
             }
             ScreenLockType lock =
                     ScreenLockType.fromQuality(
-                            mLockPatternUtils.getKeyguardStoredPasswordQuality(credentialOwner, mPrimaryCredential));
+                            mLockPatternUtils.getKeyguardStoredPasswordQuality(credentialOwner,
+                                    mPrimaryCredential));
             return lock != null ? lock.preferenceKey : null;
         }
 
@@ -912,16 +911,13 @@ public class ChooseLockGeneric extends SettingsActivity {
                             LockscreenCredential.createNone(), mUserPassword, mPrimaryCredential,
                             mUserId);
                 }
-                // Could probably put this in the above block but doing it like this to preserve
-                // original call order.
                 if (mPrimaryCredential) {
-                    // TODO: I don't think we should disable for secondary, but review it.
-                    //  Should help us resolve TODO in LockPatternUtils.isLockScreenDisabled.
+                    // Secondary is always disabled when no secondary password is set, so no need to
+                    // explicitly disable. See LockPatternUtils#isLockScreenDisabled.
                     mLockPatternUtils.setLockScreenDisabled(disabled, mUserId);
+                    LockScreenSafetySource.onLockScreenChange(getContext());
                 }
                 getActivity().setResult(Activity.RESULT_OK);
-                // TODO: Primary only?
-                LockScreenSafetySource.onLockScreenChange(getContext());
                 finish();
             }
         }
