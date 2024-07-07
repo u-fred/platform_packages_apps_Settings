@@ -126,7 +126,8 @@ public class ChooseLockGeneric extends SettingsActivity {
         private static final String KEY_SKIP_BIOMETRICS = "unlock_skip_biometrics";
         private static final String PASSWORD_CONFIRMED = "password_confirmed";
         private static final String WAITING_FOR_CONFIRMATION = "waiting_for_confirmation";
-        private static final String CHOOSE_LOCK_REQUEST_LAUNCHED = "choose_lock_request_launched";
+        private static final String WAITING_FOR_CHOOSE_LOCK_REQUEST =
+                "waiting_forchoose_lock_request";
 
         public static final String HIDE_INSECURE_OPTIONS = "hide_insecure_options";
         public static final String TAG_FRP_WARNING_DIALOG = "frp_warning_dialog";
@@ -215,7 +216,7 @@ public class ChooseLockGeneric extends SettingsActivity {
         private boolean mWaitingForBiometricEnrollment = false;
         // Base code has mWaitingForActivityResult, but this is not used to track every Activity.
         // Introduce this new variable to avoid breaking anything in base.
-        private boolean mChooseLockRequestLaunched;
+        private boolean mWaitingForChooseLockRequest;
 
         @Override
         public int getMetricsCategory() {
@@ -294,8 +295,8 @@ public class ChooseLockGeneric extends SettingsActivity {
                 mWaitingForConfirmation = savedInstanceState.getBoolean(WAITING_FOR_CONFIRMATION);
                 mUserPassword = savedInstanceState.getParcelable(
                         ChooseLockSettingsHelper.EXTRA_KEY_PASSWORD);
-                mChooseLockRequestLaunched = savedInstanceState.getBoolean(
-                        CHOOSE_LOCK_REQUEST_LAUNCHED);
+                mWaitingForChooseLockRequest = savedInstanceState.getBoolean(
+                        WAITING_FOR_CHOOSE_LOCK_REQUEST);
             }
 
             // a) If this is started from other user, use that user id.
@@ -519,7 +520,7 @@ public class ChooseLockGeneric extends SettingsActivity {
                     : null;
                 updatePreferencesOrFinish(false /* isRecreatingActivity */);
             } else if (requestCode == CHOOSE_LOCK_REQUEST) {
-                mChooseLockRequestLaunched = false;
+                mWaitingForChooseLockRequest = false;
                 if (resultCode ==
                         ChooseLockPassword.ChooseLockPasswordFragment.RESULT_NOT_FOREGROUND) {
                     getActivity().setResult(RESULT_APP_NOT_FOREGROUND, data);
@@ -590,7 +591,7 @@ public class ChooseLockGeneric extends SettingsActivity {
                 outState.putParcelable(ChooseLockSettingsHelper.EXTRA_KEY_PASSWORD,
                         mUserPassword.duplicate());
             }
-            outState.putBoolean(CHOOSE_LOCK_REQUEST_LAUNCHED, mChooseLockRequestLaunched);
+            outState.putBoolean(WAITING_FOR_CHOOSE_LOCK_REQUEST, mWaitingForChooseLockRequest);
         }
 
         @VisibleForTesting
@@ -896,7 +897,7 @@ public class ChooseLockGeneric extends SettingsActivity {
                     request = CHOOSE_LOCK_BEFORE_BIOMETRIC_REQUEST;
                 } else {
                     request = CHOOSE_LOCK_REQUEST;
-                    mChooseLockRequestLaunched = true;
+                    mWaitingForChooseLockRequest = true;
                 }
                 startActivityForResult(intent, request);
                 return;
@@ -950,7 +951,7 @@ public class ChooseLockGeneric extends SettingsActivity {
                     && !mWaitingForBiometricEnrollment) {
                 if (mPrimaryCredential && hasCredential) {
                     getActivity().finish();
-                } else if (!mPrimaryCredential && !mChooseLockRequestLaunched) {
+                } else if (!mPrimaryCredential && !mWaitingForChooseLockRequest) {
                     getActivity().setResult(RESULT_APP_NOT_FOREGROUND);
                     getActivity().finish();
                 }
