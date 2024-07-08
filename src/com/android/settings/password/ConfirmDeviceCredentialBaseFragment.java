@@ -17,7 +17,6 @@
 // TODO (b/35202196): move this class out of the root of the package.
 package com.android.settings.password;
 
-import static android.app.Activity.RESULT_CANCELED;
 import static android.app.Activity.RESULT_FIRST_USER;
 import static android.app.admin.DevicePolicyResources.Strings.Settings.WORK_PROFILE_LOCK_ATTEMPTS_FAILED;
 
@@ -130,8 +129,6 @@ public abstract class ConfirmDeviceCredentialBaseFragment extends InstrumentedFr
                 KeyguardManager.EXTRA_ALTERNATE_BUTTON_LABEL);
         mReturnCredentials = intent.getBooleanExtra(
                 ChooseLockSettingsHelper.EXTRA_KEY_RETURN_CREDENTIALS, false);
-        mPrimaryCredential = intent.getBooleanExtra(
-                ChooseLockSettingsHelper.EXTRA_KEY_PRIMARY_CREDENTIAL, true);
 
         mReturnGatekeeperPassword = intent.getBooleanExtra(
                 ChooseLockSettingsHelper.EXTRA_KEY_REQUEST_GK_PW_HANDLE, false);
@@ -194,6 +191,9 @@ public abstract class ConfirmDeviceCredentialBaseFragment extends InstrumentedFr
         mDevicePolicyManager = (DevicePolicyManager) getActivity().getSystemService(
                 Context.DEVICE_POLICY_SERVICE);
         mBiometricManager = getActivity().getSystemService(BiometricManager.class);
+
+        mPrimaryCredential = intent.getBooleanExtra(
+                ChooseLockSettingsHelper.EXTRA_KEY_PRIMARY_CREDENTIAL, true);
     }
 
     @Override
