@@ -338,10 +338,10 @@ public abstract class ConfirmDeviceCredentialBaseFragment extends InstrumentedFr
         mLockPatternUtils.reportFailedPasswordAttempt(mEffectiveUserId, mPrimaryCredential);
     }
 
-    // TODO: Secondary.
     protected void updateErrorMessage(int numAttempts) {
         final int maxAttempts =
-                mLockPatternUtils.getMaximumFailedPasswordsForWipe(mEffectiveUserId);
+                mLockPatternUtils.getMaximumFailedPasswordsForWipe(mEffectiveUserId,
+                        mPrimaryCredential);
         if (maxAttempts <= 0 || numAttempts <= 0) {
             return;
         }
