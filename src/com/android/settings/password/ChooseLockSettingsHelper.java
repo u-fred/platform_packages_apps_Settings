@@ -408,6 +408,27 @@ public final class ChooseLockSettingsHelper {
                         + " ReturnCredentials. Are you sure this is what you want?");
             }
 
+            if (mNotForegroundResultCode != Activity.RESULT_CANCELED && !mForegroundOnly) {
+                throw new IllegalArgumentException(
+                        "Must set mForegroundOnly if setting mNotForegroundResultCode");
+            }
+
+            LockPatternUtils lpu = new LockPatternUtils(mActivity.getApplicationContext());
+            lpu.checkUserSupportsBiometricSecondFactorIfSecondary(mUserId, mPrimaryCredential);
+            // TODO: This will fall out of sync as time goes on. We would prefer an inclusion list.
+            //  Could only include certain fields for secondary in #launchConfirmationActivity, but
+            //  then it's all getting a bit messy. Likelihood and impact of issue is low, so I
+            //  think this is fine.
+            if (!mPrimaryCredential
+                    && (mRemoteLockscreenValidation
+                    || mRemoteLockscreenValidationSession != null
+                    || mRemoteLockscreenValidationServiceComponent != null
+                    || mAllowAnyUserId
+                    || mRequestGatekeeperPasswordHandle
+                    || mRequestWriteRepairModePassword)) {
+                throw new IllegalArgumentException("Invalid field set for !mPrimaryCredential");
+            }
+
             return new ChooseLockSettingsHelper(this, mActivity, mFragment,
                     mActivityResultLauncher);
         }
