@@ -459,7 +459,7 @@ public class WifiDppUtils {
                 builder.setTextForDeviceCredential(
                         null /* title */,
                         Utils.getConfirmCredentialStringForUser(
-                                context, userId, Utils.getCredentialType(context, userId)),
+                                context, userId, Utils.getCredentialType(context, userId, true)),
                         null /* description */);
             }
 

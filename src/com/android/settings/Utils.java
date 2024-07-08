@@ -774,9 +774,9 @@ public final class Utils extends com.android.settingslib.Utils {
      * Returns the credential type of the given user id.
      */
     public static @LockPatternUtils.CredentialType int getCredentialType(Context context,
-            int userId) {
+            int userId, boolean primary) {
         final LockPatternUtils lpu = new LockPatternUtils(context);
-        return lpu.getCredentialTypeForUser(userId, true);
+        return lpu.getCredentialTypeForUser(userId, primary);
     }
 
     /**
