@@ -161,7 +161,7 @@ public class EnterprisePrivacyFeatureProviderImpl implements EnterprisePrivacyFe
         if (owner == null) {
             return 0;
         }
-        return mDpm.getMaximumFailedPasswordsForWipe(owner, MY_USER_ID);
+        return mDpm.getMaximumFailedPasswordsForWipe(owner, MY_USER_ID, true);
     }
 
     @Override
@@ -174,7 +174,7 @@ public class EnterprisePrivacyFeatureProviderImpl implements EnterprisePrivacyFe
         if (profileOwner == null) {
             return 0;
         }
-        return mDpm.getMaximumFailedPasswordsForWipe(profileOwner, userId);
+        return mDpm.getMaximumFailedPasswordsForWipe(profileOwner, userId, true);
     }
 
     @Override
