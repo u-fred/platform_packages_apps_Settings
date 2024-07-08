@@ -101,7 +101,7 @@ public class ScreenLockSettings extends DashboardFragment
         builder.setTitle(getString(R.string.security_settings_fingerprint_preference_title))
                 .setUserId(MY_USER_ID)
                 .setForegroundOnly(true)
-                .setNotForegroundDistinctResultCode(true)
+                .setNotForegroundResultCode(RESULT_NOT_FOREGROUND)
                 .setPrimaryCredential(false)
                 .setRequestCode(REQUEST_CONFIRM_CREDENTIAL)
                 .show();
