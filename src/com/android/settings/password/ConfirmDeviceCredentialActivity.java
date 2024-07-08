@@ -119,7 +119,6 @@ public class ConfirmDeviceCredentialActivity extends FragmentActivity {
             mTrustManager.setDeviceLockedForUser(mUserId, false);
             final boolean isStrongAuth = result.getAuthenticationType()
                     == BiometricPrompt.AUTHENTICATION_RESULT_TYPE_DEVICE_CREDENTIAL;
-            // TODO: Why always primary?
             ConfirmDeviceCredentialUtils.reportSuccessfulAttempt(mLockPatternUtils, mUserManager,
                     mDevicePolicyManager, mUserId, true, isStrongAuth);
             ConfirmDeviceCredentialUtils.checkForPendingIntent(
@@ -210,9 +209,8 @@ public class ConfirmDeviceCredentialActivity extends FragmentActivity {
             promptInfo.setShowEmergencyCallButton(true);
         }
 
-        // TODO: Why always primary?
         final @LockPatternUtils.CredentialType int credentialType = Utils.getCredentialType(
-                mContext, effectiveUserId);
+                mContext, effectiveUserId, true);
         if (mTitle == null) {
             promptInfo.setDeviceCredentialTitle(
                     getTitleFromCredentialType(credentialType, isEffectiveUserManagedProfile));
