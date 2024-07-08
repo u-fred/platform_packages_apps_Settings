@@ -995,8 +995,6 @@ public class ChooseLockPassword extends SettingsActivity {
 
             LockscreenCredential password = mIsAlphaMode
                     ? LockscreenCredential.createPassword(mPasswordEntry.getText())
-                    // TODO: Add mPrimaryCredential to this call. Might need to create the method
-                    //  because was originally using createPinOrNone.
                     : LockscreenCredential.createPin(mPasswordEntry.getText());
             final int length = password.size();
             if (mUiStage == Stage.Introduction) {
@@ -1111,7 +1109,6 @@ public class ChooseLockPassword extends SettingsActivity {
                     .setListener(this)
                     .setRequestGatekeeperPasswordHandle(mRequestGatekeeperPassword)
                     .setRequestWriteRepairModePassword(mRequestWriteRepairModePassword);
-                    // TODO: Add .setPrimary.
 
             getFragmentManager().beginTransaction().add(mSaveAndFinishWorker,
                     FRAGMENT_TAG_SAVE_AND_FINISH).commit();
