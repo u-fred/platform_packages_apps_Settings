@@ -278,6 +278,10 @@ public class ChooseLockPassword extends SettingsActivity {
 
         private TextChangedHandler mTextChangedHandler;
 
+        private static final int CONFIRM_EXISTING_REQUEST = 58;
+        static final int RESULT_FINISHED = RESULT_FIRST_USER;
+        public static final int RESULT_TIMEOUT = RESULT_FIRST_USER + 1;
+
         /** Used to store the profile type for which pin/password is being set */
         protected enum ProfileType {
             None,
@@ -286,11 +290,6 @@ public class ChooseLockPassword extends SettingsActivity {
             Other
         };
         protected ProfileType mProfileType;
-
-        private static final int CONFIRM_EXISTING_REQUEST = 58;
-        static final int RESULT_FINISHED = RESULT_FIRST_USER;
-        public static final int RESULT_TIMEOUT = RESULT_FIRST_USER + 1;
-
 
         /**
          * Keep track internally of where the user is in choosing a pattern.
