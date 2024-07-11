@@ -19,6 +19,8 @@ package com.android.settings.password;
 import static android.app.admin.DevicePolicyManager.PASSWORD_COMPLEXITY_NONE;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_NONE;
+import static com.android.internal.widget.LockPatternUtils.CredentialPurpose.PRIMARY;
+import static com.android.internal.widget.LockPatternUtils.CredentialPurpose.SECOND_FACTOR;
 
 import android.app.admin.DevicePolicyManager.PasswordComplexity;
 import android.app.admin.PasswordMetrics;
@@ -30,6 +32,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.widget.LockPatternUtils;
+import com.android.internal.widget.WrappedLockPatternUtils;
 import com.android.settings.R;
 
 import java.util.ArrayList;
@@ -57,7 +60,7 @@ public class ChooseLockGenericController {
     private final boolean mDevicePasswordRequirementOnly;
     private final int mUnificationProfileId;
     private final ManagedLockPasswordProvider mManagedPasswordProvider;
-    private final LockPatternUtils mLockPatternUtils;
+    private final WrappedLockPatternUtils mLockPatternUtils;
     private final boolean mPrimaryScreenLock;
 
     public ChooseLockGenericController(Context context, int userId,
@@ -79,7 +82,8 @@ public class ChooseLockGenericController {
         mContext = context;
         mUserId = userId;
         mManagedPasswordProvider = managedPasswordProvider;
-        mLockPatternUtils = lockPatternUtils;
+        mLockPatternUtils = new WrappedLockPatternUtils(lockPatternUtils,
+                primaryScreenLock ? PRIMARY : SECOND_FACTOR);
         mHideInsecureScreenLockTypes = hideInsecureScreenLockTypes;
         mAppRequestedMinComplexity = appRequestedMinComplexity;
         mDevicePasswordRequirementOnly = devicePasswordRequirementOnly;
@@ -217,7 +221,7 @@ public class ChooseLockGenericController {
      * requirements. The lock's visibility ({@link #isScreenLockVisible}) is not considered here.
      */
     public boolean isScreenLockEnabled(ScreenLockType type) {
-        return !mLockPatternUtils.isCredentialsDisabledForUser(mUserId, mPrimaryScreenLock)
+        return !mLockPatternUtils.isCredentialsDisabledForUser(mUserId)
                 && type.maxQuality >= upgradeQuality(PASSWORD_QUALITY_UNSPECIFIED);
     }
 
@@ -285,11 +289,11 @@ public class ChooseLockGenericController {
      */
     public PasswordMetrics getAggregatedPasswordMetrics() {
         PasswordMetrics metrics = mLockPatternUtils.getRequestedPasswordMetrics(mUserId,
-                mPrimaryScreenLock, mDevicePasswordRequirementOnly);
+                mDevicePasswordRequirementOnly);
         // Will only be true if !mPrimaryScreenLock.
         if (mUnificationProfileId != UserHandle.USER_NULL) {
             metrics.maxWith(mLockPatternUtils.getRequestedPasswordMetrics(mUnificationProfileId,
-                    true, false));
+                    false));
         }
         return metrics;
     }
@@ -302,12 +306,12 @@ public class ChooseLockGenericController {
     public int getAggregatedPasswordComplexity() {
         int complexity = Math.max(mAppRequestedMinComplexity,
                 mLockPatternUtils.getRequestedPasswordComplexity(
-                        mUserId, mPrimaryScreenLock, mDevicePasswordRequirementOnly));
+                        mUserId, mDevicePasswordRequirementOnly));
         // Will only be true if !mPrimaryScreenLock.
         if (mUnificationProfileId != UserHandle.USER_NULL) {
             complexity = Math.max(complexity,
-                    mLockPatternUtils.getRequestedPasswordComplexity(mUnificationProfileId, true,
-                            true));
+                    mLockPatternUtils.getRequestedPasswordComplexity(
+                            mUnificationProfileId, true));
         }
         return complexity;
     }
