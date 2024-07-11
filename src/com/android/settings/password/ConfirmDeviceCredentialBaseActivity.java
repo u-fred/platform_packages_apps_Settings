@@ -38,7 +38,6 @@ public abstract class ConfirmDeviceCredentialBaseActivity extends SettingsActivi
 
     private static final String STATE_IS_KEYGUARD_LOCKED = "STATE_IS_KEYGUARD_LOCKED";
     private static final String TAG = "ConfirmDeviceCredentialBaseActivity";
-    public static final int RESULT_NOT_FOREGROUND = RESULT_FIRST_USER;
 
     enum ConfirmCredentialTheme {
         NORMAL,
