@@ -50,13 +50,12 @@ import com.android.settingslib.transition.SettingsTransitionHelper;
  * Utilities for screen lock details shared between Security Settings and Safety Center.
  */
 public class ScreenLockPreferenceDetailsUtils {
-
-    protected final int mUserId = UserHandle.myUserId();
-    protected final Context mContext;
-    protected final LockPatternUtils mLockPatternUtils;
-    protected final int mProfileChallengeUserId;
-    protected final UserManager mUm;
-    protected final boolean mIsForPrimaryScreenLock;
+    private final int mUserId = UserHandle.myUserId();
+    private final Context mContext;
+    private final LockPatternUtils mLockPatternUtils;
+    private final int mProfileChallengeUserId;
+    private final UserManager mUm;
+    private final boolean mIsForPrimaryScreenLock;
 
     public ScreenLockPreferenceDetailsUtils(Context context, boolean isForPrimaryScreenLock) {
         mContext = context;
@@ -76,7 +75,7 @@ public class ScreenLockPreferenceDetailsUtils {
             return false;
         } else if (mIsForPrimaryScreenLock) {
             return true;
-        } else if (UserManager.get(mContext).isManagedProfile(userId)) {
+        } else if (!mLockPatternUtils.checkUserSupportsBiometricSecondFactor(userId, false)) {
            return false;
         } else {
             return Settings.Secure.getIntForUser(
