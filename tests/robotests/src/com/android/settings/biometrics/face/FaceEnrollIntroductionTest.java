@@ -513,7 +513,7 @@ public class FaceEnrollIntroductionTest {
     @Test
     public void testFaceEnrollIntroduction_maxFacesEnrolled_isSuw_notLaunchFaceSettings() {
         setFaceManagerToHave(1 /* numEnrollments */);
-        ShadowLockPatternUtils.setActivePasswordQuality(PASSWORD_QUALITY_NUMERIC);
+        ShadowLockPatternUtils.setActivePasswordQuality(PASSWORD_QUALITY_NUMERIC, true);
         final Intent intent = new Intent();
         intent.putExtra(WizardManagerHelper.EXTRA_IS_SETUP_FLOW, true);
         intent.putExtra(ChooseLockSettingsHelper.EXTRA_KEY_CHALLENGE_TOKEN, new byte[0]);
@@ -530,7 +530,7 @@ public class FaceEnrollIntroductionTest {
     @Test
     public void testFaceEnrollIntroduction_maxFacesEnrolled_fromSettings_notLaunchFaceSettings() {
         setFaceManagerToHave(1 /* numEnrollments */);
-        ShadowLockPatternUtils.setActivePasswordQuality(PASSWORD_QUALITY_NUMERIC);
+        ShadowLockPatternUtils.setActivePasswordQuality(PASSWORD_QUALITY_NUMERIC, true);
         final Intent intent = new Intent();
         intent.putExtra(BiometricEnrollBase.EXTRA_FROM_SETTINGS_SUMMARY, true);
         intent.putExtra(ChooseLockSettingsHelper.EXTRA_KEY_CHALLENGE_TOKEN, new byte[0]);
@@ -549,7 +549,7 @@ public class FaceEnrollIntroductionTest {
         when(mFakeFeatureFactory.mFaceFeatureProvider.getPostureGuidanceIntent(any()))
                 .thenReturn(new Intent());
         setFaceManagerToHave(0 /* numEnrollments */);
-        ShadowLockPatternUtils.setActivePasswordQuality(PASSWORD_QUALITY_NUMERIC);
+        ShadowLockPatternUtils.setActivePasswordQuality(PASSWORD_QUALITY_NUMERIC, true);
         final Intent intent = new Intent();
         intent.putExtra(BiometricEnrollBase.EXTRA_FROM_SETTINGS_SUMMARY, true);
         intent.putExtra(ChooseLockSettingsHelper.EXTRA_KEY_CHALLENGE_TOKEN, new byte[0]);
@@ -567,7 +567,7 @@ public class FaceEnrollIntroductionTest {
         when(mFakeFeatureFactory.mFaceFeatureProvider.getPostureGuidanceIntent(any()))
                 .thenReturn(new Intent());
         setFaceManagerToHave(1 /* numEnrollments */);
-        ShadowLockPatternUtils.setActivePasswordQuality(PASSWORD_QUALITY_NUMERIC);
+        ShadowLockPatternUtils.setActivePasswordQuality(PASSWORD_QUALITY_NUMERIC, true);
         final Intent intent = new Intent();
         intent.putExtra(BiometricEnrollBase.EXTRA_FROM_SETTINGS_SUMMARY, true);
         intent.putExtra(ChooseLockSettingsHelper.EXTRA_KEY_CHALLENGE_TOKEN, new byte[0]);
