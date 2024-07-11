@@ -53,7 +53,7 @@ public class SaveAndFinishWorker extends Fragment {
     private LockscreenCredential mUnificationProfileCredential;
     private LockscreenCredential mChosenCredential;
     private LockscreenCredential mCurrentCredential;
-    private boolean mPrimary;
+    private boolean mIsPrimaryCredential = true;
 
     private boolean mBlocking;
 
@@ -88,7 +88,8 @@ public class SaveAndFinishWorker extends Fragment {
         mChosenCredential = chosenCredential;
         mCurrentCredential = currentCredential != null ? currentCredential
                 : LockscreenCredential.createNone();
-        mPrimary = primary;
+
+        mIsPrimaryCredential = primary;
     }
 
     public void start(LockPatternUtils utils, LockscreenCredential chosenCredential,
@@ -110,8 +111,8 @@ public class SaveAndFinishWorker extends Fragment {
     Pair<Boolean, Intent> saveAndVerifyInBackground() {
         final int userId = mUserId;
         try {
-            if (!mUtils.setLockCredential(mChosenCredential, mCurrentCredential, mPrimary,
-                    userId)) {
+            if (!mUtils.setLockCredential(mChosenCredential, mCurrentCredential,
+                    mIsPrimaryCredential, userId)) {
                 return Pair.create(false, null);
             }
         } catch (RuntimeException e) {
@@ -137,7 +138,7 @@ public class SaveAndFinishWorker extends Fragment {
 
         Intent result = new Intent();
         final VerifyCredentialResponse response = mUtils.verifyCredential(mChosenCredential,
-                mPrimary, userId, flags);
+                mIsPrimaryCredential, userId, flags);
         if (response.isMatched()) {
             if (mRequestGatekeeperPassword && response.containsGatekeeperPasswordHandle()) {
                 result.putExtra(ChooseLockSettingsHelper.EXTRA_KEY_GK_PW_HANDLE,
