@@ -1444,7 +1444,7 @@
     <string name="lock_settings_picker_update_lock_title">Choose a new screen lock</string>
 
     <!--  Screen title. This title is asking the user to choose a type of biometric second factor for their device, such as a PIN, or none. [CHAR LIMIT=55] -->
-    <string name="lock_settings_picker_new_biometric_second_factor_title">Choose a new biometric second factor</string>
+    <string name="lock_settings_picker_new_biometric_second_factor_title">Choose a biometric second factor</string>
 
     <!--  Screen title. This title is asking the user to choose a new biometric second factor for their device, such as a PIN, or none. [CHAR LIMIT=55] -->
     <string name="lock_settings_picker_update_biometric_second_factor_title">Choose a new biometric second factor</string>
