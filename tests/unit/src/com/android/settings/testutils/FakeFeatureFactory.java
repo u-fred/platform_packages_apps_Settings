@@ -15,10 +15,13 @@
  */
 package com.android.settings.testutils;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import android.content.Context;
 
+import com.android.internal.widget.LockPatternUtils;
 import com.android.settings.accessibility.AccessibilityMetricsFeatureProvider;
 import com.android.settings.accessibility.AccessibilitySearchFeatureProvider;
 import com.android.settings.accounts.AccountFeatureProvider;
@@ -133,6 +136,7 @@ public class FakeFeatureFactory extends FeatureFactory {
         searchFeatureProvider = mock(SearchFeatureProvider.class);
         surveyFeatureProvider = mock(SurveyFeatureProvider.class);
         securityFeatureProvider = mock(SecurityFeatureProvider.class);
+        when(securityFeatureProvider.getLockPatternUtils(any())).thenReturn(mock(LockPatternUtils.class));
         suggestionsFeatureProvider = mock(SuggestionFeatureProvider.class);
         userFeatureProvider = mock(UserFeatureProvider.class);
         slicesFeatureProvider = mock(SlicesFeatureProvider.class);
