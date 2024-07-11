@@ -54,11 +54,11 @@ public class ChangeScreenLockPreferenceController extends AbstractPreferenceCont
     protected final int mUserId = UserHandle.myUserId();
     protected final int mProfileChallengeUserId;
     private int mEffectiveUserId;
-    protected final MetricsFeatureProvider mMetricsFeatureProvider;
-    protected ScreenLockPreferenceDetailsUtils mScreenLockPreferenceDetailUtils;
+    private final MetricsFeatureProvider mMetricsFeatureProvider;
+    private final ScreenLockPreferenceDetailsUtils mScreenLockPreferenceDetailUtils;
 
     protected RestrictedPreference mPreference;
-    private boolean mIsForPrimaryScreenLock;
+    private final boolean mIsForPrimaryScreenLock;
     @Nullable private LockscreenCredential mUserPassword;
 
     public ChangeScreenLockPreferenceController(Context context, SettingsPreferenceFragment host,
@@ -82,7 +82,7 @@ public class ChangeScreenLockPreferenceController extends AbstractPreferenceCont
     }
 
     public void setEffectiveUserId(int userId) {
-         mEffectiveUserId = userId;
+        mEffectiveUserId = userId;
     }
 
     @Override
@@ -123,8 +123,9 @@ public class ChangeScreenLockPreferenceController extends AbstractPreferenceCont
             }
         }
 
-        // TODO: Should this be effective user?
-        updateSummary(preference, mUserId);
+        // updateState() is only called if preference is available so no error will be thrown here
+        // if updateSummary() assumes userId supports second factor when !mIsForPrimaryScreenLock.
+        updateSummary(preference, mEffectiveUserId);
 
         // There is no way to manage biometric second factor password quality.
         if (mIsForPrimaryScreenLock) {
