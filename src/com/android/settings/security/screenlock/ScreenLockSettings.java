@@ -84,8 +84,14 @@ public class ScreenLockSettings extends DashboardFragment
 
         if (!mIsForPrimaryScreenLock) {
             if (!mLaunchedConfirm && !mCredentialConfirmed) {
-                if (mLockPatternUtils.getPinLength(MY_USER_ID, false) ==
-                        LockPatternUtils.PIN_LENGTH_UNAVAILABLE) {
+                // Need the LockscreenCredential in LSS.mUserBiometricSecondFactorMetrics, otherwise
+                // will get failure when calling LSS#refreshStoredPinLength on auto-confirm disable.
+                // This is the only existing call that we can use to check. Alternatively could
+                // introduce new Binder call or just prompt every time.
+
+                // If the second factor LockscreenCredential is not contained within
+                // LSS.mUserBiometricSecondFactorMetrics then
+                if (!mLockPatternUtils.refreshStoredPinLength(MY_USER_ID, false)) {
                     mLaunchedConfirm = true;
                     confirmBiometricSecondFactor();
                 }
