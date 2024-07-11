@@ -88,7 +88,7 @@ public class ScreenLockPreferenceDetailsUtilsTest {
         doNothing().when(mContext).startActivity(any());
         when(mUserManager.getProfileIdsWithDisabled(anyInt())).thenReturn(new int[]{});
 
-        final FakeFeatureFactory featureFactory = FakeFeatureFactory.setupForTest(mContext);
+        final FakeFeatureFactory featureFactory = FakeFeatureFactory.setupForTest();
         when(featureFactory.securityFeatureProvider.getLockPatternUtils(mContext))
                  .thenReturn(mLockPatternUtils);
 
