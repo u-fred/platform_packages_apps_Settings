@@ -236,8 +236,8 @@ public class FingerprintSettings extends SubSettings {
         private static final int CONFIRM_REQUEST = 101;
         @VisibleForTesting
         static final int CHOOSE_LOCK_GENERIC_REQUEST = 102;
-        // This is used when starting ChooseLockGeneric, but CHOOSE_LOCK_GENERIC_REQUEST is used for
-        // primary.
+        // Although this starts ChooseLockGeneric Activity, the constant CHOOSE_LOCK_GENERIC_REQUEST
+        // is used for a separate purpose.
         public static final int CHOOSE_BIOMETRIC_SECOND_FACTOR_REQUEST = 103;
         public static final int BIOMETRIC_SECOND_FACTOR_SETTINGS_REQUEST = 104;
         @VisibleForTesting
