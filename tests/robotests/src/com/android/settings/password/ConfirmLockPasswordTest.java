@@ -117,7 +117,7 @@ public class ConfirmLockPasswordTest {
                         ManagedSubscriptionsPolicy.TYPE_ALL_PERSONAL_SUBSCRIPTIONS));
 
         // Set false by default so we can check if lock was set when remote validation succeeds.
-        ShadowLockPatternUtils.setIsSecure(UserHandle.myUserId(), false);
+        ShadowLockPatternUtils.setIsSecure(UserHandle.myUserId(), true, false);
 
         FeatureFlagUtils.setEnabled(mContext,
                 FeatureFlagUtils.SETTINGS_REMOTE_DEVICE_CREDENTIAL_VALIDATION, true);
