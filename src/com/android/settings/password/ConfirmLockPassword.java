@@ -430,7 +430,7 @@ public class ConfirmLockPassword extends ConfirmDeviceCredentialBaseActivity {
                 mErrorTextView.setText("");
                 updateErrorMessage(
                         mLockPatternUtils.getCurrentFailedPasswordAttempts(mEffectiveUserId,
-                                mPrimaryCredential));
+                                mPrimaryCredential ? Primary : Secondary));
             }
             mCredentialCheckResultTracker.setListener(this);
             if (mRemoteLockscreenValidationFragment != null) {
@@ -704,7 +704,7 @@ public class ConfirmLockPassword extends ConfirmDeviceCredentialBaseActivity {
                     mErrorTextView.setText("");
                     updateErrorMessage(
                             mLockPatternUtils.getCurrentFailedPasswordAttempts(mEffectiveUserId,
-                                    mPrimaryCredential));
+                                    mPrimaryCredential ? Primary : Secondary));
                 }
             }.start();
             updatePasswordEntry();
