@@ -16,6 +16,8 @@
 
 package com.android.settings.security.screenlock;
 
+import static com.android.internal.widget.LockDomain.Primary;
+import static com.android.internal.widget.LockDomain.Secondary;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.Mockito.when;
@@ -75,7 +77,7 @@ public class AutoPinConfirmPreferenceControllerTest {
     @Test
     public void isAvailable_featureEnabledAndLockSetToPassword_shouldReturnFalse() {
         when(mLockPatternUtils.isSecure(TEST_USER_ID, mPrimary)).thenReturn(true);
-        when(mLockPatternUtils.getCredentialTypeForUser(TEST_USER_ID, mPrimary))
+        when(mLockPatternUtils.getCredentialTypeForUser(TEST_USER_ID, mPrimary ? Primary : Secondary))
                 .thenReturn(LockPatternUtils.CREDENTIAL_TYPE_PASSWORD);
 
         assertThat(mController.isAvailable()).isFalse();
@@ -83,7 +85,7 @@ public class AutoPinConfirmPreferenceControllerTest {
 
     @Test
     public void isAvailable_featureEnabledAndLockSetToPIN_lengthLessThanSix_shouldReturnFalse() {
-        when(mLockPatternUtils.getCredentialTypeForUser(TEST_USER_ID, mPrimary))
+        when(mLockPatternUtils.getCredentialTypeForUser(TEST_USER_ID, mPrimary ? Primary : Secondary))
                 .thenReturn(LockPatternUtils.CREDENTIAL_TYPE_PIN);
         when(mLockPatternUtils.getPinLength(TEST_USER_ID, mPrimary)).thenReturn(5);
 
@@ -93,7 +95,7 @@ public class AutoPinConfirmPreferenceControllerTest {
     @Test
     public void isAvailable_featureEnabledAndLockSetToPIN_lengthMoreThanEqSix_shouldReturnTrue() {
         when(mLockPatternUtils.isSecure(TEST_USER_ID, mPrimary)).thenReturn(true);
-        when(mLockPatternUtils.getCredentialTypeForUser(TEST_USER_ID, mPrimary))
+        when(mLockPatternUtils.getCredentialTypeForUser(TEST_USER_ID, mPrimary ? Primary : Secondary))
                 .thenReturn(LockPatternUtils.CREDENTIAL_TYPE_PIN);
         when(mLockPatternUtils.getPinLength(TEST_USER_ID, mPrimary)).thenReturn(6);
 

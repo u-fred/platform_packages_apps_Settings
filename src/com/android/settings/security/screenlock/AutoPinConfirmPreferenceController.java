@@ -16,6 +16,8 @@
 
 package com.android.settings.security.screenlock;
 
+import static com.android.internal.widget.LockDomain.Primary;
+import static com.android.internal.widget.LockDomain.Secondary;
 import static com.android.internal.widget.LockPatternUtils.MIN_AUTO_PIN_REQUIREMENT_LENGTH;
 
 import android.content.Context;
@@ -85,7 +87,7 @@ public class AutoPinConfirmPreferenceController extends AbstractPreferenceContro
 
     private boolean isPinLock() {
         // TODO: Make sure mUserId supports second factor if secondary.
-        return mLockPatternUtils.getCredentialTypeForUser(mUserId, mIsForPrimaryScreenLock)
+        return mLockPatternUtils.getCredentialTypeForUser(mUserId, mIsForPrimaryScreenLock ? Primary : Secondary)
                 == LockPatternUtils.CREDENTIAL_TYPE_PIN;
     }
 
