@@ -48,13 +48,12 @@ public class AutoPinConfirmPreferenceController extends AbstractPreferenceContro
     private final AutoPinConfirmSettingChangeCallback mCallback;
 
     public AutoPinConfirmPreferenceController(Context context, int userId,
-            LockPatternUtils lockPatternUtils,
+            WrappedLockPatternUtils lockPatternUtils,
             ObservablePreferenceFragment parentFragment,
-            LockDomain lockDomain,
             AutoPinConfirmSettingChangeCallback callback) {
         super(context);
         mUserId = userId;
-        mLockPatternUtils = new WrappedLockPatternUtils(lockPatternUtils, lockDomain);
+        mLockPatternUtils = lockPatternUtils;
         mParentFragment = parentFragment;
         mCallback = callback;
     }

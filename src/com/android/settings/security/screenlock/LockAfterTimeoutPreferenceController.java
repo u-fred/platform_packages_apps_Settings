@@ -19,6 +19,8 @@ package com.android.settings.security.screenlock;
 import static android.app.admin.DevicePolicyResources.Strings.Settings.DISABLED_BY_IT_ADMIN_TITLE;
 import static android.provider.Settings.System.SCREEN_OFF_TIMEOUT;
 
+import static com.android.internal.widget.LockDomain.Secondary;
+
 import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.os.UserHandle;
@@ -28,7 +30,9 @@ import android.util.Log;
 
 import androidx.preference.Preference;
 
+import com.android.internal.widget.LockDomain;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.internal.widget.WrappedLockPatternUtils;
 import com.android.settings.R;
 import com.android.settings.core.PreferenceControllerMixin;
 import com.android.settings.display.TimeoutListPreference;
@@ -47,22 +51,22 @@ public class LockAfterTimeoutPreferenceController extends AbstractPreferenceCont
     private final LockPatternUtils mLockPatternUtils;
     private final TrustAgentManager mTrustAgentManager;
     private final DevicePolicyManager mDPM;
-    private final boolean mIsForPrimaryScreenLock;
+    private final LockDomain mLockDomain;
 
     public LockAfterTimeoutPreferenceController(Context context, int userId,
-            LockPatternUtils lockPatternUtils, boolean isForPrimaryScreenLock) {
+           LockPatternUtils lockPatternUtils, LockDomain lockDomain) {
         super(context);
         mUserId = userId;
         mLockPatternUtils = lockPatternUtils;
         mDPM = (DevicePolicyManager) context.getSystemService(Context.DEVICE_POLICY_SERVICE);
         mTrustAgentManager = FeatureFactory.getFeatureFactory()
                 .getSecurityFeatureProvider().getTrustAgentManager();
-        mIsForPrimaryScreenLock = isForPrimaryScreenLock;
+        mLockDomain = lockDomain;
     }
 
     @Override
     public boolean isAvailable() {
-        if (!mLockPatternUtils.isSecure(mUserId) || !mIsForPrimaryScreenLock) {
+        if (!mLockPatternUtils.isSecure(mUserId) || mLockDomain == Secondary) {
             return false;
         }
         switch (mLockPatternUtils.getKeyguardStoredPasswordQuality(mUserId)) {
