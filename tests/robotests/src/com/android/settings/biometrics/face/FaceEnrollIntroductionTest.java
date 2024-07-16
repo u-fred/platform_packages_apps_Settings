@@ -214,7 +214,7 @@ public class FaceEnrollIntroductionTest {
         when(mContext.getApplicationContext()).thenReturn(mContext);
         when(mContext.getSystemService(Context.FACE_SERVICE)).thenReturn(mFaceManager);
         when(mContext.getSystemService(Context.USER_SERVICE)).thenReturn(mUserManager);
-        when(mLockPatternUtils.getActivePasswordQuality(Mockito.anyInt(), eq(true))).thenReturn(
+        when(mLockPatternUtils.getActivePasswordQuality(Mockito.anyInt())).thenReturn(
                 PASSWORD_QUALITY_NUMERIC);
 
         mController.create();
@@ -239,7 +239,7 @@ public class FaceEnrollIntroductionTest {
         when(mSpyActivity.getPostureGuidanceIntent()).thenReturn(testIntent);
         when(mContext.getSystemService(Context.FACE_SERVICE)).thenReturn(mFaceManager);
         when(mContext.getSystemService(Context.USER_SERVICE)).thenReturn(mUserManager);
-        when(mLockPatternUtils.getActivePasswordQuality(Mockito.anyInt(), eq(true))).thenReturn(
+        when(mLockPatternUtils.getActivePasswordQuality(Mockito.anyInt())).thenReturn(
                 PASSWORD_QUALITY_NUMERIC);
 
         mController.create();
