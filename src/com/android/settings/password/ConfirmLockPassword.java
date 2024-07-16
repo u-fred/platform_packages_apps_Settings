@@ -421,7 +421,7 @@ public class ConfirmLockPassword extends ConfirmDeviceCredentialBaseActivity {
         public void onResume() {
             super.onResume();
             long deadline = mLockPatternUtils.getLockoutAttemptDeadline(mEffectiveUserId,
-                    mPrimaryCredential);
+                    mPrimaryCredential ? Primary : Secondary);
             if (deadline != 0) {
                 mCredentialCheckResultTracker.clearResult();
                 handleAttemptLockout(deadline);
@@ -446,7 +446,7 @@ public class ConfirmLockPassword extends ConfirmDeviceCredentialBaseActivity {
         private void updatePasswordEntry() {
             final boolean isLockedOut =
                     mLockPatternUtils.getLockoutAttemptDeadline(mEffectiveUserId,
-                            mPrimaryCredential) != 0;
+                            mPrimaryCredential ? Primary : Secondary) != 0;
             final boolean isRemoteLockscreenValidationInProgress =
                     mRemoteLockscreenValidationFragment != null
                     && mRemoteLockscreenValidationFragment.isRemoteValidationInProgress();
