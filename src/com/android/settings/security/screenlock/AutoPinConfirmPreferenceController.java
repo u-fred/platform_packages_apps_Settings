@@ -101,7 +101,7 @@ public class AutoPinConfirmPreferenceController extends AbstractPreferenceContro
     }
 
     private void setPinAutoConfirmSettingState(boolean state) {
-        mLockPatternUtils.setAutoPinConfirm(state, mUserId, mIsForPrimaryScreenLock);
+        mLockPatternUtils.setAutoPinConfirm(state, mUserId, mIsForPrimaryScreenLock ? Primary : Secondary);
     }
 
     private void launchPinConfirmActivity(boolean newState) {
