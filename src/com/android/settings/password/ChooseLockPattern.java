@@ -19,6 +19,7 @@ package com.android.settings.password;
 import static android.app.admin.DevicePolicyResources.Strings.Settings.SET_WORK_PROFILE_PATTERN_HEADER;
 import static android.view.View.ACCESSIBILITY_LIVE_REGION_POLITE;
 
+import static com.android.internal.widget.LockDomain.Primary;
 import static com.android.settings.password.ChooseLockSettingsHelper.EXTRA_KEY_UNIFICATION_PROFILE_CREDENTIAL;
 import static com.android.settings.password.ChooseLockSettingsHelper.EXTRA_KEY_UNIFICATION_PROFILE_ID;
 
@@ -52,6 +53,7 @@ import com.android.internal.widget.LockPatternView;
 import com.android.internal.widget.LockPatternView.Cell;
 import com.android.internal.widget.LockPatternView.DisplayMode;
 import com.android.internal.widget.LockscreenCredential;
+import com.android.internal.widget.WrappedLockPatternUtils;
 import com.android.settings.R;
 import com.android.settings.SettingsActivity;
 import com.android.settings.SetupWizardUtils;
@@ -433,7 +435,7 @@ public class ChooseLockPattern extends SettingsActivity {
             }
         };
 
-        private LockPatternUtils mLockPatternUtils;
+        private WrappedLockPatternUtils mLockPatternUtils;
         private SaveAndFinishWorker mSaveAndFinishWorker;
         protected int mUserId;
         protected boolean mIsManagedProfile;
@@ -457,7 +459,7 @@ public class ChooseLockPattern extends SettingsActivity {
             mUserId = Utils.getUserIdFromBundle(getActivity(), intent.getExtras());
             mIsManagedProfile = UserManager.get(getActivity()).isManagedProfile(mUserId);
 
-            mLockPatternUtils = new LockPatternUtils(getActivity());
+            mLockPatternUtils = new WrappedLockPatternUtils(getActivity(), Primary);
 
             mForFingerprint = intent.getBooleanExtra(
                     ChooseLockSettingsHelper.EXTRA_KEY_FOR_FINGERPRINT, false);
@@ -857,7 +859,7 @@ public class ChooseLockPattern extends SettingsActivity {
                 }
             }
             mSaveAndFinishWorker.start(mLockPatternUtils,
-                    mChosenPattern, mCurrentCredential, true, mUserId);
+                    mChosenPattern, mCurrentCredential, mUserId);
         }
 
         @Override
