@@ -28,6 +28,7 @@ import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_NUMERIC_COM
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_SOMETHING;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
 
+import static com.android.internal.widget.LockDomain.Secondary;
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_NONE;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
@@ -45,7 +46,7 @@ import android.app.admin.PasswordMetrics;
 import android.app.admin.PasswordPolicy;
 import android.os.UserHandle;
 
-import com.android.internal.widget.LockPatternUtils;
+import com.android.internal.widget.WrappedLockPatternUtils;
 import com.android.settings.R;
 import com.android.settings.testutils.shadow.SettingsShadowResources;
 import com.android.settings.testutils.shadow.ShadowUserManager;
@@ -75,7 +76,7 @@ public class ChooseLockGenericControllerTest {
     private ManagedLockPasswordProvider mManagedLockPasswordProvider;
 
     @Mock
-    private LockPatternUtils mLockPatternUtils;
+    private WrappedLockPatternUtils mLockPatternUtils;
 
     @Before
     public void setUp() {
@@ -450,7 +451,7 @@ public class ChooseLockGenericControllerTest {
     public void constructor_SecondaryWithUnifiedProfile_ThrowsException() {
         ChooseLockGenericController.Builder builder = new ChooseLockGenericController.Builder(
                 application, 0, null, mLockPatternUtils);
-        builder.setPrimaryScreenLock(false);
+        builder.setLockDomain(Secondary);
         builder.setProfileToUnify(1);
 
         assertThrows(IllegalArgumentException.class, builder::build);
@@ -460,7 +461,7 @@ public class ChooseLockGenericControllerTest {
     public void constructor_SecondaryWithManagedPasswordProvider_ThrowsException() {
         ChooseLockGenericController.Builder builder = new ChooseLockGenericController.Builder(
                 application, 0, mManagedLockPasswordProvider, mLockPatternUtils);
-        builder.setPrimaryScreenLock(false);
+        builder.setLockDomain(Secondary);
 
         assertThrows(IllegalArgumentException.class, builder::build);
     }
@@ -485,6 +486,6 @@ public class ChooseLockGenericControllerTest {
                 0 /* userId */,
                 managedLockPasswordProvider,
                 mLockPatternUtils)
-                .setPrimaryScreenLock(primary);
+                .setLockDomain(Secondary);
     }
 }
