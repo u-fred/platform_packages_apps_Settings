@@ -616,7 +616,7 @@ public class ConfirmLockPassword extends ConfirmDeviceCredentialBaseActivity {
                 if (timeoutMs > 0) {
                     refreshLockScreen();
                     long deadline = mLockPatternUtils.setLockoutAttemptDeadline(
-                            effectiveUserId, mPrimaryCredential, timeoutMs);
+                            effectiveUserId, mPrimaryCredential ? Primary : Secondary, timeoutMs);
                     handleAttemptLockout(deadline);
                 } else {
                     showError(getErrorMessage(), CLEAR_WRONG_ATTEMPT_TIMEOUT_MS);
