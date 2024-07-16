@@ -27,6 +27,8 @@ import static android.app.admin.DevicePolicyResources.Strings.Settings.SET_WORK_
 import static android.app.admin.DevicePolicyResources.UNDEFINED;
 import static android.view.View.ACCESSIBILITY_LIVE_REGION_POLITE;
 
+import static com.android.internal.widget.LockDomain.Primary;
+import static com.android.internal.widget.LockDomain.Secondary;
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_NONE;
 import static com.android.internal.widget.PasswordValidationError.CONTAINS_INVALID_CHARACTERS;
 import static com.android.internal.widget.PasswordValidationError.CONTAINS_SEQUENCE;
@@ -792,7 +794,7 @@ public class ChooseLockPassword extends SettingsActivity {
             mValidationErrors = PasswordMetrics.validateCredential(mMinMetrics, mMinComplexity,
                     credential);
             if (mValidationErrors.isEmpty() && mLockPatternUtils.checkPasswordHistory(
-                        credential.getCredential(), getPasswordHistoryHashFactor(), mUserId, primary)) {
+                        credential.getCredential(), getPasswordHistoryHashFactor(), mUserId, primary ? Primary : Secondary)) {
                 mValidationErrors =
                         Collections.singletonList(new PasswordValidationError(RECENTLY_USED));
             }
