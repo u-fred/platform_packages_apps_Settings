@@ -85,7 +85,7 @@ public class ConfirmDeviceCredentialUtils {
                 }
             }
         } else {
-            dpm.reportSuccessfulBiometricAttempt(userId, utils.isBiometricSecondFactorEnabled(userId));
+            dpm.reportSuccessfulBiometricAttempt(userId);
         }
         if (primary && !isBiometricUnlockEnabledForPrivateSpace()) {
             if (userManager.isManagedProfile(userId)) {
