@@ -222,10 +222,10 @@ public class ScreenLockSettings extends DashboardFragment
 
     private void onAutoPinConfirmSettingChange(boolean newState) {
         // update the auto pin confirm setting.
-        mLockPatternUtils.setAutoPinConfirm(newState, MY_USER_ID, mIsForPrimaryScreenLock);
+        mLockPatternUtils.setAutoPinConfirm(newState, MY_USER_ID, mIsForPrimaryScreenLock ? Primary : Secondary);
         // store the pin length info to disk; If it fails, reset the setting to prev state.
-            mLockPatternUtils.setAutoPinConfirm(!newState, MY_USER_ID, mIsForPrimaryScreenLock);
         if (!mLockPatternUtils.refreshStoredPinLength(MY_USER_ID, mIsForPrimaryScreenLock ? Primary : Secondary)) {
+            mLockPatternUtils.setAutoPinConfirm(!newState, MY_USER_ID, mIsForPrimaryScreenLock ? Primary : Secondary);
         }
     }
 }
