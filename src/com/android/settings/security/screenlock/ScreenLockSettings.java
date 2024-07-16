@@ -18,6 +18,8 @@ package com.android.settings.security.screenlock;
 
 import static android.app.Activity.RESULT_FIRST_USER;
 import static android.app.Activity.RESULT_OK;
+import static com.android.internal.widget.LockDomain.Primary;
+import static com.android.internal.widget.LockDomain.Secondary;
 import static com.android.settings.security.screenlock.AutoPinConfirmPreferenceController.AutoPinConfirmSettingChangeCallback;
 import static com.android.settings.security.screenlock.AutoPinConfirmPreferenceController.PREF_KEY_PIN_AUTO_CONFIRM;
 
@@ -91,7 +93,7 @@ public class ScreenLockSettings extends DashboardFragment
 
                 // If the second factor LockscreenCredential is not contained within
                 // LSS.mUserBiometricSecondFactorMetrics then
-                if (!mLockPatternUtils.refreshStoredPinLength(MY_USER_ID, false)) {
+                if (!mLockPatternUtils.refreshStoredPinLength(MY_USER_ID, Secondary)) {
                     mLaunchedConfirm = true;
                     confirmBiometricSecondFactor();
                 }
@@ -222,8 +224,8 @@ public class ScreenLockSettings extends DashboardFragment
         // update the auto pin confirm setting.
         mLockPatternUtils.setAutoPinConfirm(newState, MY_USER_ID, mIsForPrimaryScreenLock);
         // store the pin length info to disk; If it fails, reset the setting to prev state.
-        if (!mLockPatternUtils.refreshStoredPinLength(MY_USER_ID, mIsForPrimaryScreenLock)) {
             mLockPatternUtils.setAutoPinConfirm(!newState, MY_USER_ID, mIsForPrimaryScreenLock);
+        if (!mLockPatternUtils.refreshStoredPinLength(MY_USER_ID, mIsForPrimaryScreenLock ? Primary : Secondary)) {
         }
     }
 }
