@@ -90,6 +90,7 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockscreenCredential;
 import com.android.internal.widget.PasswordValidationError;
 import com.android.internal.widget.TextViewInputDisabler;
+import com.android.internal.widget.WrappedLockPatternUtils;
 import com.android.settings.R;
 import com.android.settings.SettingsActivity;
 import com.android.settings.SetupWizardUtils;
@@ -258,7 +259,7 @@ public class ChooseLockPassword extends SettingsActivity {
         private byte[] mPasswordHistoryHashFactor;
         private int mUnificationProfileId = UserHandle.USER_NULL;
 
-        private LockPatternUtils mLockPatternUtils;
+        private WrappedLockPatternUtils mLockPatternUtils;
         private SaveAndFinishWorker mSaveAndFinishWorker;
         private int mPasswordType = DevicePolicyManager.PASSWORD_QUALITY_NUMERIC;
         protected Stage mUiStage = Stage.Introduction;
@@ -486,11 +487,18 @@ public class ChooseLockPassword extends SettingsActivity {
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
-            mLockPatternUtils = new LockPatternUtils(getActivity());
             Intent intent = getActivity().getIntent();
             if (!(getActivity() instanceof ChooseLockPassword)) {
                 throw new SecurityException("Fragment contained in wrong activity");
             }
+
+            // TODO: Convert to EXTRA_KEY_LOCK_DOMAIN.
+            // TODO: Remove mPrimaryCredential and add WLPU#getLockDomain.
+            mPrimaryCredential = intent.getBooleanExtra(
+                    ChooseLockSettingsHelper.EXTRA_KEY_PRIMARY_CREDENTIAL, true);
+            mLockPatternUtils = new WrappedLockPatternUtils(getActivity(),
+                    mPrimaryCredential ? Primary : Secondary);
+
             // Only take this argument into account if it belongs to the current profile.
             mUserId = Utils.getUserIdFromBundle(getActivity(), intent.getExtras());
             mProfileType = getProfileType();
@@ -510,9 +518,6 @@ public class ChooseLockPassword extends SettingsActivity {
             if (mMinMetrics == null) mMinMetrics = new PasswordMetrics(CREDENTIAL_TYPE_NONE);
 
             mTextChangedHandler = new TextChangedHandler();
-
-            mPrimaryCredential = intent.getBooleanExtra(
-                    ChooseLockSettingsHelper.EXTRA_KEY_PRIMARY_CREDENTIAL, true);
         }
 
         @Override
@@ -794,7 +799,7 @@ public class ChooseLockPassword extends SettingsActivity {
             mValidationErrors = PasswordMetrics.validateCredential(mMinMetrics, mMinComplexity,
                     credential);
             if (mValidationErrors.isEmpty() && mLockPatternUtils.checkPasswordHistory(
-                        credential.getCredential(), getPasswordHistoryHashFactor(), mUserId, primary ? Primary : Secondary)) {
+                        credential.getCredential(), getPasswordHistoryHashFactor(), mUserId)) {
                 mValidationErrors =
                         Collections.singletonList(new PasswordValidationError(RECENTLY_USED));
             }
@@ -1128,10 +1133,10 @@ public class ChooseLockPassword extends SettingsActivity {
             // so that pinLength information is stored accordingly when setting is turned on.
             mLockPatternUtils.setAutoPinConfirm(
                     (mAutoPinConfirmOption != null && mAutoPinConfirmOption.isChecked()),
-                    mUserId, mPrimaryCredential ? Primary : Secondary);
+                    mUserId);
 
             mSaveAndFinishWorker.start(mLockPatternUtils,
-                    mChosenPassword, mCurrentCredential, mPrimaryCredential, mUserId);
+                    mChosenPassword, mCurrentCredential, mUserId);
         }
 
         @Override
