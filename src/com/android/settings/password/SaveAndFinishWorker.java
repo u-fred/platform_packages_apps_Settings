@@ -33,6 +33,7 @@ import androidx.fragment.app.Fragment;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockscreenCredential;
 import com.android.internal.widget.VerifyCredentialResponse;
+import com.android.internal.widget.WrappedLockPatternUtils;
 import com.android.settings.R;
 import com.android.settings.safetycenter.LockScreenSafetySource;
 
@@ -47,7 +48,7 @@ public class SaveAndFinishWorker extends Fragment {
     private boolean mFinished;
     private Intent mResultData;
 
-    private LockPatternUtils mUtils;
+    private WrappedLockPatternUtils mUtils;
     private boolean mRequestGatekeeperPassword;
     private boolean mRequestWriteRepairModePassword;
     private boolean mWasSecureBefore;
@@ -56,7 +57,6 @@ public class SaveAndFinishWorker extends Fragment {
     private LockscreenCredential mUnificationProfileCredential;
     private LockscreenCredential mChosenCredential;
     private LockscreenCredential mCurrentCredential;
-    private boolean mIsPrimaryCredential = true;
 
     private boolean mBlocking;
 
@@ -79,8 +79,8 @@ public class SaveAndFinishWorker extends Fragment {
     }
 
     @VisibleForTesting
-    void prepare(LockPatternUtils utils, LockscreenCredential chosenCredential,
-            LockscreenCredential currentCredential, boolean primary, int userId) {
+    void prepare(WrappedLockPatternUtils utils, LockscreenCredential chosenCredential,
+            LockscreenCredential currentCredential, int userId) {
         mUtils = utils;
         mUserId = userId;
         // This will be a no-op for non managed profiles.
@@ -91,13 +91,11 @@ public class SaveAndFinishWorker extends Fragment {
         mChosenCredential = chosenCredential;
         mCurrentCredential = currentCredential != null ? currentCredential
                 : LockscreenCredential.createNone();
-
-        mIsPrimaryCredential = primary;
     }
 
-    public void start(LockPatternUtils utils, LockscreenCredential chosenCredential,
-            LockscreenCredential currentCredential, boolean primary, int userId) {
-        prepare(utils, chosenCredential, currentCredential, primary, userId);
+    public void start(WrappedLockPatternUtils utils, LockscreenCredential chosenCredential,
+            LockscreenCredential currentCredential, int userId) {
+        prepare(utils, chosenCredential, currentCredential, userId);
         if (mBlocking) {
             finish(saveAndVerifyInBackground().second);
         } else {
@@ -114,8 +112,7 @@ public class SaveAndFinishWorker extends Fragment {
     Pair<Boolean, Intent> saveAndVerifyInBackground() {
         final int userId = mUserId;
         try {
-            if (!mUtils.setLockCredential(mChosenCredential, mCurrentCredential,
-                    mIsPrimaryCredential ? Primary : Secondary, userId)) {
+            if (!mUtils.setLockCredential(mChosenCredential, mCurrentCredential, userId)) {
                 return Pair.create(false, null);
             }
         } catch (RuntimeException e) {
@@ -141,7 +138,7 @@ public class SaveAndFinishWorker extends Fragment {
 
         Intent result = new Intent();
         final VerifyCredentialResponse response = mUtils.verifyCredential(mChosenCredential,
-                mIsPrimaryCredential ? Primary : Secondary, userId, flags);
+                userId, flags);
         if (response.isMatched()) {
             if (mRequestGatekeeperPassword && response.containsGatekeeperPasswordHandle()) {
                 result.putExtra(ChooseLockSettingsHelper.EXTRA_KEY_GK_PW_HANDLE,
