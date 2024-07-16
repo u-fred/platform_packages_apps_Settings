@@ -52,6 +52,7 @@ import androidx.test.filters.MediumTest;
 import com.android.internal.widget.LockPatternChecker;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockscreenCredential;
+import com.android.internal.widget.WrappedLockPatternUtils;
 import com.android.settings.biometrics.face.FaceEnrollIntroduction;
 import com.android.settings.biometrics.fingerprint.FingerprintEnrollIntroduction;
 import com.android.settings.password.ChooseLockGeneric;
@@ -147,8 +148,8 @@ public class BiometricEnrollActivityTest {
 
         setPin();
         final Intent intent = getIntent(true /* useInternal */);
-        LockPatternChecker.verifyCredential(new LockPatternUtils(mContext),
-                LockscreenCredential.createPin(TEST_PIN), Primary, UserHandle.myUserId(),
+        LockPatternChecker.verifyCredential(new WrappedLockPatternUtils(mContext, Primary),
+                LockscreenCredential.createPin(TEST_PIN), UserHandle.myUserId(),
                 LockPatternUtils.VERIFY_FLAG_REQUEST_GK_PW_HANDLE, (response, timeoutMs) -> {
                     assertThat(response.containsGatekeeperPasswordHandle()).isTrue();
                     intent.putExtra(ChooseLockSettingsHelper.EXTRA_KEY_GK_PW_HANDLE,
