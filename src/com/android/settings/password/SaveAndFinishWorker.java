@@ -16,6 +16,9 @@
 
 package com.android.settings.password;
 
+import static com.android.internal.widget.LockDomain.Primary;
+import static com.android.internal.widget.LockDomain.Secondary;
+
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
