@@ -16,6 +16,9 @@
 
 package com.android.settings.security.screenlock;
 
+import static com.android.internal.widget.LockDomain.Primary;
+import static com.android.internal.widget.LockDomain.Secondary;
+
 import android.content.Context;
 
 import androidx.preference.Preference;
@@ -60,7 +63,7 @@ public class PatternVisiblePreferenceController extends AbstractPreferenceContro
 
     private boolean isPatternLock() {
         // TODO: Make sure user supports second factor if secondary.
-        return mLockPatternUtils.getCredentialTypeForUser(mUserId, mIsForPrimaryScreenLock)
+        return mLockPatternUtils.getCredentialTypeForUser(mUserId, mIsForPrimaryScreenLock ? Primary : Secondary)
                 == LockPatternUtils.CREDENTIAL_TYPE_PATTERN;
     }
 

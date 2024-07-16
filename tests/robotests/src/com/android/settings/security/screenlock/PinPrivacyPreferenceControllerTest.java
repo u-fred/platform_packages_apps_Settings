@@ -16,6 +16,8 @@
 
 package com.android.settings.security.screenlock;
 
+import static com.android.internal.widget.LockDomain.Primary;
+import static com.android.internal.widget.LockDomain.Secondary;
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PASSWORD_OR_PIN;
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PATTERN;
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PIN;
@@ -72,7 +74,7 @@ public class PinPrivacyPreferenceControllerTest {
 
     @Test
     public void isAvailable_lockSetToPin_shouldReturnTrue() {
-        when(mLockPatternUtils.getCredentialTypeForUser(TEST_USER_ID, mPrimary)).thenReturn(
+        when(mLockPatternUtils.getCredentialTypeForUser(TEST_USER_ID, mPrimary ? Primary : Secondary)).thenReturn(
                 CREDENTIAL_TYPE_PIN);
         assertThat(mController.isAvailable()).isTrue();
     }
@@ -80,14 +82,14 @@ public class PinPrivacyPreferenceControllerTest {
     @Ignore("b/313612259")
     @Test
     public void isAvailable_lockSetToPinOrPw_shouldReturnTrue() {
-        when(mLockPatternUtils.getCredentialTypeForUser(TEST_USER_ID, mPrimary)).thenReturn(
+        when(mLockPatternUtils.getCredentialTypeForUser(TEST_USER_ID, mPrimary ? Primary : Secondary)).thenReturn(
                 CREDENTIAL_TYPE_PASSWORD_OR_PIN);
         assertThat(mController.isAvailable()).isTrue();
     }
 
     @Test
     public void isAvailable_lockSetToOther_shouldReturnFalse() {
-        when(mLockPatternUtils.getCredentialTypeForUser(TEST_USER_ID, mPrimary)).thenReturn(
+        when(mLockPatternUtils.getCredentialTypeForUser(TEST_USER_ID, mPrimary ? Primary : Secondary)).thenReturn(
                 CREDENTIAL_TYPE_PATTERN);
         assertThat(mController.isAvailable()).isFalse();
     }

@@ -86,7 +86,7 @@ public class UseOneLockControllerTest {
         doReturn(true)
                 .when(mLockPatternUtils).isSeparateProfileChallengeEnabled(anyInt());
         doReturn(CREDENTIAL_TYPE_PATTERN)
-                .when(mLockPatternUtils).getCredentialTypeForUser(anyInt(), true);
+                .when(mLockPatternUtils).getCredentialTypeForUser(anyInt());
         mSetFlagsRule.enableFlags(Flags.FLAG_ALLOW_PRIVATE_PROFILE);
 
         mUseOneLockController.updateState(mPreference);
@@ -98,8 +98,7 @@ public class UseOneLockControllerTest {
     public void getSummary_whenProfileLockPin() {
         doReturn(true)
                 .when(mLockPatternUtils).isSeparateProfileChallengeEnabled(anyInt());
-        doReturn(CREDENTIAL_TYPE_PIN).when(mLockPatternUtils).getCredentialTypeForUser(anyInt(),
-                true);
+        doReturn(CREDENTIAL_TYPE_PIN).when(mLockPatternUtils).getCredentialTypeForUser(anyInt());
         mSetFlagsRule.enableFlags(Flags.FLAG_ALLOW_PRIVATE_PROFILE);
 
         mUseOneLockController.updateState(mPreference);
@@ -112,7 +111,7 @@ public class UseOneLockControllerTest {
         doReturn(true)
                 .when(mLockPatternUtils).isSeparateProfileChallengeEnabled(anyInt());
         doReturn(CREDENTIAL_TYPE_PASSWORD)
-                .when(mLockPatternUtils).getCredentialTypeForUser(anyInt(), true);
+                .when(mLockPatternUtils).getCredentialTypeForUser(anyInt());
         mSetFlagsRule.enableFlags(Flags.FLAG_ALLOW_PRIVATE_PROFILE);
 
         mUseOneLockController.updateState(mPreference);
