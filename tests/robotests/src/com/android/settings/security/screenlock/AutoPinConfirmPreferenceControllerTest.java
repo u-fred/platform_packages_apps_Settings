@@ -87,7 +87,7 @@ public class AutoPinConfirmPreferenceControllerTest {
     public void isAvailable_featureEnabledAndLockSetToPIN_lengthLessThanSix_shouldReturnFalse() {
         when(mLockPatternUtils.getCredentialTypeForUser(TEST_USER_ID, mPrimary ? Primary : Secondary))
                 .thenReturn(LockPatternUtils.CREDENTIAL_TYPE_PIN);
-        when(mLockPatternUtils.getPinLength(TEST_USER_ID, mPrimary)).thenReturn(5);
+        when(mLockPatternUtils.getPinLength(TEST_USER_ID, mPrimary ? Primary : Secondary)).thenReturn(5);
 
         assertThat(mController.isAvailable()).isFalse();
     }
@@ -97,7 +97,7 @@ public class AutoPinConfirmPreferenceControllerTest {
         when(mLockPatternUtils.isSecure(TEST_USER_ID, mPrimary)).thenReturn(true);
         when(mLockPatternUtils.getCredentialTypeForUser(TEST_USER_ID, mPrimary ? Primary : Secondary))
                 .thenReturn(LockPatternUtils.CREDENTIAL_TYPE_PIN);
-        when(mLockPatternUtils.getPinLength(TEST_USER_ID, mPrimary)).thenReturn(6);
+        when(mLockPatternUtils.getPinLength(TEST_USER_ID, mPrimary ? Primary : Secondary)).thenReturn(6);
 
         assertThat(mController.isAvailable()).isTrue();
     }

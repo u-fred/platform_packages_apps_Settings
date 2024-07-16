@@ -92,7 +92,7 @@ public class AutoPinConfirmPreferenceController extends AbstractPreferenceContro
     }
 
     private boolean isPinLengthEligibleForAutoConfirmation() {
-        return mLockPatternUtils.getPinLength(mUserId, mIsForPrimaryScreenLock) >=
+        return mLockPatternUtils.getPinLength(mUserId, mIsForPrimaryScreenLock ? Primary : Secondary) >=
                 MIN_AUTO_PIN_REQUIREMENT_LENGTH;
     }
 
