@@ -179,7 +179,7 @@ public class ScreenLockSettings extends DashboardFragment
         controllers.add(new LockAfterTimeoutPreferenceController(
                 context, MY_USER_ID, lockPatternUtils, isForPrimaryScreenLock));
         controllers.add(new AutoPinConfirmPreferenceController(
-                context, MY_USER_ID, lockPatternUtils, parent, isForPrimaryScreenLock, callback));
+                context, MY_USER_ID, lockPatternUtils, parent, isForPrimaryScreenLock ? Primary : Secondary, callback));
         controllers.add(new OwnerInfoPreferenceController(context, parent, isForPrimaryScreenLock));
         return controllers;
     }

@@ -28,6 +28,7 @@ import androidx.preference.SwitchPreference;
 import androidx.test.core.app.ApplicationProvider;
 
 import com.android.internal.widget.LockPatternUtils;
+import com.android.internal.widget.WrappedLockPatternUtils;
 import com.android.settingslib.core.lifecycle.ObservablePreferenceFragment;
 
 import org.junit.Before;
@@ -51,7 +52,7 @@ public class AutoPinConfirmPreferenceControllerTest {
     }
     private static final Integer TEST_USER_ID = 1;
     @Mock
-    private LockPatternUtils mLockPatternUtils;
+    private WrappedLockPatternUtils mLockPatternUtils;
     @Mock
     private ObservablePreferenceFragment mParentFragment;
     private AutoPinConfirmPreferenceController mController;
