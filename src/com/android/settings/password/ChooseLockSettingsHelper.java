@@ -416,7 +416,7 @@ public final class ChooseLockSettingsHelper {
             }
 
             LockPatternUtils lpu = new LockPatternUtils(mActivity.getApplicationContext());
-            lpu.checkUserSupportsBiometricSecondFactorIfSecondary(mUserId, mPrimaryCredential);
+            lpu.checkUserSupportsBiometricSecondFactorIfSecondary(mUserId, mPrimaryCredential ? Primary : Secondary);
             // TODO: This will fall out of sync as time goes on. We would prefer an inclusion list.
             //  Could only include certain fields for secondary in #launchConfirmationActivity, but
             //  then it's all getting a bit messy. Likelihood and impact of issue is low, so I
