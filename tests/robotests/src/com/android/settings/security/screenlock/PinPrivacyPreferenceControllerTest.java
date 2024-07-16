@@ -112,7 +112,7 @@ public class PinPrivacyPreferenceControllerTest {
     @Test
     public void onPreferenceChange_shouldUpdateLockPatternUtils() {
         mController.onPreferenceChange(mPreference, true);
-        verify(mLockPatternUtils).setPinEnhancedPrivacyEnabled(true, TEST_USER_ID, mPrimary);
+        verify(mLockPatternUtils).setPinEnhancedPrivacyEnabled(true, TEST_USER_ID, mPrimary ? Primary : Secondary);
     }
 
     @Test

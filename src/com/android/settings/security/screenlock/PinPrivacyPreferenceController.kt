@@ -52,7 +52,7 @@ class PinPrivacyPreferenceController(
 
     override fun onPreferenceChange(preference: Preference, value: Any): Boolean {
         lockPatternUtils.setPinEnhancedPrivacyEnabled((value as Boolean), userId,
-                isForPrimaryScreenLock)
+            if(isForPrimaryScreenLock) Primary else Secondary)
         return true
     }
 
