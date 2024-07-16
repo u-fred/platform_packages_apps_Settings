@@ -96,14 +96,14 @@ public class PinPrivacyPreferenceControllerTest {
 
     @Test
     public void updateState_shouldSetPref() {
-        when(mLockPatternUtils.isPinEnhancedPrivacyEnabled(TEST_USER_ID, mPrimary)).thenReturn(true);
+        when(mLockPatternUtils.isPinEnhancedPrivacyEnabled(TEST_USER_ID, mPrimary ? Primary : Secondary)).thenReturn(true);
         mController.updateState(mPreference);
         assertThat(mPreference.isChecked()).isTrue();
     }
 
     @Test
     public void updateState_shouldSetPref_false() {
-        when(mLockPatternUtils.isPinEnhancedPrivacyEnabled(TEST_USER_ID, mPrimary)).thenReturn(
+        when(mLockPatternUtils.isPinEnhancedPrivacyEnabled(TEST_USER_ID, mPrimary ? Primary : Secondary)).thenReturn(
                 false);
         mController.updateState(mPreference);
         assertThat(mPreference.isChecked()).isFalse();

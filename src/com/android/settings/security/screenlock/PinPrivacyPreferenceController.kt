@@ -61,6 +61,6 @@ class PinPrivacyPreferenceController(
     }
 
     private fun getCurrentPreferenceState(): Boolean {
-        return lockPatternUtils.isPinEnhancedPrivacyEnabled(userId,  isForPrimaryScreenLock)
+        return lockPatternUtils.isPinEnhancedPrivacyEnabled(userId,  if(isForPrimaryScreenLock) Primary else Secondary)
     }
 }
