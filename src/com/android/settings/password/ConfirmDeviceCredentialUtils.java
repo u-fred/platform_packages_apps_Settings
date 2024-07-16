@@ -16,6 +16,9 @@
 
 package com.android.settings.password;
 
+import static com.android.internal.widget.LockDomain.Primary;
+import static com.android.internal.widget.LockDomain.Secondary;
+
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
@@ -69,7 +72,7 @@ public class ConfirmDeviceCredentialUtils {
     public static void reportSuccessfulAttempt(LockPatternUtils utils, UserManager userManager,
             DevicePolicyManager dpm, int userId, boolean primary, boolean isStrongAuth) {
         if (isStrongAuth) {
-            utils.reportSuccessfulPasswordAttempt(userId, primary, false);
+            utils.reportSuccessfulPasswordAttempt(userId, primary ? Primary : Secondary, false);
             if (primary && isBiometricUnlockEnabledForPrivateSpace()) {
                 final UserInfo userInfo = userManager.getUserInfo(userId);
                 if (userInfo != null) {
