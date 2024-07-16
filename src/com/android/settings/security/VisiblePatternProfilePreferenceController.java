@@ -82,7 +82,7 @@ public class VisiblePatternProfilePreferenceController extends TogglePreferenceC
                 () -> {
                     final boolean isSecure = mLockPatternUtils.isSecure(mProfileChallengeUserId);
                     final boolean hasPassword = mLockPatternUtils
-                            .getKeyguardStoredPasswordQuality(mProfileChallengeUserId, true)
+                            .getKeyguardStoredPasswordQuality(mProfileChallengeUserId)
                             == PASSWORD_QUALITY_SOMETHING;
                     if (isSecure && hasPassword) {
                         return AVAILABLE;

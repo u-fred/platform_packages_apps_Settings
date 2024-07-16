@@ -787,7 +787,7 @@ public class ChooseLockGeneric extends SettingsActivity {
             ScreenLockType lock =
                     ScreenLockType.fromQuality(
                             mLockPatternUtils.getKeyguardStoredPasswordQuality(credentialOwner,
-                                    mPrimaryCredential));
+                                    mPrimaryCredential ? Primary : Secondary));
             return lock != null ? lock.preferenceKey : null;
         }
 
@@ -996,7 +996,7 @@ public class ChooseLockGeneric extends SettingsActivity {
             }
 
             switch (mLockPatternUtils.getKeyguardStoredPasswordQuality(mUserId,
-                    mPrimaryCredential)) {
+                    mPrimaryCredential ? Primary : Secondary)) {
                 case DevicePolicyManager.PASSWORD_QUALITY_SOMETHING:
                     if (hasFingerprints && hasFace) {
                         return R.string.unlock_disable_frp_warning_content_pattern_face_fingerprint;
