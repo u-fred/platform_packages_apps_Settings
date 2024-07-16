@@ -36,6 +36,7 @@ import android.view.WindowInsetsController;
 
 import androidx.annotation.NonNull;
 
+import com.android.internal.widget.LockDomain;
 import com.android.internal.widget.LockPatternUtils;
 
 /** Class containing methods shared between CDCA and CDCBA */
@@ -70,10 +71,10 @@ public class ConfirmDeviceCredentialUtils {
     }
 
     public static void reportSuccessfulAttempt(LockPatternUtils utils, UserManager userManager,
-            DevicePolicyManager dpm, int userId, boolean primary, boolean isStrongAuth) {
+            DevicePolicyManager dpm, int userId, LockDomain lockDomain, boolean isStrongAuth) {
         if (isStrongAuth) {
-            utils.reportSuccessfulPasswordAttempt(userId, primary ? Primary : Secondary, false);
-            if (primary && isBiometricUnlockEnabledForPrivateSpace()) {
+            utils.reportSuccessfulPasswordAttempt(userId, lockDomain, false);
+            if (lockDomain == Primary && isBiometricUnlockEnabledForPrivateSpace()) {
                 final UserInfo userInfo = userManager.getUserInfo(userId);
                 if (userInfo != null) {
                     if (isProfileThatAlwaysRequiresAuthToDisableQuietMode(userManager, userInfo)
@@ -87,7 +88,7 @@ public class ConfirmDeviceCredentialUtils {
         } else {
             dpm.reportSuccessfulBiometricAttempt(userId);
         }
-        if (primary && !isBiometricUnlockEnabledForPrivateSpace()) {
+        if (lockDomain == Primary && !isBiometricUnlockEnabledForPrivateSpace()) {
             if (userManager.isManagedProfile(userId)) {
                 // Disable StrongAuth for work challenge only here.
                 utils.userPresent(userId);

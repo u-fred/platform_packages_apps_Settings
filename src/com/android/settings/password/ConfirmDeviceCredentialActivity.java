@@ -22,6 +22,8 @@ import static android.app.admin.DevicePolicyResources.Strings.Settings.CONFIRM_W
 import static android.app.admin.DevicePolicyResources.Strings.Settings.CONFIRM_WORK_PROFILE_PIN_HEADER;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS;
 
+import static com.android.internal.widget.LockDomain.Primary;
+
 import android.app.Activity;
 import android.app.KeyguardManager;
 import android.app.RemoteLockscreenValidationSession;
@@ -120,7 +122,7 @@ public class ConfirmDeviceCredentialActivity extends FragmentActivity {
             final boolean isStrongAuth = result.getAuthenticationType()
                     == BiometricPrompt.AUTHENTICATION_RESULT_TYPE_DEVICE_CREDENTIAL;
             ConfirmDeviceCredentialUtils.reportSuccessfulAttempt(mLockPatternUtils, mUserManager,
-                    mDevicePolicyManager, mUserId, true, isStrongAuth);
+                    mDevicePolicyManager, mUserId, Primary, isStrongAuth);
             ConfirmDeviceCredentialUtils.checkForPendingIntent(
                     ConfirmDeviceCredentialActivity.this);
 
