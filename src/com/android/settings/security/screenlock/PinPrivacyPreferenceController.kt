@@ -24,14 +24,14 @@ import com.android.internal.widget.LockDomain.Primary
 import com.android.internal.widget.LockDomain.Secondary
 import com.android.internal.widget.LockPatternUtils
 import com.android.internal.widget.LockPatternUtils.*
+import com.android.internal.widget.WrappedLockPatternUtils
 import com.android.settings.core.PreferenceControllerMixin
 import com.android.settingslib.core.AbstractPreferenceController
 
 class PinPrivacyPreferenceController(
     context: Context,
     private val userId: Int,
-    private val lockPatternUtils: LockPatternUtils,
-    private val isForPrimaryScreenLock: Boolean,
+    private val lockPatternUtils: WrappedLockPatternUtils,
 ) : AbstractPreferenceController(context), PreferenceControllerMixin,
     Preference.OnPreferenceChangeListener {
 
@@ -41,8 +41,7 @@ class PinPrivacyPreferenceController(
 
     override fun isAvailable(): Boolean {
         // TODO: Make sure user supports second factor if secondary.
-        val credentialType = lockPatternUtils.getCredentialTypeForUser(userId,
-                if(isForPrimaryScreenLock) Primary else Secondary)
+        val credentialType = lockPatternUtils.getCredentialTypeForUser(userId)
         return credentialType == CREDENTIAL_TYPE_PIN
     }
 
@@ -51,8 +50,7 @@ class PinPrivacyPreferenceController(
     }
 
     override fun onPreferenceChange(preference: Preference, value: Any): Boolean {
-        lockPatternUtils.setPinEnhancedPrivacyEnabled((value as Boolean), userId,
-            if(isForPrimaryScreenLock) Primary else Secondary)
+        lockPatternUtils.setPinEnhancedPrivacyEnabled((value as Boolean), userId)
         return true
     }
 
@@ -61,6 +59,6 @@ class PinPrivacyPreferenceController(
     }
 
     private fun getCurrentPreferenceState(): Boolean {
-        return lockPatternUtils.isPinEnhancedPrivacyEnabled(userId,  if(isForPrimaryScreenLock) Primary else Secondary)
+        return lockPatternUtils.isPinEnhancedPrivacyEnabled(userId)
     }
 }

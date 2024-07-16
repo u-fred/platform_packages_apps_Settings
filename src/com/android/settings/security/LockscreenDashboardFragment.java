@@ -19,6 +19,8 @@ package com.android.settings.security;
 import static android.app.admin.DevicePolicyResources.Strings.Settings.WORK_PROFILE_LOCKED_NOTIFICATION_TITLE;
 import static android.app.admin.DevicePolicyResources.Strings.Settings.WORK_PROFILE_NOTIFICATIONS_SECTION_HEADER;
 
+import static com.android.internal.widget.LockDomain.Primary;
+
 import android.app.settings.SettingsEnums;
 import android.content.Context;
 import android.database.ContentObserver;
@@ -148,7 +150,7 @@ public class LockscreenDashboardFragment extends DashboardFragment
         lifecycle.addObserver(notificationController);
         controllers.add(notificationController);
         mOwnerInfoPreferenceController = new OwnerInfoPreferenceController(context, this,
-                true);
+                Primary);
         controllers.add(mOwnerInfoPreferenceController);
 
         return controllers;
@@ -177,7 +179,7 @@ public class LockscreenDashboardFragment extends DashboardFragment
                     final List<AbstractPreferenceController> controllers = new ArrayList<>();
                     controllers.add(new LockScreenNotificationPreferenceController(context));
                     controllers.add(new OwnerInfoPreferenceController(
-                            context, null /* fragment */, true));
+                            context, null /* fragment */, Primary));
                     return controllers;
                 }
 

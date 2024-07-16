@@ -15,6 +15,8 @@
  */
 package com.android.settings.security;
 
+import static com.android.internal.widget.LockDomain.Primary;
+
 import android.content.Context;
 import android.os.UserHandle;
 import android.text.TextUtils;
@@ -23,6 +25,7 @@ import androidx.annotation.VisibleForTesting;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceScreen;
 
+import com.android.internal.widget.LockDomain;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.settings.core.PreferenceControllerMixin;
 import com.android.settings.users.OwnerInfoSettings;
@@ -44,7 +47,7 @@ public class OwnerInfoPreferenceController extends AbstractPreferenceController
     private final LockPatternUtils mLockPatternUtils;
     private final ObservablePreferenceFragment mParent;
     private RestrictedPreference mOwnerInfoPref;
-    private final boolean mIsForPrimaryScreenLock;
+    private final LockDomain mLockDomain;
 
     // Container fragment should implement this in order to show the correct summary
     public interface OwnerInfoCallback {
@@ -52,14 +55,14 @@ public class OwnerInfoPreferenceController extends AbstractPreferenceController
     }
 
     public OwnerInfoPreferenceController(Context context, ObservablePreferenceFragment parent,
-            boolean isForPrimaryScreenLock) {
+            LockDomain lockDomain) {
         super(context);
         mParent = parent;
         mLockPatternUtils = new LockPatternUtils(context);
         if (parent != null) {
             parent.getSettingsLifecycle().addObserver(this);
         }
-        mIsForPrimaryScreenLock = isForPrimaryScreenLock;
+        mLockDomain = lockDomain;
     }
 
     @Override
@@ -75,7 +78,7 @@ public class OwnerInfoPreferenceController extends AbstractPreferenceController
 
     @Override
     public boolean isAvailable() {
-        return mIsForPrimaryScreenLock;
+        return mLockDomain == Primary;
     }
 
     @Override

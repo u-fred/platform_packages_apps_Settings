@@ -25,6 +25,7 @@ import androidx.preference.Preference;
 import androidx.preference.TwoStatePreference;
 
 import com.android.internal.widget.LockPatternUtils;
+import com.android.internal.widget.WrappedLockPatternUtils;
 import com.android.settings.core.PreferenceControllerMixin;
 import com.android.settingslib.core.AbstractPreferenceController;
 
@@ -34,15 +35,13 @@ public class PatternVisiblePreferenceController extends AbstractPreferenceContro
     private static final String PREF_KEY = "visiblepattern";
 
     private final int mUserId;
-    private final LockPatternUtils mLockPatternUtils;
-    private final boolean mIsForPrimaryScreenLock;
+    private final WrappedLockPatternUtils mLockPatternUtils;
 
     public PatternVisiblePreferenceController(Context context, int userId,
-            LockPatternUtils lockPatternUtils, boolean isForPrimaryScreenLock) {
+            WrappedLockPatternUtils lockPatternUtils) {
         super(context);
         mUserId = userId;
         mLockPatternUtils = lockPatternUtils;
-        mIsForPrimaryScreenLock = isForPrimaryScreenLock;
     }
 
     @Override
@@ -63,7 +62,7 @@ public class PatternVisiblePreferenceController extends AbstractPreferenceContro
 
     private boolean isPatternLock() {
         // TODO: Make sure user supports second factor if secondary.
-        return mLockPatternUtils.getCredentialTypeForUser(mUserId, mIsForPrimaryScreenLock ? Primary : Secondary)
+        return mLockPatternUtils.getCredentialTypeForUser(mUserId)
                 == LockPatternUtils.CREDENTIAL_TYPE_PATTERN;
     }
 
