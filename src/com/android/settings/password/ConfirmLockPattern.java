@@ -566,7 +566,7 @@ public class ConfirmLockPattern extends ConfirmDeviceCredentialBaseActivity {
                 };
                 mPendingLockCheck = (localEffectiveUserId == localUserId)
                         ? LockPatternChecker.verifyCredential(
-                                mLockPatternUtils, pattern, Primary, localUserId, flags,
+                                mLockPatternUtils, pattern, localUserId, flags,
                                 onVerifyCallback)
                         : LockPatternChecker.verifyTiedProfileChallenge(
                                 mLockPatternUtils, pattern, localUserId, flags,
@@ -585,7 +585,6 @@ public class ConfirmLockPattern extends ConfirmDeviceCredentialBaseActivity {
                 mPendingLockCheck = LockPatternChecker.checkCredential(
                         mLockPatternUtils,
                         pattern,
-                        Primary,
                         localEffectiveUserId,
                         new LockPatternChecker.OnCheckCallback() {
                             @Override
@@ -607,9 +606,9 @@ public class ConfirmLockPattern extends ConfirmDeviceCredentialBaseActivity {
             mLockPatternView.setEnabled(true);
             if (matched) {
                 if (newResult) {
-                    ConfirmDeviceCredentialUtils.reportSuccessfulAttempt(mLockPatternUtils,
-                            mUserManager, mDevicePolicyManager, mEffectiveUserId, true,
-                            /* isStrongAuth */ true);
+                    ConfirmDeviceCredentialUtils.reportSuccessfulAttempt(
+                            mLockPatternUtils.getInner(), mUserManager, mDevicePolicyManager,
+                            mEffectiveUserId, Primary, /* isStrongAuth */ true);
                 }
                 startDisappearAnimation(intent);
                 ConfirmDeviceCredentialUtils.checkForPendingIntent(getActivity());
@@ -648,7 +647,6 @@ public class ConfirmLockPattern extends ConfirmDeviceCredentialBaseActivity {
                                 mLockPatternUtils,
                                 mRemoteLockscreenValidationFragment.getLockscreenCredential(),
                                 /* currentCredential= */ null,
-                                true,
                                 mEffectiveUserId);
                     } else {
                         mCredentialCheckResultTracker.setResult(/* matched= */ true, new Intent(),
