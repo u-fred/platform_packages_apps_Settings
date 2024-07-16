@@ -20,6 +20,8 @@ package com.android.settings.password;
 import static android.app.Activity.RESULT_FIRST_USER;
 import static android.app.admin.DevicePolicyResources.Strings.Settings.WORK_PROFILE_LOCK_ATTEMPTS_FAILED;
 
+import static com.android.internal.widget.LockDomain.Primary;
+import static com.android.internal.widget.LockDomain.Secondary;
 import static com.android.settings.Utils.SETTINGS_PACKAGE_NAME;
 
 import android.app.Dialog;
@@ -334,14 +336,14 @@ public abstract class ConfirmDeviceCredentialBaseFragment extends InstrumentedFr
     protected void reportFailedAttempt() {
         updateErrorMessage(
                 mLockPatternUtils.getCurrentFailedPasswordAttempts(mEffectiveUserId,
-                        mPrimaryCredential) + 1);
-        mLockPatternUtils.reportFailedPasswordAttempt(mEffectiveUserId, mPrimaryCredential);
+                        mPrimaryCredential ? Primary : Secondary) + 1);
+        mLockPatternUtils.reportFailedPasswordAttempt(mEffectiveUserId, mPrimaryCredential ? Primary : Secondary);
     }
 
     protected void updateErrorMessage(int numAttempts) {
         final int maxAttempts =
                 mLockPatternUtils.getMaximumFailedPasswordsForWipe(mEffectiveUserId,
-                        mPrimaryCredential);
+                        mPrimaryCredential ? Primary : Secondary);
         if (maxAttempts <= 0 || numAttempts <= 0) {
             return;
         }
