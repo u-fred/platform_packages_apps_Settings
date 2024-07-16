@@ -113,8 +113,8 @@ public class ScreenLockPreferenceDetailsUtilsTest {
     public void getSummary_unsecureAndDisabledPattern_shouldReturnUnlockModeOff() {
         final String summary = prepareString("unlock_set_unlock_mode_off", "unlockModeOff");
 
-        when(mLockPatternUtils.isLockScreenDisabled(anyInt(), eq(true))).thenReturn(true);
         when(mLockPatternUtils.isSecure(USER_ID)).thenReturn(false);
+        when(mLockPatternUtils.isLockScreenDisabled(anyInt())).thenReturn(true);
 
         assertThat(mScreenLockPreferenceDetailsUtils.getSummary(USER_ID)).isEqualTo(summary);
     }
@@ -124,8 +124,8 @@ public class ScreenLockPreferenceDetailsUtilsTest {
         final String summary =
                 prepareString("unlock_set_unlock_mode_none", "unlockModeNone");
 
-        when(mLockPatternUtils.isLockScreenDisabled(anyInt(), eq(true))).thenReturn(false);
         when(mLockPatternUtils.isSecure(USER_ID)).thenReturn(false);
+        when(mLockPatternUtils.isLockScreenDisabled(anyInt())).thenReturn(false);
 
         assertThat(mScreenLockPreferenceDetailsUtils.getSummary(USER_ID)).isEqualTo(summary);
     }

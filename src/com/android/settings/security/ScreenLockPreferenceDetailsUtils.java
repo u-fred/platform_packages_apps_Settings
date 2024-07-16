@@ -240,7 +240,7 @@ public class ScreenLockPreferenceDetailsUtils {
         // TODO: Look at base commit when updating this.
         if (!mLockPatternUtils.isSecure(userId, mIsForPrimaryScreenLock ? Primary : Secondary)) {
             if (userId == mProfileChallengeUserId
-                    || mLockPatternUtils.isLockScreenDisabled(userId, mIsForPrimaryScreenLock)) {
+                    || mLockPatternUtils.isLockScreenDisabled(userId, mIsForPrimaryScreenLock ? Primary : Secondary)) {
                 return R.string.unlock_set_unlock_mode_off;
             } else {
                 return R.string.unlock_set_unlock_mode_none;

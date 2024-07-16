@@ -781,7 +781,7 @@ public class ChooseLockGeneric extends SettingsActivity {
         private String getKeyForCurrent() {
             final int credentialOwner = UserManager.get(getContext())
                     .getCredentialOwnerProfile(mUserId);
-            if (mLockPatternUtils.isLockScreenDisabled(credentialOwner, mPrimaryCredential)) {
+            if (mLockPatternUtils.isLockScreenDisabled(credentialOwner, mPrimaryCredential ? Primary : Secondary)) {
                 return ScreenLockType.NONE.preferenceKey;
             }
             ScreenLockType lock =
