@@ -36,6 +36,7 @@ import androidx.annotation.StringRes;
 import com.android.internal.app.UnlaunchableAppActivity;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockscreenCredential;
+import com.android.internal.widget.WrappedLockPatternUtils;
 import com.android.settings.R;
 import com.android.settings.SettingsPreferenceFragment;
 import com.android.settings.Utils;
@@ -55,7 +56,7 @@ import com.android.settingslib.transition.SettingsTransitionHelper;
 public class ScreenLockPreferenceDetailsUtils {
     private final int mUserId = UserHandle.myUserId();
     private final Context mContext;
-    private final LockPatternUtils mLockPatternUtils;
+    private final WrappedLockPatternUtils mLockPatternUtils;
     private final int mProfileChallengeUserId;
     private final UserManager mUm;
     private final boolean mIsForPrimaryScreenLock;
@@ -63,11 +64,14 @@ public class ScreenLockPreferenceDetailsUtils {
     public ScreenLockPreferenceDetailsUtils(Context context, boolean isForPrimaryScreenLock) {
         mContext = context;
         mUm = context.getSystemService(UserManager.class);
-        mLockPatternUtils = FeatureFactory.getFeatureFactory()
+        mIsForPrimaryScreenLock = isForPrimaryScreenLock;
+        LockPatternUtils inner = FeatureFactory.getFeatureFactory()
                 .getSecurityFeatureProvider()
                 .getLockPatternUtils(context);
+        mLockPatternUtils = new WrappedLockPatternUtils(inner,
+                isForPrimaryScreenLock ? Primary : Secondary);
         mProfileChallengeUserId = Utils.getManagedProfileId(mUm, mUserId);
-        mIsForPrimaryScreenLock = isForPrimaryScreenLock;
+
     }
 
     /**
@@ -115,7 +119,7 @@ public class ScreenLockPreferenceDetailsUtils {
      * Returns whether the lock pattern is secure.
      */
     public boolean isLockPatternSecure() {
-        return mLockPatternUtils.isSecure(mUserId, mIsForPrimaryScreenLock ? Primary : Secondary);
+        return mLockPatternUtils.isSecure(mUserId);
     }
 
     /**
@@ -238,16 +242,16 @@ public class ScreenLockPreferenceDetailsUtils {
     @StringRes
     private Integer getSummaryResId(int userId) {
         // TODO: Look at base commit when updating this.
-        if (!mLockPatternUtils.isSecure(userId, mIsForPrimaryScreenLock ? Primary : Secondary)) {
+        if (!mLockPatternUtils.isSecure(userId)) {
             if (userId == mProfileChallengeUserId
-                    || mLockPatternUtils.isLockScreenDisabled(userId, mIsForPrimaryScreenLock ? Primary : Secondary)) {
+                    || mLockPatternUtils.isLockScreenDisabled(userId)) {
                 return R.string.unlock_set_unlock_mode_off;
             } else {
                 return R.string.unlock_set_unlock_mode_none;
             }
         } else {
             int keyguardStoredPasswordQuality =
-                    mLockPatternUtils.getKeyguardStoredPasswordQuality(userId, mIsForPrimaryScreenLock ? Primary : Secondary);
+                    mLockPatternUtils.getKeyguardStoredPasswordQuality(userId);
             switch (keyguardStoredPasswordQuality) {
                 case DevicePolicyManager.PASSWORD_QUALITY_SOMETHING:
                     return R.string.unlock_set_unlock_mode_pattern;
