@@ -101,7 +101,7 @@ public class OwnerInfoPreferenceController extends AbstractPreferenceController
             mOwnerInfoPref.setDisabledByAdmin(admin);
         } else {
             mOwnerInfoPref.setDisabledByAdmin(null);
-            mOwnerInfoPref.setEnabled(!mLockPatternUtils.isLockScreenDisabled(MY_USER_ID, true));
+            mOwnerInfoPref.setEnabled(!mLockPatternUtils.isLockScreenDisabled(MY_USER_ID));
         }
     }
 

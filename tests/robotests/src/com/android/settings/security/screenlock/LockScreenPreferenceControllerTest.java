@@ -89,7 +89,7 @@ public class LockScreenPreferenceControllerTest {
     @Test
     public void getAvailabilityStatus_notSecure_lockscreenDisabled_AVAILABLE() {
         when(mLockPatternUtils.isSecure(anyInt())).thenReturn(false);
-        when(mLockPatternUtils.isLockScreenDisabled(anyInt(), eq(true))).thenReturn(true);
+        when(mLockPatternUtils.isLockScreenDisabled(anyInt())).thenReturn(true);
 
         assertThat(mController.getAvailabilityStatus()).isEqualTo(AVAILABLE);
     }
@@ -97,7 +97,7 @@ public class LockScreenPreferenceControllerTest {
     @Test
     public void getAvailabilityStatus_notSecure_lockscreenEnabled_AVAILABLE() {
         when(mLockPatternUtils.isSecure(anyInt())).thenReturn(false);
-        when(mLockPatternUtils.isLockScreenDisabled(anyInt(), eq(true))).thenReturn(false);
+        when(mLockPatternUtils.isLockScreenDisabled(anyInt())).thenReturn(false);
 
         assertThat(mController.getAvailabilityStatus()).isEqualTo(AVAILABLE);
     }
