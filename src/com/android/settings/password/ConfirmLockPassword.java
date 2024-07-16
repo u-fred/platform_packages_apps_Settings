@@ -557,7 +557,7 @@ public class ConfirmLockPassword extends ConfirmDeviceCredentialBaseActivity {
             mPendingLockCheck = LockPatternChecker.checkCredential(
                     mLockPatternUtils,
                     credential,
-                    mPrimaryCredential,
+                    mPrimaryCredential ? Primary : Secondary,
                     localEffectiveUserId,
                     new LockPatternChecker.OnCheckCallback() {
                         @Override
