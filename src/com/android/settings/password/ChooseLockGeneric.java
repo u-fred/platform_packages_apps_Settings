@@ -908,7 +908,7 @@ public class ChooseLockGeneric extends SettingsActivity {
                     // No need to call setLockCredential if the user currently doesn't
                     // have a password
                     mLockPatternUtils.setLockCredential(
-                            LockscreenCredential.createNone(), mUserPassword, mPrimaryCredential,
+                            LockscreenCredential.createNone(), mUserPassword, mPrimaryCredential ? Primary : Secondary,
                             mUserId);
                 }
                 if (mPrimaryCredential) {

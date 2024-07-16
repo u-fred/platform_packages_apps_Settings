@@ -115,7 +115,7 @@ public class SaveAndFinishWorker extends Fragment {
         final int userId = mUserId;
         try {
             if (!mUtils.setLockCredential(mChosenCredential, mCurrentCredential,
-                    mIsPrimaryCredential, userId)) {
+                    mIsPrimaryCredential ? Primary : Secondary, userId)) {
                 return Pair.create(false, null);
             }
         } catch (RuntimeException e) {
@@ -141,7 +141,7 @@ public class SaveAndFinishWorker extends Fragment {
 
         Intent result = new Intent();
         final VerifyCredentialResponse response = mUtils.verifyCredential(mChosenCredential,
-                mIsPrimaryCredential, userId, flags);
+                mIsPrimaryCredential ? Primary : Secondary, userId, flags);
         if (response.isMatched()) {
             if (mRequestGatekeeperPassword && response.containsGatekeeperPasswordHandle()) {
                 result.putExtra(ChooseLockSettingsHelper.EXTRA_KEY_GK_PW_HANDLE,
