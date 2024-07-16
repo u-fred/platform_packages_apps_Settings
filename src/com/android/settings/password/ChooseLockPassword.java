@@ -1128,7 +1128,7 @@ public class ChooseLockPassword extends SettingsActivity {
             // so that pinLength information is stored accordingly when setting is turned on.
             mLockPatternUtils.setAutoPinConfirm(
                     (mAutoPinConfirmOption != null && mAutoPinConfirmOption.isChecked()),
-                    mUserId, mPrimaryCredential);
+                    mUserId, mPrimaryCredential ? Primary : Secondary);
 
             mSaveAndFinishWorker.start(mLockPatternUtils,
                     mChosenPassword, mCurrentCredential, mPrimaryCredential, mUserId);
