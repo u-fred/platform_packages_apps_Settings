@@ -18,6 +18,9 @@ package com.android.settings.security;
 
 import static android.provider.Settings.Secure.BIOMETRIC_KEYGUARD_ENABLED;
 
+import static com.android.internal.widget.LockDomain.Primary;
+import static com.android.internal.widget.LockDomain.Secondary;
+
 import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.content.Intent;
@@ -112,7 +115,7 @@ public class ScreenLockPreferenceDetailsUtils {
      * Returns whether the lock pattern is secure.
      */
     public boolean isLockPatternSecure() {
-        return mLockPatternUtils.isSecure(mUserId, mIsForPrimaryScreenLock);
+        return mLockPatternUtils.isSecure(mUserId, mIsForPrimaryScreenLock ? Primary : Secondary);
     }
 
     /**
@@ -235,7 +238,7 @@ public class ScreenLockPreferenceDetailsUtils {
     @StringRes
     private Integer getSummaryResId(int userId) {
         // TODO: Look at base commit when updating this.
-        if (!mLockPatternUtils.isSecure(userId, mIsForPrimaryScreenLock)) {
+        if (!mLockPatternUtils.isSecure(userId, mIsForPrimaryScreenLock ? Primary : Secondary)) {
             if (userId == mProfileChallengeUserId
                     || mLockPatternUtils.isLockScreenDisabled(userId, mIsForPrimaryScreenLock)) {
                 return R.string.unlock_set_unlock_mode_off;

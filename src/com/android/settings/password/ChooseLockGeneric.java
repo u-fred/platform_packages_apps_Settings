@@ -28,6 +28,8 @@ import static android.app.admin.DevicePolicyResources.Strings.Settings.WORK_PROF
 import static android.app.admin.DevicePolicyResources.Strings.Settings.WORK_PROFILE_IT_ADMIN_CANT_RESET_SCREEN_LOCK_ACTION;
 import static android.app.admin.DevicePolicyResources.Strings.Settings.WORK_PROFILE_SCREEN_LOCK_SETUP_MESSAGE;
 
+import static com.android.internal.widget.LockDomain.Primary;
+import static com.android.internal.widget.LockDomain.Secondary;
 import static com.android.settings.password.ChooseLockPassword.ChooseLockPasswordFragment.RESULT_FINISHED;
 import static com.android.settings.password.ChooseLockSettingsHelper.EXTRA_KEY_CALLER_APP_NAME;
 import static com.android.settings.password.ChooseLockSettingsHelper.EXTRA_KEY_CHOOSE_LOCK_SCREEN_DESCRIPTION;
@@ -398,7 +400,7 @@ public class ChooseLockGeneric extends SettingsActivity {
                 // Show customized screen lock title if it is passed as an extra in the intent.
                 getActivity().setTitle(mExtraLockScreenTitleResId);
             } else {
-                updateExistingLock = mLockPatternUtils.isSecure(mUserId, mPrimaryCredential);
+                updateExistingLock = mLockPatternUtils.isSecure(mUserId, mPrimaryCredential ? Primary : Secondary);
                 if (updateExistingLock) {
                     if (mPrimaryCredential) {
                         getActivity().setTitle(R.string.lock_settings_picker_update_lock_title);
@@ -472,7 +474,7 @@ public class ChooseLockGeneric extends SettingsActivity {
 
             final String key = preference.getKey();
             if (!isUnlockMethodSecure(key) && mLockPatternUtils.isSecure(mUserId,
-                    mPrimaryCredential)) {
+                    mPrimaryCredential ? Primary : Secondary)) {
                 // Show the disabling FRP warning only when the user is switching from a secure
                 // unlock method to an insecure one
                 showFactoryResetProtectionWarningDialog(key, GateKeeper.getSecureUserId(mUserId),
@@ -938,7 +940,7 @@ public class ChooseLockGeneric extends SettingsActivity {
             // hasCredential checks to see if user chooses a password for screen lock. If the
             // screen lock is None or Swipe, we do not want to call getActivity().finish().
             // Otherwise, bugs would be caused. (e.g. b/278488549, b/278530059)
-            final boolean hasCredential = mLockPatternUtils.isSecure(mUserId, mPrimaryCredential);
+            final boolean hasCredential = mLockPatternUtils.isSecure(mUserId, mPrimaryCredential ? Primary : Secondary);
             if (!getActivity().isChangingConfigurations()
                     && !mWaitingForConfirmation && !mWaitingForActivityResult
                     && !mWaitingForBiometricEnrollment) {
