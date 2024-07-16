@@ -105,12 +105,12 @@ public class AutoPinConfirmPreferenceControllerTest {
     @Test
     public void updateState_ChangingSettingState_shouldSetPreferenceToAppropriateCheckedState() {
         // When auto_pin_confirm setting is disabled, switchPreference is unchecked
-        when(mLockPatternUtils.isAutoPinConfirmEnabled(TEST_USER_ID, mPrimary)).thenReturn(false);
+        when(mLockPatternUtils.isAutoPinConfirmEnabled(TEST_USER_ID, mPrimary ? Primary : Secondary)).thenReturn(false);
         mController.updateState(mPreference);
         assertThat(mPreference.isChecked()).isFalse();
 
         // When auto_pin_confirm setting is enabled, switchPreference is checked
-        when(mLockPatternUtils.isAutoPinConfirmEnabled(TEST_USER_ID, mPrimary)).thenReturn(true);
+        when(mLockPatternUtils.isAutoPinConfirmEnabled(TEST_USER_ID, mPrimary ? Primary : Secondary)).thenReturn(true);
         mController.updateState(mPreference);
         assertThat(mPreference.isChecked()).isTrue();
     }
