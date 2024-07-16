@@ -585,7 +585,7 @@ public class ConfirmLockPattern extends ConfirmDeviceCredentialBaseActivity {
                 mPendingLockCheck = LockPatternChecker.checkCredential(
                         mLockPatternUtils,
                         pattern,
-                        true,
+                        Primary,
                         localEffectiveUserId,
                         new LockPatternChecker.OnCheckCallback() {
                             @Override
