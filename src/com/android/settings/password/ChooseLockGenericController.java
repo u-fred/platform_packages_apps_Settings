@@ -19,8 +19,8 @@ package com.android.settings.password;
 import static android.app.admin.DevicePolicyManager.PASSWORD_COMPLEXITY_NONE;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_NONE;
-import static com.android.internal.widget.LockPatternUtils.CredentialPurpose.PRIMARY;
-import static com.android.internal.widget.LockPatternUtils.CredentialPurpose.SECOND_FACTOR;
+import static com.android.internal.widget.LockDomain.Primary;
+import static com.android.internal.widget.LockDomain.Secondary;
 
 import android.app.admin.DevicePolicyManager.PasswordComplexity;
 import android.app.admin.PasswordMetrics;
@@ -292,8 +292,7 @@ public class ChooseLockGenericController {
                 mDevicePasswordRequirementOnly);
         // Will only be true if !mPrimaryScreenLock.
         if (mUnificationProfileId != UserHandle.USER_NULL) {
-            metrics.maxWith(mLockPatternUtils.getRequestedPasswordMetrics(mUnificationProfileId,
-                    false));
+            metrics.maxWith(mLockPatternUtils.getRequestedPasswordMetrics(mUnificationProfileId));
         }
         return metrics;
     }
