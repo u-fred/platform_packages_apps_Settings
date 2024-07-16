@@ -471,7 +471,7 @@ public class ChooseLockGenericControllerTest {
 
         when(mLockPatternUtils.getRequestedPasswordMetrics(anyInt(), eq(true), anyBoolean()))
                 .thenReturn(policy.getMinMetrics());
-        when(mLockPatternUtils.isCredentialsDisabledForUser(anyInt(), eq(true)))
+        when(mLockPatternUtils.isCredentialsDisabledForUser(anyInt()))
                 .thenReturn(quality == PASSWORD_QUALITY_MANAGED);
     }
 
