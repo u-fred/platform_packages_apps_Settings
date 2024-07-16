@@ -309,8 +309,7 @@ public class ChooseLockGenericController {
         // Will only be true if !mPrimaryScreenLock.
         if (mUnificationProfileId != UserHandle.USER_NULL) {
             complexity = Math.max(complexity,
-                    mLockPatternUtils.getRequestedPasswordComplexity(
-                            mUnificationProfileId, true));
+                    mLockPatternUtils.getRequestedPasswordComplexity(mUnificationProfileId));
         }
         return complexity;
     }
