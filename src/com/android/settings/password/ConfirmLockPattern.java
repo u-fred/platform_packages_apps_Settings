@@ -566,7 +566,7 @@ public class ConfirmLockPattern extends ConfirmDeviceCredentialBaseActivity {
                 };
                 mPendingLockCheck = (localEffectiveUserId == localUserId)
                         ? LockPatternChecker.verifyCredential(
-                                mLockPatternUtils, pattern, true, localUserId, flags,
+                                mLockPatternUtils, pattern, Primary, localUserId, flags,
                                 onVerifyCallback)
                         : LockPatternChecker.verifyTiedProfileChallenge(
                                 mLockPatternUtils, pattern, localUserId, flags,

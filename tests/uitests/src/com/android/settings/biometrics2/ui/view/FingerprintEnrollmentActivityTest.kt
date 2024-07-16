@@ -29,6 +29,7 @@ import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.UiObject2
 import androidx.test.uiautomator.Until
+import com.android.internal.widget.LockDomain.Primary
 import com.android.internal.widget.LockPatternChecker
 import com.android.internal.widget.LockPatternUtils
 import com.android.internal.widget.LockscreenCredential
@@ -740,7 +741,7 @@ class FingerprintEnrollmentActivityTest {
                 context.startActivity(intent)
             }
         LockPatternChecker.verifyCredential(
-            lockPatternUtils, lockscreenCredential, true,
+            lockPatternUtils, lockscreenCredential, Primary,
             userId, LockPatternUtils.VERIFY_FLAG_REQUEST_GK_PW_HANDLE, onVerifyCallback
         )
     }
@@ -757,7 +758,7 @@ class FingerprintEnrollmentActivityTest {
                 context.startActivity(intent)
             }
         LockPatternChecker.verifyCredential(
-            lockPatternUtils, lockscreenCredential, true,
+            lockPatternUtils, lockscreenCredential, Primary,
             userId, LockPatternUtils.VERIFY_FLAG_REQUEST_GK_PW_HANDLE, onVerifyCallback
         )
     }
@@ -774,7 +775,7 @@ class FingerprintEnrollmentActivityTest {
                 context.startActivity(intent)
             }
         LockPatternChecker.verifyCredential(
-            lockPatternUtils, lockscreenCredential, true,
+            lockPatternUtils, lockscreenCredential, Primary,
             userId, LockPatternUtils.VERIFY_FLAG_REQUEST_GK_PW_HANDLE, onVerifyCallback
         )
     }

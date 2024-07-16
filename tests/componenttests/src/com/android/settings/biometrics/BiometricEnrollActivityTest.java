@@ -23,6 +23,7 @@ import static androidx.test.espresso.intent.Intents.intended;
 import static androidx.test.espresso.intent.matcher.IntentMatchers.hasComponent;
 import static androidx.test.espresso.intent.matcher.IntentMatchers.hasExtra;
 
+import static com.android.internal.widget.LockDomain.Primary;
 import static com.android.settings.password.ChooseLockSettingsHelper.EXTRA_KEY_FOR_BIOMETRICS;
 import static com.android.settings.password.ChooseLockSettingsHelper.EXTRA_KEY_FOR_FACE;
 import static com.android.settings.password.ChooseLockSettingsHelper.EXTRA_KEY_FOR_FINGERPRINT;
@@ -147,7 +148,7 @@ public class BiometricEnrollActivityTest {
         setPin();
         final Intent intent = getIntent(true /* useInternal */);
         LockPatternChecker.verifyCredential(new LockPatternUtils(mContext),
-                LockscreenCredential.createPin(TEST_PIN), true, UserHandle.myUserId(),
+                LockscreenCredential.createPin(TEST_PIN), Primary, UserHandle.myUserId(),
                 LockPatternUtils.VERIFY_FLAG_REQUEST_GK_PW_HANDLE, (response, timeoutMs) -> {
                     assertThat(response.containsGatekeeperPasswordHandle()).isTrue();
                     intent.putExtra(ChooseLockSettingsHelper.EXTRA_KEY_GK_PW_HANDLE,
