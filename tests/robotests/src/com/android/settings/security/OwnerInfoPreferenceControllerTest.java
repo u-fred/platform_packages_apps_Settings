@@ -165,7 +165,7 @@ public class OwnerInfoPreferenceControllerTest {
     @Test
     public void updateEnableState_lockScreenDisabled_shouldDisablePreference() {
         doReturn(false).when(mController).isDeviceOwnerInfoEnabled();
-        doReturn(true).when(mLockPatternUtils).isLockScreenDisabled(anyInt(), eq(true));
+        doReturn(true).when(mLockPatternUtils).isLockScreenDisabled(anyInt());
         mController.displayPreference(mScreen);
 
         mController.updateEnableState();
@@ -176,7 +176,7 @@ public class OwnerInfoPreferenceControllerTest {
     @Test
     public void updateEnableState_lockScreenEnabled_shouldEnablePreference() {
         doReturn(false).when(mController).isDeviceOwnerInfoEnabled();
-        doReturn(false).when(mLockPatternUtils).isLockScreenDisabled(anyInt(), eq(true));
+        doReturn(false).when(mLockPatternUtils).isLockScreenDisabled(anyInt());
         mController.displayPreference(mScreen);
 
         mController.updateEnableState();
@@ -190,7 +190,7 @@ public class OwnerInfoPreferenceControllerTest {
         preference.setKey(KEY_OWNER_INFO);
         when(mScreen.findPreference(mController.getPreferenceKey())).thenReturn(preference);
         doReturn(false).when(mController).isDeviceOwnerInfoEnabled();
-        doReturn(false).when(mLockPatternUtils).isLockScreenDisabled(anyInt(), eq(true));
+        doReturn(false).when(mLockPatternUtils).isLockScreenDisabled(anyInt());
         mController.displayPreference(mScreen);
         mController.updateEnableState();
 
