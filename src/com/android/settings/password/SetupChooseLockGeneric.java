@@ -145,8 +145,7 @@ public class SetupChooseLockGeneric extends ChooseLockGeneric {
             // Setup Wizard.
             LockPatternUtils lockPatternUtils = new LockPatternUtils(getActivity());
             data.putExtra(EXTRA_PASSWORD_QUALITY,
-                    lockPatternUtils.getKeyguardStoredPasswordQuality(UserHandle.myUserId(),
-                            true));
+                    lockPatternUtils.getKeyguardStoredPasswordQuality(UserHandle.myUserId()));
 
             super.onActivityResult(requestCode, resultCode, data);
         }

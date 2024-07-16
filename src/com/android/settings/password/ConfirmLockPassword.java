@@ -22,6 +22,8 @@ import static android.app.admin.DevicePolicyResources.Strings.Settings.WORK_PROF
 import static android.app.admin.DevicePolicyResources.Strings.Settings.WORK_PROFILE_LAST_PIN_ATTEMPT_BEFORE_WIPE;
 import static android.app.admin.DevicePolicyResources.UNDEFINED;
 
+import static com.android.internal.widget.LockDomain.Primary;
+import static com.android.internal.widget.LockDomain.Secondary;
 import static com.android.settings.biometrics.GatekeeperPasswordProvider.containsGatekeeperPasswordHandle;
 import static com.android.settings.biometrics.GatekeeperPasswordProvider.getGatekeeperPasswordHandle;
 import static com.android.settings.password.ChooseLockSettingsHelper.EXTRA_KEY_GK_PW_HANDLE;
@@ -131,7 +133,7 @@ public class ConfirmLockPassword extends ConfirmDeviceCredentialBaseActivity {
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                 Bundle savedInstanceState) {
             final int storedQuality = mLockPatternUtils.getKeyguardStoredPasswordQuality(
-                    mEffectiveUserId, mPrimaryCredential);
+                    mEffectiveUserId, mPrimaryCredential ? Primary : Secondary);
 
             ConfirmLockPassword activity = (ConfirmLockPassword) getActivity();
             View view = inflater.inflate(

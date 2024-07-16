@@ -16,6 +16,8 @@
 
 package com.android.settings.password;
 
+import static com.android.internal.widget.LockDomain.Primary;
+import static com.android.internal.widget.LockDomain.Secondary;
 import static com.android.settings.Utils.SETTINGS_PACKAGE_NAME;
 
 import android.app.Activity;
@@ -594,7 +596,7 @@ public final class ChooseLockSettingsHelper {
                     .get(mActivity).getCredentialOwnerProfile(userId);
             Optional<Integer> lockTypeOptional = passwordQualityToLockTypes(
                     mLockPatternUtils.getKeyguardStoredPasswordQuality(effectiveUserId,
-                            primaryCredential));
+                            primaryCredential ? Primary : Secondary));
             if (lockTypeOptional.isEmpty()) {
                 return Optional.empty();
             }

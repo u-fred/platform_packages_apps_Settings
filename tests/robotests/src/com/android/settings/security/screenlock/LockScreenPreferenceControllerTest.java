@@ -105,7 +105,7 @@ public class LockScreenPreferenceControllerTest {
     @Test
     public void getAvailabilityStatus_secure_hasLockScreen_AVAILABLE() {
         when(mLockPatternUtils.isSecure(anyInt())).thenReturn(true);
-        when(mLockPatternUtils.getKeyguardStoredPasswordQuality(anyInt(), eq(true)))
+        when(mLockPatternUtils.getKeyguardStoredPasswordQuality(anyInt()))
                 .thenReturn(PASSWORD_QUALITY_ALPHABETIC);
 
         assertThat(mController.getAvailabilityStatus()).isEqualTo(AVAILABLE);
@@ -114,7 +114,7 @@ public class LockScreenPreferenceControllerTest {
     @Test
     public void getAvailabilityStatus_secure_noLockScreen_AVAILABLE() {
         when(mLockPatternUtils.isSecure(anyInt())).thenReturn(true);
-        when(mLockPatternUtils.getKeyguardStoredPasswordQuality(anyInt(), eq(true)))
+        when(mLockPatternUtils.getKeyguardStoredPasswordQuality(anyInt()))
                 .thenReturn(PASSWORD_QUALITY_UNSPECIFIED);
 
         assertThat(mController.getAvailabilityStatus()).isEqualTo(AVAILABLE);
@@ -123,7 +123,7 @@ public class LockScreenPreferenceControllerTest {
     @Test
     public void onResume_available_shouldShow() {
         when(mLockPatternUtils.isSecure(anyInt())).thenReturn(true);
-        when(mLockPatternUtils.getKeyguardStoredPasswordQuality(anyInt(), eq(true)))
+        when(mLockPatternUtils.getKeyguardStoredPasswordQuality(anyInt()))
                 .thenReturn(PASSWORD_QUALITY_ALPHABETIC);
 
         mController.displayPreference(mScreen);
@@ -135,7 +135,7 @@ public class LockScreenPreferenceControllerTest {
     @Test
     public void onResume_unavailable_shouldShow() {
         when(mLockPatternUtils.isSecure(anyInt())).thenReturn(true);
-        when(mLockPatternUtils.getKeyguardStoredPasswordQuality(anyInt(), eq(true)))
+        when(mLockPatternUtils.getKeyguardStoredPasswordQuality(anyInt()))
                 .thenReturn(PASSWORD_QUALITY_UNSPECIFIED);
 
         mController.displayPreference(mScreen);

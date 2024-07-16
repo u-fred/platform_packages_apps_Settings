@@ -58,7 +58,7 @@ public class ChangeProfileScreenLockPreferenceController extends
         if (!mLockPatternUtils.isSecure(mProfileChallengeUserId)) {
             return true;
         }
-        switch (mLockPatternUtils.getKeyguardStoredPasswordQuality(mProfileChallengeUserId, true)) {
+        switch (mLockPatternUtils.getKeyguardStoredPasswordQuality(mProfileChallengeUserId)) {
             case DevicePolicyManager.PASSWORD_QUALITY_SOMETHING:
             case DevicePolicyManager.PASSWORD_QUALITY_NUMERIC:
             case DevicePolicyManager.PASSWORD_QUALITY_NUMERIC_COMPLEX:

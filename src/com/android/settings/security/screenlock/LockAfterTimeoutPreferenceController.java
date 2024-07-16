@@ -65,7 +65,7 @@ public class LockAfterTimeoutPreferenceController extends AbstractPreferenceCont
         if (!mLockPatternUtils.isSecure(mUserId) || !mIsForPrimaryScreenLock) {
             return false;
         }
-        switch (mLockPatternUtils.getKeyguardStoredPasswordQuality(mUserId, true)) {
+        switch (mLockPatternUtils.getKeyguardStoredPasswordQuality(mUserId)) {
             case DevicePolicyManager.PASSWORD_QUALITY_SOMETHING:
             case DevicePolicyManager.PASSWORD_QUALITY_NUMERIC:
             case DevicePolicyManager.PASSWORD_QUALITY_NUMERIC_COMPLEX:

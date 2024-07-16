@@ -247,7 +247,7 @@ public class ScreenLockPreferenceDetailsUtils {
             }
         } else {
             int keyguardStoredPasswordQuality =
-                    mLockPatternUtils.getKeyguardStoredPasswordQuality(userId, mIsForPrimaryScreenLock);
+                    mLockPatternUtils.getKeyguardStoredPasswordQuality(userId, mIsForPrimaryScreenLock ? Primary : Secondary);
             switch (keyguardStoredPasswordQuality) {
                 case DevicePolicyManager.PASSWORD_QUALITY_SOMETHING:
                     return R.string.unlock_set_unlock_mode_pattern;
