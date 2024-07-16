@@ -379,8 +379,7 @@ public class ConfirmLockPattern extends ConfirmDeviceCredentialBaseActivity {
 
                     mErrorTextView.setText("");
                     updateErrorMessage(
-                            mLockPatternUtils.getCurrentFailedPasswordAttempts(mEffectiveUserId,
-                                    true));
+                            mLockPatternUtils.getCurrentFailedPasswordAttempts(mEffectiveUserId));
 
                     mLockPatternView.setEnabled(true);
                     mLockPatternView.enableInput();

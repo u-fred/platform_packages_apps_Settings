@@ -291,7 +291,7 @@ public abstract class ConfirmDeviceCredentialBaseFragment extends InstrumentedFr
 
     protected void refreshLockScreen() {
         updateErrorMessage(mLockPatternUtils.getCurrentFailedPasswordAttempts(mEffectiveUserId,
-                mPrimaryCredential));
+                mPrimaryCredential ? Primary : Secondary));
     }
 
     protected void setAccessibilityTitle(CharSequence supplementalText) {
