@@ -44,13 +44,13 @@ public class SaveAndFinishWorkerTest {
         var worker = new SaveAndFinishWorker();
         var lpu = mock(LockPatternUtils.class);
 
-        when(lpu.setLockCredential(chosenCredential, currentCredential, true, userId)).thenReturn(false);
+        when(lpu.setLockCredential(chosenCredential, currentCredential, userId)).thenReturn(false);
 
         worker.setRequestWriteRepairModePassword(true);
         worker.prepare(lpu, chosenCredential, currentCredential, true, userId);
         var result = worker.saveAndVerifyInBackground();
 
-        verify(lpu).setLockCredential(chosenCredential, currentCredential, true, userId);
+        verify(lpu).setLockCredential(chosenCredential, currentCredential, userId);
         verify(lpu, never()).verifyCredential(chosenCredential, userId, flags);
         assertThat(result.first).isFalse();
     }
@@ -65,14 +65,14 @@ public class SaveAndFinishWorkerTest {
         var lpu = mock(LockPatternUtils.class);
         var response = VerifyCredentialResponse.fromError();
 
-        when(lpu.setLockCredential(chosenCredential, currentCredential, true, userId)).thenReturn(true);
+        when(lpu.setLockCredential(chosenCredential, currentCredential, userId)).thenReturn(true);
         when(lpu.verifyCredential(chosenCredential, userId, flags)).thenReturn(response);
 
         worker.setRequestWriteRepairModePassword(true);
         worker.prepare(lpu, chosenCredential, currentCredential, true, userId);
         var result = worker.saveAndVerifyInBackground();
 
-        verify(lpu).setLockCredential(chosenCredential, currentCredential, true, userId);
+        verify(lpu).setLockCredential(chosenCredential, currentCredential, userId);
         verify(lpu).verifyCredential(chosenCredential, userId, flags);
         assertThat(result.first).isTrue();
         assertThat(result.second.getBooleanExtra(
@@ -90,14 +90,14 @@ public class SaveAndFinishWorkerTest {
         var lpu = mock(LockPatternUtils.class);
         var response = new VerifyCredentialResponse.Builder().build();
 
-        when(lpu.setLockCredential(chosenCredential, currentCredential, true, userId)).thenReturn(true);
+        when(lpu.setLockCredential(chosenCredential, currentCredential, userId)).thenReturn(true);
         when(lpu.verifyCredential(chosenCredential, userId, flags)).thenReturn(response);
 
         worker.setRequestWriteRepairModePassword(true);
         worker.prepare(lpu, chosenCredential, currentCredential, true, userId);
         var result = worker.saveAndVerifyInBackground();
 
-        verify(lpu).setLockCredential(chosenCredential, currentCredential, true, userId);
+        verify(lpu).setLockCredential(chosenCredential, currentCredential, userId);
         verify(lpu).verifyCredential(chosenCredential, userId, flags);
         assertThat(result.first).isTrue();
         assertThat(result.second.getBooleanExtra(
@@ -116,7 +116,7 @@ public class SaveAndFinishWorkerTest {
         var lpu = mock(LockPatternUtils.class);
         var response = new VerifyCredentialResponse.Builder().build();
 
-        when(lpu.setLockCredential(chosenCredential, currentCredential, true, userId)).thenReturn(true);
+        when(lpu.setLockCredential(chosenCredential, currentCredential, userId)).thenReturn(true);
         when(lpu.verifyCredential(chosenCredential, userId, flags)).thenReturn(response);
 
         worker.setRequestWriteRepairModePassword(true);
@@ -124,7 +124,7 @@ public class SaveAndFinishWorkerTest {
         worker.prepare(lpu, chosenCredential, currentCredential, true, userId);
         var result = worker.saveAndVerifyInBackground();
 
-        verify(lpu).setLockCredential(chosenCredential, currentCredential, true, userId);
+        verify(lpu).setLockCredential(chosenCredential, currentCredential, userId);
         verify(lpu).verifyCredential(chosenCredential, userId, flags);
         assertThat(result.first).isTrue();
         assertThat(result.second.getBooleanExtra(
