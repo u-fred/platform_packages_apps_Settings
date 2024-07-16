@@ -56,6 +56,7 @@ import androidx.fragment.app.FragmentManager;
 
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockscreenCredential;
+import com.android.internal.widget.WrappedLockPatternUtils;
 import com.android.settings.R;
 import com.android.settings.Utils;
 import com.android.settings.core.InstrumentedFragment;
@@ -101,7 +102,7 @@ public abstract class ConfirmDeviceCredentialBaseFragment extends InstrumentedFr
     protected int mEffectiveUserId;
     protected int mUserId;
     protected UserManager mUserManager;
-    protected LockPatternUtils mLockPatternUtils;
+    protected WrappedLockPatternUtils mLockPatternUtils;
     protected DevicePolicyManager mDevicePolicyManager;
     protected TextView mErrorTextView;
     protected final Handler mHandler = new Handler();
@@ -189,13 +190,17 @@ public abstract class ConfirmDeviceCredentialBaseFragment extends InstrumentedFr
         mRepairMode = (mUserId == LockPatternUtils.USER_REPAIR_MODE);
         mUserManager = UserManager.get(getActivity());
         mEffectiveUserId = mUserManager.getCredentialOwnerProfile(mUserId);
-        mLockPatternUtils = new LockPatternUtils(getActivity());
+
+        mPrimaryCredential = intent.getBooleanExtra(
+                ChooseLockSettingsHelper.EXTRA_KEY_PRIMARY_CREDENTIAL, true);
+        mLockPatternUtils = new WrappedLockPatternUtils(getActivity(),
+                mPrimaryCredential ? Primary : Secondary);
+
         mDevicePolicyManager = (DevicePolicyManager) getActivity().getSystemService(
                 Context.DEVICE_POLICY_SERVICE);
         mBiometricManager = getActivity().getSystemService(BiometricManager.class);
 
-        mPrimaryCredential = intent.getBooleanExtra(
-                ChooseLockSettingsHelper.EXTRA_KEY_PRIMARY_CREDENTIAL, true);
+
     }
 
     @Override
@@ -290,8 +295,7 @@ public abstract class ConfirmDeviceCredentialBaseFragment extends InstrumentedFr
     }
 
     protected void refreshLockScreen() {
-        updateErrorMessage(mLockPatternUtils.getCurrentFailedPasswordAttempts(mEffectiveUserId,
-                mPrimaryCredential ? Primary : Secondary));
+        updateErrorMessage(mLockPatternUtils.getCurrentFailedPasswordAttempts(mEffectiveUserId));
     }
 
     protected void setAccessibilityTitle(CharSequence supplementalText) {
@@ -335,15 +339,13 @@ public abstract class ConfirmDeviceCredentialBaseFragment extends InstrumentedFr
 
     protected void reportFailedAttempt() {
         updateErrorMessage(
-                mLockPatternUtils.getCurrentFailedPasswordAttempts(mEffectiveUserId,
-                        mPrimaryCredential ? Primary : Secondary) + 1);
-        mLockPatternUtils.reportFailedPasswordAttempt(mEffectiveUserId, mPrimaryCredential ? Primary : Secondary);
+                mLockPatternUtils.getCurrentFailedPasswordAttempts(mEffectiveUserId) + 1);
+        mLockPatternUtils.reportFailedPasswordAttempt(mEffectiveUserId);
     }
 
     protected void updateErrorMessage(int numAttempts) {
         final int maxAttempts =
-                mLockPatternUtils.getMaximumFailedPasswordsForWipe(mEffectiveUserId,
-                        mPrimaryCredential ? Primary : Secondary);
+                mLockPatternUtils.getMaximumFailedPasswordsForWipe(mEffectiveUserId);
         if (maxAttempts <= 0 || numAttempts <= 0) {
             return;
         }
