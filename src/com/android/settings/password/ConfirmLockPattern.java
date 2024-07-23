@@ -569,7 +569,7 @@ public class ConfirmLockPattern extends ConfirmDeviceCredentialBaseActivity {
                                 mLockPatternUtils, pattern, localUserId, flags,
                                 onVerifyCallback)
                         : LockPatternChecker.verifyTiedProfileChallenge(
-                                mLockPatternUtils, pattern, localUserId, flags,
+                                mLockPatternUtils.getInner(), pattern, localUserId, flags,
                                 onVerifyCallback);
             }
 
