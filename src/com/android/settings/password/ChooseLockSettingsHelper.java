@@ -29,6 +29,7 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.os.UserManager;
 import android.util.Log;
 
@@ -38,6 +39,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 import androidx.fragment.app.Fragment;
 
+import com.android.internal.widget.LockDomain;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.settings.SetupWizardUtils;
 import com.android.settings.Utils;
@@ -132,8 +134,8 @@ public final class ChooseLockSettingsHelper {
     public static final String EXTRA_KEY_CHOOSE_LOCK_SCREEN_DESCRIPTION =
             "choose_lock_setup_screen_description";
 
-    // Whether we are doing an operation involving the primary or secondary credential.
-    public static final String EXTRA_KEY_PRIMARY_CREDENTIAL = "primary_credential";
+    // Whether doing an operation involving the primary or secondary lock.
+    public static final String EXTRA_KEY_LOCK_DOMAIN = "lock_domain";
 
     @VisibleForTesting @NonNull LockPatternUtils mLockPatternUtils;
     @NonNull private final Activity mActivity;
@@ -176,7 +178,7 @@ public final class ChooseLockSettingsHelper {
         private boolean mRequestGatekeeperPasswordHandle;
         private boolean mRequestWriteRepairModePassword;
         private boolean mTaskOverlay;
-        private boolean mPrimaryCredential = true;
+        private LockDomain mLockDomain = Primary;
 
         public Builder(@NonNull Activity activity) {
             mActivity = activity;
@@ -416,27 +418,27 @@ public final class ChooseLockSettingsHelper {
             }
 
             LockPatternUtils lpu = new LockPatternUtils(mActivity.getApplicationContext());
-            lpu.checkUserSupportsBiometricSecondFactorIfSecondary(mUserId, mPrimaryCredential ? Primary : Secondary);
+            lpu.checkUserSupportsBiometricSecondFactorIfSecondary(mUserId, mLockDomain);
             // TODO: This will fall out of sync as time goes on. We would prefer an inclusion list.
             //  Could only include certain fields for secondary in #launchConfirmationActivity, but
             //  then it's all getting a bit messy. Likelihood and impact of issue is low, so I
             //  think this is fine.
-            if (!mPrimaryCredential
+            if (mLockDomain == Secondary
                     && (mRemoteLockscreenValidation
                     || mRemoteLockscreenValidationSession != null
                     || mRemoteLockscreenValidationServiceComponent != null
                     || mAllowAnyUserId
                     || mRequestGatekeeperPasswordHandle
                     || mRequestWriteRepairModePassword)) {
-                throw new IllegalArgumentException("Invalid field set for !mPrimaryCredential");
+                throw new IllegalArgumentException("Invalid field set for Secondary LockDomain");
             }
 
             return new ChooseLockSettingsHelper(this, mActivity, mFragment,
                     mActivityResultLauncher);
         }
 
-        @NonNull public Builder setPrimaryCredential(boolean primary) {
-            mPrimaryCredential = primary;
+        @NonNull public Builder setLockDomain(LockDomain lockDomain) {
+            mLockDomain = lockDomain;
             return this;
         }
 
@@ -458,7 +460,7 @@ public final class ChooseLockSettingsHelper {
                 mBuilder.mRemoteLockscreenValidationServiceComponent, mBuilder.mAllowAnyUserId,
                 mBuilder.mForegroundOnly, mBuilder.mNotForegroundResultCode,
                 mBuilder.mRequestGatekeeperPasswordHandle, mBuilder.mRequestWriteRepairModePassword,
-                mBuilder.mTaskOverlay, mBuilder.mPrimaryCredential);
+                mBuilder.mTaskOverlay, mBuilder.mLockDomain);
     }
 
     private boolean launchConfirmationActivity(int request, @Nullable CharSequence title,
@@ -470,10 +472,10 @@ public final class ChooseLockSettingsHelper {
             @Nullable ComponentName remoteLockscreenValidationServiceComponent,
             boolean allowAnyUser, boolean foregroundOnly, int notForegroundResultCode,
             boolean requestGatekeeperPasswordHandle, boolean requestWriteRepairModePassword,
-            boolean taskOverlay, boolean primaryCredential) {
+            boolean taskOverlay, LockDomain lockDomain) {
         Optional<Class<?>> activityClass = determineAppropriateActivityClass(
                 returnCredentials, forceVerifyPath, userId, remoteLockscreenValidationSession,
-                primaryCredential);
+                lockDomain);
         if (activityClass.isEmpty()) {
             return false;
         }
@@ -483,7 +485,7 @@ public final class ChooseLockSettingsHelper {
                 checkboxLabel, remoteLockscreenValidation, remoteLockscreenValidationSession,
                 remoteLockscreenValidationServiceComponent, allowAnyUser, foregroundOnly,
                 notForegroundResultCode, requestGatekeeperPasswordHandle,
-                requestWriteRepairModePassword, taskOverlay, primaryCredential);
+                requestWriteRepairModePassword, taskOverlay, lockDomain);
     }
 
     private boolean launchConfirmationActivity(int request, CharSequence title, CharSequence header,
@@ -495,7 +497,7 @@ public final class ChooseLockSettingsHelper {
             @Nullable ComponentName remoteLockscreenValidationServiceComponent,
             boolean allowAnyUser, boolean foregroundOnly, int notForegroundResultCode,
             boolean requestGatekeeperPasswordHandle, boolean requestWriteRepairModePassword,
-            boolean taskOverlay, boolean primaryCredential) {
+            boolean taskOverlay, LockDomain lockDomain) {
         final Intent intent = new Intent();
         intent.putExtra(ConfirmDeviceCredentialBaseFragment.TITLE_TEXT, title);
         intent.putExtra(ConfirmDeviceCredentialBaseFragment.HEADER_TEXT, header);
@@ -523,7 +525,8 @@ public final class ChooseLockSettingsHelper {
                 requestGatekeeperPasswordHandle);
         intent.putExtra(ChooseLockSettingsHelper.EXTRA_KEY_REQUEST_WRITE_REPAIR_MODE_PW,
                 requestWriteRepairModePassword);
-        intent.putExtra(ChooseLockSettingsHelper.EXTRA_KEY_PRIMARY_CREDENTIAL, primaryCredential);
+        intent.putExtra(ChooseLockSettingsHelper.EXTRA_KEY_LOCK_DOMAIN,
+                (Parcelable) (lockDomain));
 
         intent.setClassName(SETTINGS_PACKAGE_NAME, activityClass.getName());
         intent.putExtra(SettingsBaseActivity.EXTRA_PAGE_TRANSITION_TYPE,
@@ -587,7 +590,7 @@ public final class ChooseLockSettingsHelper {
     private Optional<Class<?>> determineAppropriateActivityClass(boolean returnCredentials,
             boolean forceVerifyPath, int userId,
             @Nullable RemoteLockscreenValidationSession remoteLockscreenValidationSession,
-            boolean primaryCredential) {
+            LockDomain lockDomain) {
         int lockType;
         if (remoteLockscreenValidationSession != null) {
             lockType = remoteLockscreenValidationSession.getLockType();
@@ -596,7 +599,7 @@ public final class ChooseLockSettingsHelper {
                     .get(mActivity).getCredentialOwnerProfile(userId);
             Optional<Integer> lockTypeOptional = passwordQualityToLockTypes(
                     mLockPatternUtils.getKeyguardStoredPasswordQuality(effectiveUserId,
-                            primaryCredential ? Primary : Secondary));
+                            lockDomain));
             if (lockTypeOptional.isEmpty()) {
                 return Optional.empty();
             }

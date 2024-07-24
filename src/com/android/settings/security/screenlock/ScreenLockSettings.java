@@ -31,7 +31,7 @@ import android.os.UserHandle;
 
 import androidx.annotation.Nullable;
 
-import com.android.internal.widget.LockPatternUtils;
+import com.android.internal.widget.LockDomain;
 import com.android.internal.widget.WrappedLockPatternUtils;
 import com.android.settings.R;
 import com.android.settings.dashboard.DashboardFragment;
@@ -62,7 +62,7 @@ public class ScreenLockSettings extends DashboardFragment
     public static final int RESULT_NOT_FOREGROUND = RESULT_FIRST_USER;
 
     private WrappedLockPatternUtils mLockPatternUtils;
-    private boolean mIsForPrimaryScreenLock;
+    private LockDomain mLockDomain;
     private boolean mForegroundOnly;
     private boolean mLaunchedConfirm;
     private boolean mCredentialConfirmed;
@@ -70,8 +70,10 @@ public class ScreenLockSettings extends DashboardFragment
 
     @Override
     public void onAttach(Context context) {
-        mIsForPrimaryScreenLock = getIntent().getBooleanExtra(
-                ChooseLockSettingsHelper.EXTRA_KEY_PRIMARY_CREDENTIAL, true);
+        mLockDomain = getIntent().getParcelableExtra(
+                ChooseLockSettingsHelper.EXTRA_KEY_LOCK_DOMAIN, LockDomain.class);
+        mLockDomain = mLockDomain == null ? Primary : mLockDomain;
+
         mForegroundOnly = getIntent().getBooleanExtra(
                 ChooseLockSettingsHelper.EXTRA_KEY_FOREGROUND_ONLY, false);
         super.onAttach(context);
@@ -85,7 +87,7 @@ public class ScreenLockSettings extends DashboardFragment
             mCredentialConfirmed = savedInstanceState.getBoolean(KEY_CREDENTIAL_CONFIRMED);
         }
 
-        if (!mIsForPrimaryScreenLock) {
+        if (mLockDomain == Secondary) {
             if (!mLaunchedConfirm && !mCredentialConfirmed) {
                 // Need the LockscreenCredential in LSS.mUserBiometricSecondFactorMetrics, otherwise
                 // will get failure when calling LSS#refreshStoredPinLength on auto-confirm disable.
@@ -111,7 +113,7 @@ public class ScreenLockSettings extends DashboardFragment
                 .setUserId(MY_USER_ID)
                 .setForegroundOnly(true)
                 .setNotForegroundResultCode(RESULT_NOT_FOREGROUND)
-                .setPrimaryCredential(false)
+                .setLockDomain(Secondary)
                 .setRequestCode(REQUEST_CONFIRM_CREDENTIAL)
                 .show();
     }
@@ -133,7 +135,7 @@ public class ScreenLockSettings extends DashboardFragment
 
     @Override
     protected List<AbstractPreferenceController> createPreferenceControllers(Context context) {
-        mLockPatternUtils = new WrappedLockPatternUtils(context, mIsForPrimaryScreenLock ? Primary : Secondary);
+        mLockPatternUtils = new WrappedLockPatternUtils(context, mLockDomain);
         List<AbstractPreferenceController> controllers =  buildPreferenceControllers(context,
                 this /* parent */, mLockPatternUtils, this::onAutoPinConfirmSettingChange);
         for (AbstractPreferenceController controller : controllers) {

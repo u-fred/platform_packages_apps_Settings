@@ -16,6 +16,8 @@
 
 package com.android.settings.testutils.shadow;
 
+import static com.android.internal.widget.LockDomain.Primary;
+
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.PasswordMetrics;
 import android.content.ComponentName;
@@ -26,6 +28,7 @@ import android.os.UserHandle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.android.internal.widget.LockDomain;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockscreenCredential;
 
@@ -87,8 +90,13 @@ public class ShadowLockPatternUtils {
     }
 
     @Implementation
-    protected boolean isSecure(int userId, boolean primary) {
-        Map<Integer, Boolean> isSecureMap = primary ? sUserToIsSecureMap :
+    protected boolean isSecure(int userId) {
+        return isSecure(userId, Primary);
+    }
+
+    @Implementation
+    protected boolean isSecure(int userId, LockDomain lockDomain) {
+        Map<Integer, Boolean> isSecureMap = lockDomain == Primary ? sUserToIsSecureMap :
                 sUserToIsSecureMapSecondary;
         Boolean isSecure = isSecureMap.get(userId);
         if (isSecure == null) {
@@ -97,16 +105,21 @@ public class ShadowLockPatternUtils {
         return isSecure;
     }
 
-    public static void setIsSecure(int userId, boolean primary, boolean isSecure) {
-        Map<Integer, Boolean> isSecureMap = primary ? sUserToIsSecureMap :
+    public static void setIsSecure(int userId, LockDomain lockDomain, boolean isSecure) {
+        Map<Integer, Boolean> isSecureMap = lockDomain == Primary ? sUserToIsSecureMap :
                 sUserToIsSecureMapSecondary;
         isSecureMap.put(userId, isSecure);
     }
 
     @Implementation
-    protected int getActivePasswordQuality(int userId, boolean primary) {
-        Map<Integer, Integer> activePasswordQualityMap = primary ? sUserToActivePasswordQualityMap :
-                sUserToActivePasswordQualityMapSecondary;
+    protected int getActivePasswordQuality(int userId) {
+        return getActivePasswordQuality(userId, Primary);
+    }
+
+    @Implementation
+    protected int getActivePasswordQuality(int userId, LockDomain lockDomain) {
+        Map<Integer, Integer> activePasswordQualityMap = lockDomain == Primary ?
+                sUserToActivePasswordQualityMap : sUserToActivePasswordQualityMapSecondary;
         final Integer activePasswordQuality = activePasswordQualityMap.get(userId);
         if (activePasswordQuality == null) {
             return DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
@@ -115,9 +128,14 @@ public class ShadowLockPatternUtils {
     }
 
     @Implementation
-    protected int getKeyguardStoredPasswordQuality(int userHandle, boolean primary) {
-        Map<Integer, Integer> passwordQualityMap = primary ? sKeyguardStoredPasswordQualityMap :
-                sKeyguardStoredPasswordQualityMapSecondary;
+    protected int getKeyguardStoredPasswordQuality(int userHandle) {
+        return getKeyguardStoredPasswordQuality(userHandle, Primary);
+    }
+
+    @Implementation
+    protected int getKeyguardStoredPasswordQuality(int userHandle, LockDomain lockDomain) {
+        Map<Integer, Integer> passwordQualityMap = lockDomain == Primary ?
+                sKeyguardStoredPasswordQualityMap : sKeyguardStoredPasswordQualityMapSecondary;
         return passwordQualityMap.getOrDefault(userHandle, /* defaultValue= */ 1);
     }
 
@@ -142,25 +160,42 @@ public class ShadowLockPatternUtils {
     }
 
     @Implementation
+    protected boolean checkPasswordHistory(byte[] passwordToCheck, byte[] hashFactor, int userId) {
+        return checkPasswordHistory(passwordToCheck, hashFactor, userId, Primary);
+    }
+
+    @Implementation
     protected boolean checkPasswordHistory(byte[] passwordToCheck, byte[] hashFactor, int userId,
-            boolean primary) {
+            LockDomain lockDomain) {
         return false;
     }
 
     @Implementation
+    public @DevicePolicyManager.PasswordComplexity int getRequestedPasswordComplexity(int userId) {
+        return getRequestedPasswordComplexity(userId, Primary);
+    }
+
+    @Implementation
     public @DevicePolicyManager.PasswordComplexity int getRequestedPasswordComplexity(int userId,
-            boolean primary) {
-        return getRequestedPasswordComplexity(userId, false);
+            LockDomain lockDomain) {
+        return getRequestedPasswordComplexity(userId, lockDomain, false);
+    }
+
+    @Implementation
+    public @DevicePolicyManager.PasswordComplexity int getRequestedPasswordComplexity(int userId,
+            boolean deviceWideOnly) {
+        return getRequestedPasswordComplexity(userId, Primary, false);
     }
 
     @Implementation
     @DevicePolicyManager.PasswordComplexity
-    public int getRequestedPasswordComplexity(int userId, boolean primary, boolean deviceWideOnly) {
-        Map<Integer, Integer> complexityMap = primary ? sUserToComplexityMap :
+    public int getRequestedPasswordComplexity(int userId, LockDomain lockDomain,
+            boolean deviceWideOnly) {
+        Map<Integer, Integer> complexityMap = lockDomain == Primary ? sUserToComplexityMap :
                 sUserToComplexityMapSecondary;
         int complexity = complexityMap.getOrDefault(userId,
                 DevicePolicyManager.PASSWORD_COMPLEXITY_NONE);
-        if (primary && !deviceWideOnly) {
+        if (lockDomain == Primary && !deviceWideOnly) {
             complexity = Math.max(complexity, sUserToProfileComplexityMap.getOrDefault(userId,
                     DevicePolicyManager.PASSWORD_COMPLEXITY_NONE));
         }
@@ -206,30 +241,47 @@ public class ShadowLockPatternUtils {
     @Implementation
     public boolean setLockCredential(
             @NonNull LockscreenCredential newCredential,
-            @NonNull LockscreenCredential savedCredential, boolean primary, int userHandle) {
-        setIsSecure(userHandle, true, primary);
+            @NonNull LockscreenCredential savedCredential, int userHandle) {
+        return setLockCredential(newCredential, savedCredential, Primary, userHandle);
+    }
+
+    @Implementation
+    public boolean setLockCredential(
+            @NonNull LockscreenCredential newCredential,
+            @NonNull LockscreenCredential savedCredential, LockDomain lockDomain, int userHandle) {
+        setIsSecure(userHandle, Primary, true);
         return true;
     }
 
     @Implementation
     public boolean checkCredential(
-            @NonNull LockscreenCredential credential, boolean primary, int userId,
+            @NonNull LockscreenCredential credential, int userId,
+            @Nullable LockPatternUtils.CheckCredentialProgressCallback progressCallback)
+            throws LockPatternUtils.RequestThrottledException {
+        return checkCredential(credential, Primary, userId, progressCallback);
+    }
+
+    @Implementation
+    public boolean checkCredential(
+            @NonNull LockscreenCredential credential, LockDomain lockDomain, int userId,
             @Nullable LockPatternUtils.CheckCredentialProgressCallback progressCallback)
             throws LockPatternUtils.RequestThrottledException {
         return true;
     }
 
-    public static void setRequiredPasswordComplexity(int userHandle, boolean primary,
+    public static void setRequiredPasswordComplexity(int userHandle, LockDomain lockDomain,
             int complexity) {
-        Map<Integer, Integer> complexityMap = primary ? sUserToComplexityMap :
+        Map<Integer, Integer> complexityMap = lockDomain == Primary ? sUserToComplexityMap :
                 sUserToComplexityMapSecondary;
         complexityMap.put(userHandle, complexity);
     }
 
-    public static void setRequiredPasswordComplexity(int complexity, boolean primary) {
-        Map<Integer, Integer> complexityMap = primary ? sUserToComplexityMap :
-                sUserToComplexityMapSecondary;
-        complexityMap.put(UserHandle.myUserId(), complexity);
+    public static void setRequiredPasswordComplexity(int complexity, LockDomain lockDomain) {
+        setRequiredPasswordComplexity(UserHandle.myUserId(), lockDomain, complexity);
+    }
+
+    public static void setRequiredPasswordComplexity(int complexity) {
+        setRequiredPasswordComplexity(complexity, Primary);
     }
 
     public static void setRequiredProfilePasswordComplexity(int complexity) {
@@ -237,21 +289,40 @@ public class ShadowLockPatternUtils {
     }
 
     @Implementation
-    public PasswordMetrics getRequestedPasswordMetrics(int userId, boolean primary,
+    public PasswordMetrics getRequestedPasswordMetrics(int userId) {
+        return getRequestedPasswordMetrics(userId, false);
+    }
+
+    @Implementation
+    public PasswordMetrics getRequestedPasswordMetrics(int userId, LockDomain lockDomain) {
+        return getRequestedPasswordMetrics(userId, lockDomain, false);
+    }
+
+    @Implementation
+    public PasswordMetrics getRequestedPasswordMetrics(int userId, boolean deviceWideOnly) {
+        return getRequestedPasswordMetrics(userId, Primary, deviceWideOnly);
+    }
+
+    @Implementation
+    public PasswordMetrics getRequestedPasswordMetrics(int userId, LockDomain lockDomain,
             boolean deviceWideOnly) {
-        Map<Integer, PasswordMetrics> metricsMap = primary ? sUserToMetricsMap :
+        Map<Integer, PasswordMetrics> metricsMap = lockDomain == Primary ? sUserToMetricsMap :
                 sUserToMetricsMapSecondary;
         PasswordMetrics metrics = metricsMap.getOrDefault(userId,
                 new PasswordMetrics(LockPatternUtils.CREDENTIAL_TYPE_NONE));
-        if (primary && !deviceWideOnly) {
+        if (lockDomain == Primary && !deviceWideOnly) {
             metrics.maxWith(sUserToProfileMetricsMap.getOrDefault(userId,
                     new PasswordMetrics(LockPatternUtils.CREDENTIAL_TYPE_NONE)));
         }
         return metrics;
     }
 
-    public static void setRequestedPasswordMetrics(PasswordMetrics metrics, boolean primary) {
-        Map<Integer, PasswordMetrics> metricsMap = primary ? sUserToMetricsMap :
+    public static void setRequestedPasswordMetrics(PasswordMetrics metrics) {
+        setRequestedPasswordMetrics(metrics, Primary);
+    }
+
+    public static void setRequestedPasswordMetrics(PasswordMetrics metrics, LockDomain lockDomain) {
+        Map<Integer, PasswordMetrics> metricsMap = lockDomain == Primary ? sUserToMetricsMap :
                 sUserToMetricsMapSecondary;
         metricsMap.put(UserHandle.myUserId(), metrics);
     }
@@ -267,7 +338,12 @@ public class ShadowLockPatternUtils {
     }
 
     @Implementation
-    public boolean isLockScreenDisabled(int userId, boolean primary) {
+    public boolean isLockScreenDisabled(int userId) {
+        return isLockScreenDisabled(userId, Primary);
+    }
+
+    @Implementation
+    public boolean isLockScreenDisabled(int userId, LockDomain lockDomain) {
         return false;
     }
 

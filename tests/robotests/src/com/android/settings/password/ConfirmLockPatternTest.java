@@ -16,6 +16,7 @@
 
 package com.android.settings.password;
 
+import static com.android.internal.widget.LockDomain.Primary;
 import static com.android.settings.password.TestUtils.GUESS_INVALID_RESULT;
 import static com.android.settings.password.TestUtils.GUESS_VALID_RESULT;
 import static com.android.settings.password.TestUtils.LOCKOUT_RESULT;
@@ -115,7 +116,7 @@ public class ConfirmLockPatternTest {
                         ManagedSubscriptionsPolicy.TYPE_ALL_PERSONAL_SUBSCRIPTIONS));
 
         // Set false by default so we can check if lock was set when remote validation succeeds.
-        ShadowLockPatternUtils.setIsSecure(UserHandle.myUserId(), true, false);
+        ShadowLockPatternUtils.setIsSecure(UserHandle.myUserId(), Primary,false);
 
         FeatureFlagUtils.setEnabled(mContext,
                 FeatureFlagUtils.SETTINGS_REMOTE_DEVICE_CREDENTIAL_VALIDATION, true);

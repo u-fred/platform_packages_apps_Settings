@@ -21,7 +21,6 @@ import static android.app.Activity.RESULT_FIRST_USER;
 import static android.app.admin.DevicePolicyResources.Strings.Settings.WORK_PROFILE_LOCK_ATTEMPTS_FAILED;
 
 import static com.android.internal.widget.LockDomain.Primary;
-import static com.android.internal.widget.LockDomain.Secondary;
 import static com.android.settings.Utils.SETTINGS_PACKAGE_NAME;
 
 import android.app.Dialog;
@@ -54,6 +53,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentManager;
 
+import com.android.internal.widget.LockDomain;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockscreenCredential;
 import com.android.internal.widget.WrappedLockPatternUtils;
@@ -112,7 +112,7 @@ public abstract class ConfirmDeviceCredentialBaseFragment extends InstrumentedFr
     protected boolean mRepairMode;
     protected CharSequence mAlternateButtonText;
     protected BiometricManager mBiometricManager;
-    protected boolean mPrimaryCredential;
+    protected LockDomain mLockDomain;
 
     @Nullable protected RemoteLockscreenValidationSession mRemoteLockscreenValidationSession;
     /** Credential saved so the credential can be set for device if remote validation passes */
@@ -191,16 +191,14 @@ public abstract class ConfirmDeviceCredentialBaseFragment extends InstrumentedFr
         mUserManager = UserManager.get(getActivity());
         mEffectiveUserId = mUserManager.getCredentialOwnerProfile(mUserId);
 
-        mPrimaryCredential = intent.getBooleanExtra(
-                ChooseLockSettingsHelper.EXTRA_KEY_PRIMARY_CREDENTIAL, true);
-        mLockPatternUtils = new WrappedLockPatternUtils(getActivity(),
-                mPrimaryCredential ? Primary : Secondary);
+        mLockDomain = intent.getParcelableExtra(
+                ChooseLockSettingsHelper.EXTRA_KEY_LOCK_DOMAIN, LockDomain.class);
+        mLockDomain = mLockDomain == null ? Primary : mLockDomain;
+        mLockPatternUtils = new WrappedLockPatternUtils(getActivity(), mLockDomain);
 
         mDevicePolicyManager = (DevicePolicyManager) getActivity().getSystemService(
                 Context.DEVICE_POLICY_SERVICE);
         mBiometricManager = getActivity().getSystemService(BiometricManager.class);
-
-
     }
 
     @Override

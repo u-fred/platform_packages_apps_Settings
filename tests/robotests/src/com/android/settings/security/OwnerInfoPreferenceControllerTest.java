@@ -15,6 +15,7 @@
  */
 package com.android.settings.security;
 
+import static com.android.internal.widget.LockDomain.Primary;
 import static com.android.settings.security.OwnerInfoPreferenceController.KEY_OWNER_INFO;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -90,7 +91,7 @@ public class OwnerInfoPreferenceControllerTest {
         when(mFragment.getSettingsLifecycle()).thenReturn(mock(Lifecycle.class));
         when(mFragmentManager.beginTransaction()).thenReturn(mFragmentTransaction);
 
-        mController = spy(new OwnerInfoPreferenceController(mContext, mFragment, true));
+        mController = spy(new OwnerInfoPreferenceController(mContext, mFragment, Primary));
         when(mScreen.findPreference(mController.getPreferenceKey())).thenReturn(mPreference);
         ReflectionHelpers.setField(mController, "mLockPatternUtils", mLockPatternUtils);
     }

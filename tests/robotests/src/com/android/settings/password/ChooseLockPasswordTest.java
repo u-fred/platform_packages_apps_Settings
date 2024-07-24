@@ -443,7 +443,7 @@ public class ChooseLockPasswordTest {
 
     @Test
     public void validateComplexityMergedFromDpmOnCreate() {
-        ShadowLockPatternUtils.setRequiredPasswordComplexity(PASSWORD_COMPLEXITY_LOW, true);
+        ShadowLockPatternUtils.setRequiredPasswordComplexity(PASSWORD_COMPLEXITY_LOW);
 
         assertPasswordValidationResult(
                 /* minMetrics */ null,
@@ -566,7 +566,7 @@ public class ChooseLockPasswordTest {
             Intent intent, String... expectedValidationResult) {
         ChooseLockPassword activity = buildChooseLockPasswordActivity(intent);
         ChooseLockPasswordFragment fragment = getChooseLockPasswordFragment(activity);
-        fragment.validatePassword(userEnteredPassword, true);
+        fragment.validatePassword(userEnteredPassword);
         String[] messages = fragment.convertErrorCodeToMessages();
         assertThat(messages).asList().containsExactly(expectedValidationResult);
     }

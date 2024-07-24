@@ -16,6 +16,7 @@
 
 package com.android.settings.security.screenlock;
 
+import static com.android.internal.widget.LockDomain.Primary;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.Mockito.verify;
@@ -64,7 +65,7 @@ public class PowerButtonInstantLockPreferenceControllerTest {
 
         mPreference = new SwitchPreference(mContext);
         mController = new PowerButtonInstantLockPreferenceController(
-                mContext, TEST_USER_ID, mLockPatternUtils, true);
+                mContext, TEST_USER_ID, mLockPatternUtils, Primary);
     }
 
     @Test

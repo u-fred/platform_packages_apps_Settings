@@ -25,6 +25,7 @@ import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_COMPLEX;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_SOMETHING;
 
+import static com.android.internal.widget.LockDomain.Primary;
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_NONE;
 import static com.android.settings.password.ChooseLockGeneric.ChooseLockGenericFragment.KEY_LOCK_SETTINGS_FOOTER;
 import static com.android.settings.password.ChooseLockSettingsHelper.EXTRA_KEY_CALLER_APP_NAME;
@@ -101,7 +102,7 @@ import org.robolectric.shadows.ShadowApplication;
                 ShadowUtils.class,
                 ShadowInteractionJankMonitor.class
         })
-@Ignore("b/179136903: Tests failed with collapsing toolbar, plan to figure out root cause later.")
+//@Ignore("b/179136903: Tests failed with collapsing toolbar, plan to figure out root cause later.")
 public class ChooseLockGenericTest {
 
     @Rule
@@ -499,10 +500,12 @@ public class ChooseLockGenericTest {
 
     @Test
     @Ignore
+    // TODO: Add overload back to SLP for all true.
+    // TODO: What does below comment mean?
     // Test written before code changes.
     public void updatePreferencesOrFinish_ComplexityIsReadFromDPM() {
         ShadowStorageManager.setIsFileEncrypted(false);
-        ShadowLockPatternUtils.setRequiredPasswordComplexity(PASSWORD_COMPLEXITY_HIGH, true);
+        ShadowLockPatternUtils.setRequiredPasswordComplexity(PASSWORD_COMPLEXITY_HIGH);
 
         initActivity(null);
         mFragment.updatePreferencesOrFinish(false /* isRecreatingActivity */);
@@ -518,7 +521,7 @@ public class ChooseLockGenericTest {
     @Test
     public void updatePreferencesOrFinish_ComplexityIsMergedWithDPM() {
         ShadowStorageManager.setIsFileEncrypted(false);
-        ShadowLockPatternUtils.setRequiredPasswordComplexity(PASSWORD_COMPLEXITY_HIGH, true);
+        ShadowLockPatternUtils.setRequiredPasswordComplexity(PASSWORD_COMPLEXITY_HIGH);
         Intent intent = new Intent()
                 .putExtra(EXTRA_KEY_CALLER_APP_NAME, "app name")
                 .putExtra(EXTRA_KEY_REQUESTED_MIN_COMPLEXITY, PASSWORD_COMPLEXITY_LOW);
@@ -538,7 +541,7 @@ public class ChooseLockGenericTest {
     @Test
     public void updatePreferencesOrFinish_ComplexityIsMergedWithDPM_AppIsHigher() {
         ShadowStorageManager.setIsFileEncrypted(false);
-        ShadowLockPatternUtils.setRequiredPasswordComplexity(PASSWORD_COMPLEXITY_LOW, true);
+        ShadowLockPatternUtils.setRequiredPasswordComplexity(PASSWORD_COMPLEXITY_LOW);
         Intent intent = new Intent()
                 .putExtra(EXTRA_KEY_CALLER_APP_NAME, "app name")
                 .putExtra(EXTRA_KEY_REQUESTED_MIN_COMPLEXITY, PASSWORD_COMPLEXITY_HIGH);
@@ -559,7 +562,7 @@ public class ChooseLockGenericTest {
 
     @Test
     public void getLockPasswordIntent_DevicePasswordRequirementOnly_PasswordComplexityPassedOn() {
-        ShadowLockPatternUtils.setRequiredPasswordComplexity(PASSWORD_COMPLEXITY_LOW, true);
+        ShadowLockPatternUtils.setRequiredPasswordComplexity(PASSWORD_COMPLEXITY_LOW);
         ShadowLockPatternUtils.setRequiredProfilePasswordComplexity(PASSWORD_COMPLEXITY_HIGH);
 
         Intent intent = new Intent()
@@ -578,7 +581,7 @@ public class ChooseLockGenericTest {
     public void getLockPasswordIntent_DevicePasswordRequirementOnly_PasswordQualityPassedOn() {
         PasswordPolicy policy = new PasswordPolicy();
         policy.quality = PASSWORD_QUALITY_SOMETHING;
-        ShadowLockPatternUtils.setRequestedPasswordMetrics(policy.getMinMetrics(), true);
+        ShadowLockPatternUtils.setRequestedPasswordMetrics(policy.getMinMetrics());
         PasswordPolicy profilePolicy = new PasswordPolicy();
         profilePolicy.quality = PASSWORD_QUALITY_ALPHABETIC;
         ShadowLockPatternUtils.setRequestedProfilePasswordMetrics(profilePolicy.getMinMetrics());
@@ -596,7 +599,7 @@ public class ChooseLockGenericTest {
 
     @Test
     public void getLockPasswordIntent_DevicePasswordRequirementOnly_ComplexityAndQualityPassedOn() {
-        ShadowLockPatternUtils.setRequiredPasswordComplexity(PASSWORD_COMPLEXITY_LOW, true);
+        ShadowLockPatternUtils.setRequiredPasswordComplexity(PASSWORD_COMPLEXITY_LOW);
         PasswordPolicy policy = new PasswordPolicy();
         policy.quality = PASSWORD_QUALITY_ALPHABETIC;
         ShadowLockPatternUtils.setRequestedProfilePasswordMetrics(policy.getMinMetrics());

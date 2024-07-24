@@ -65,12 +65,14 @@ public class ChooseLockGenericController {
     private final LockDomain mLockDomain;
 
     public ChooseLockGenericController(Context context, int userId,
-            ManagedLockPasswordProvider managedPasswordProvider, LockPatternUtils lockPatternUtils,
-            boolean hideInsecureScreenLockTypes, int appRequestedMinComplexity,
-            boolean devicePasswordRequirementOnly, int unificationProfileId,
-            LockDomain lockDomain) {
-        if (lockDomain == Secondary) {
-            lockPatternUtils.checkUserSupportsBiometricSecondFactor(userId, true);
+            ManagedLockPasswordProvider managedPasswordProvider,
+            WrappedLockPatternUtils lockPatternUtils, boolean hideInsecureScreenLockTypes,
+            int appRequestedMinComplexity, boolean devicePasswordRequirementOnly,
+            int unificationProfileId) {
+        mLockPatternUtils = lockPatternUtils;
+        mLockDomain = mLockPatternUtils.getLockDomain();
+        if (mLockDomain == Secondary) {
+            mLockPatternUtils.checkUserSupportsBiometricSecondFactor(userId, true);
             if (unificationProfileId != UserHandle.USER_NULL) {
                 throw new IllegalArgumentException(
                         "unificationProfileId must be USER_NULL when lockDomain is Secondary");
@@ -83,8 +85,6 @@ public class ChooseLockGenericController {
         mContext = context;
         mUserId = userId;
         mManagedPasswordProvider = managedPasswordProvider;
-        mLockDomain = lockDomain;
-        mLockPatternUtils = new WrappedLockPatternUtils(lockPatternUtils, mLockDomain);
         mHideInsecureScreenLockTypes = hideInsecureScreenLockTypes;
         mAppRequestedMinComplexity = appRequestedMinComplexity;
         mDevicePasswordRequirementOnly = devicePasswordRequirementOnly;
@@ -96,20 +96,19 @@ public class ChooseLockGenericController {
         private final Context mContext;
         private final int mUserId;
         private final ManagedLockPasswordProvider mManagedPasswordProvider;
-        private final LockPatternUtils mLockPatternUtils;
+        private final WrappedLockPatternUtils mLockPatternUtils;
 
         private boolean mHideInsecureScreenLockTypes = false;
         @PasswordComplexity private int mAppRequestedMinComplexity = PASSWORD_COMPLEXITY_NONE;
         private boolean mDevicePasswordRequirementOnly = false;
         private int mUnificationProfileId = UserHandle.USER_NULL;
-        private LockDomain mLockDomain = Primary;
 
-        public Builder(Context context, int userId) {
-            this(context, userId, new LockPatternUtils(context));
+        public Builder(Context context, int userId, LockDomain lockDomain) {
+            this(context, userId, new WrappedLockPatternUtils(context, lockDomain));
         }
 
         public Builder(Context context, int userId,
-                LockPatternUtils lockPatternUtils) {
+                WrappedLockPatternUtils lockPatternUtils) {
             this(
                     context,
                     userId,
@@ -122,7 +121,7 @@ public class ChooseLockGenericController {
                 Context context,
                 int userId,
                 ManagedLockPasswordProvider managedLockPasswordProvider,
-                LockPatternUtils lockPatternUtils) {
+                WrappedLockPatternUtils lockPatternUtils) {
             mContext = context;
             mUserId = userId;
             mManagedPasswordProvider = managedLockPasswordProvider;
@@ -168,19 +167,11 @@ public class ChooseLockGenericController {
             return this;
         }
 
-        /**
-         * Sets whether the primary screen lock is being set.
-         */
-        public Builder setLockDomain(LockDomain lockDomain) {
-            mLockDomain = lockDomain;
-            return this;
-        }
-
         /** Creates {@link ChooseLockGenericController} instance. */
         public ChooseLockGenericController build() {
             return new ChooseLockGenericController(mContext, mUserId, mManagedPasswordProvider,
                     mLockPatternUtils, mHideInsecureScreenLockTypes, mAppRequestedMinComplexity,
-                    mDevicePasswordRequirementOnly, mUnificationProfileId, mLockDomain);
+                    mDevicePasswordRequirementOnly, mUnificationProfileId);
         }
     }
 
@@ -290,7 +281,6 @@ public class ChooseLockGenericController {
     public PasswordMetrics getAggregatedPasswordMetrics() {
         PasswordMetrics metrics = mLockPatternUtils.getRequestedPasswordMetrics(mUserId,
                 mDevicePasswordRequirementOnly);
-        // Will only be true if mLockDomain == Primary.
         if (mUnificationProfileId != UserHandle.USER_NULL) {
             metrics.maxWith(mLockPatternUtils.getRequestedPasswordMetrics(mUnificationProfileId));
         }
@@ -306,7 +296,6 @@ public class ChooseLockGenericController {
         int complexity = Math.max(mAppRequestedMinComplexity,
                 mLockPatternUtils.getRequestedPasswordComplexity(
                         mUserId, mDevicePasswordRequirementOnly));
-        // Will only be true if mLockDomain == Primary.
         if (mUnificationProfileId != UserHandle.USER_NULL) {
             complexity = Math.max(complexity,
                     mLockPatternUtils.getRequestedPasswordComplexity(mUnificationProfileId));
