@@ -34,6 +34,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 
 import com.android.internal.app.UnlaunchableAppActivity;
+import com.android.internal.widget.LockDomain;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockscreenCredential;
 import com.android.internal.widget.WrappedLockPatternUtils;
@@ -43,7 +44,6 @@ import com.android.settings.Utils;
 import com.android.settings.biometrics.fingerprint.FingerprintSettingsKeyguardPreferenceController;
 import com.android.settings.core.SubSettingLauncher;
 import com.android.settings.overlay.FeatureFactory;
-import com.android.settings.password.ChooseLockGeneric;
 import com.android.settings.password.ChooseLockGeneric.ChooseLockGenericFragment;
 import com.android.settings.password.ChooseLockSettingsHelper;
 import com.android.settings.security.screenlock.ScreenLockSettings;
@@ -59,17 +59,16 @@ public class ScreenLockPreferenceDetailsUtils {
     private final WrappedLockPatternUtils mLockPatternUtils;
     private final int mProfileChallengeUserId;
     private final UserManager mUm;
-    private final boolean mIsForPrimaryScreenLock;
+    private LockDomain mLockDomain;
 
-    public ScreenLockPreferenceDetailsUtils(Context context, boolean isForPrimaryScreenLock) {
+    public ScreenLockPreferenceDetailsUtils(Context context, LockDomain lockDomain) {
         mContext = context;
         mUm = context.getSystemService(UserManager.class);
-        mIsForPrimaryScreenLock = isForPrimaryScreenLock;
+        mLockDomain = lockDomain;
         LockPatternUtils inner = FeatureFactory.getFeatureFactory()
                 .getSecurityFeatureProvider()
                 .getLockPatternUtils(context);
-        mLockPatternUtils = new WrappedLockPatternUtils(inner,
-                isForPrimaryScreenLock ? Primary : Secondary);
+        mLockPatternUtils = new WrappedLockPatternUtils(inner, lockDomain);
         mProfileChallengeUserId = Utils.getManagedProfileId(mUm, mUserId);
 
     }
@@ -77,10 +76,11 @@ public class ScreenLockPreferenceDetailsUtils {
     /**
      * Returns whether the screen lock settings entity should be shown.
      */
+    // TODO: Overload this to reduce calls.
     public boolean isAvailable(int userId) {
         if (!mContext.getResources().getBoolean(R.bool.config_show_unlock_set_or_change)) {
             return false;
-        } else if (mIsForPrimaryScreenLock) {
+        } else if (mLockDomain == Primary) {
             return true;
         } else if (!mLockPatternUtils.checkUserSupportsBiometricSecondFactor(userId, false)) {
            return false;
@@ -106,7 +106,7 @@ public class ScreenLockPreferenceDetailsUtils {
      * Returns whether the password quality is managed by device admin.
      */
     public boolean isPasswordQualityManaged(int userId, RestrictedLockUtils.EnforcedAdmin admin) {
-        if (!mIsForPrimaryScreenLock) {
+        if (mLockDomain == Secondary) {
             return false;
         }
         final DevicePolicyManager dpm = (DevicePolicyManager) mContext
@@ -147,9 +147,9 @@ public class ScreenLockPreferenceDetailsUtils {
      */
     public Intent getLaunchScreenLockSettingsIntent(int sourceMetricsCategory) {
         Bundle extras = new Bundle();
-        if (!mIsForPrimaryScreenLock) {
+        if (mLockDomain == Secondary) {
             // TODO: Should these constants be defined in this class?
-            extras.putBoolean(ChooseLockSettingsHelper.EXTRA_KEY_PRIMARY_CREDENTIAL, false);
+            extras.putParcelable(ChooseLockSettingsHelper.EXTRA_KEY_LOCK_DOMAIN, Secondary);
             extras.putBoolean(ChooseLockSettingsHelper.EXTRA_KEY_FOREGROUND_ONLY, true);
         }
         return new SubSettingLauncher(mContext)
@@ -220,8 +220,8 @@ public class ScreenLockPreferenceDetailsUtils {
     protected Intent getChooseLockGenericFragmentIntent(int sourceMetricsCategory,
             @Nullable LockscreenCredential password) {
         Bundle extras = new Bundle();
-        if (!mIsForPrimaryScreenLock) {
-            extras.putBoolean(ChooseLockSettingsHelper.EXTRA_KEY_PRIMARY_CREDENTIAL, false);
+        if (mLockDomain == Secondary) {
+            extras.putParcelable(ChooseLockSettingsHelper.EXTRA_KEY_LOCK_DOMAIN, Secondary);
         }
 
         Bundle args = new Bundle();

@@ -18,6 +18,8 @@ package com.android.settings.safetycenter;
 
 import static android.safetycenter.SafetyEvent.SAFETY_EVENT_TYPE_SOURCE_STATE_CHANGED;
 
+import static com.android.internal.widget.LockDomain.Primary;
+
 import android.app.PendingIntent;
 import android.app.settings.SettingsEnums;
 import android.content.Context;
@@ -117,7 +119,7 @@ public final class LockScreenSafetySource {
     public static void onLockScreenChange(Context context) {
         setSafetySourceData(
                 context,
-                new ScreenLockPreferenceDetailsUtils(context, true),
+                new ScreenLockPreferenceDetailsUtils(context, Primary),
                 new SafetyEvent.Builder(SAFETY_EVENT_TYPE_SOURCE_STATE_CHANGED).build());
 
         // Also send refreshed safety center data for biometrics, since changing lockscreen settings

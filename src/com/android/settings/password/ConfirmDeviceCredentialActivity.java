@@ -212,7 +212,7 @@ public class ConfirmDeviceCredentialActivity extends FragmentActivity {
         }
 
         final @LockPatternUtils.CredentialType int credentialType = Utils.getCredentialType(
-                mContext, effectiveUserId, true);
+                mContext, effectiveUserId);
         if (mTitle == null) {
             promptInfo.setDeviceCredentialTitle(
                     getTitleFromCredentialType(credentialType, isEffectiveUserManagedProfile));

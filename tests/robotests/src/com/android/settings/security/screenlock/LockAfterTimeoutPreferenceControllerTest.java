@@ -18,6 +18,7 @@ package com.android.settings.security.screenlock;
 
 import static android.provider.Settings.System.SCREEN_OFF_TIMEOUT;
 
+import static com.android.internal.widget.LockDomain.Primary;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.Mockito.mock;
@@ -74,7 +75,7 @@ public class LockAfterTimeoutPreferenceControllerTest {
                 .thenReturn(mTrustAgentManager);
 
         mController = new LockAfterTimeoutPreferenceController(
-                mContext, TEST_USER_ID, mLockPatternUtils, true);
+                mContext, TEST_USER_ID, mLockPatternUtils, Primary);
     }
 
     @Test

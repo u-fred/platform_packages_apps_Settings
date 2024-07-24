@@ -16,6 +16,8 @@
 
 package com.android.settings.security;
 
+import static com.android.internal.widget.LockDomain.Primary;
+import static com.android.internal.widget.LockDomain.Secondary;
 import static com.android.settings.biometrics.fingerprint.FingerprintSettings.FingerprintSettingsFragment.BIOMETRIC_SECOND_FACTOR_SETTINGS_REQUEST;
 import static com.android.settings.biometrics.fingerprint.FingerprintSettings.FingerprintSettingsFragment.CHOOSE_BIOMETRIC_SECOND_FACTOR_REQUEST;
 
@@ -73,7 +75,7 @@ public class ChangeScreenLockPreferenceController extends AbstractPreferenceCont
         mMetricsFeatureProvider = FeatureFactory.getFeatureFactory().getMetricsFeatureProvider();
         mIsForPrimaryScreenLock = isForPrimaryScreenLock;
         mScreenLockPreferenceDetailUtils = new ScreenLockPreferenceDetailsUtils(context,
-                isForPrimaryScreenLock);
+                isForPrimaryScreenLock ? Primary : Secondary);
         mEffectiveUserId = mUserId;
     }
 

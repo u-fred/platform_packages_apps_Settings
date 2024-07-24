@@ -26,6 +26,7 @@ import android.content.Context;
 import androidx.preference.SwitchPreference;
 
 import com.android.internal.widget.LockPatternUtils;
+import com.android.internal.widget.WrappedLockPatternUtils;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -41,7 +42,7 @@ public class PatternVisiblePreferenceControllerTest {
     private static final int TEST_USER_ID = 0;
 
     @Mock
-    private LockPatternUtils mLockPatternUtils;
+    private WrappedLockPatternUtils mLockPatternUtils;
     private Context mContext;
     private PatternVisiblePreferenceController mController;
     private SwitchPreference mPreference;
@@ -50,9 +51,9 @@ public class PatternVisiblePreferenceControllerTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         mContext = RuntimeEnvironment.application;
+
         mController =
-                new PatternVisiblePreferenceController(mContext, TEST_USER_ID, mLockPatternUtils,
-                        true);
+                new PatternVisiblePreferenceController(mContext, TEST_USER_ID, mLockPatternUtils);
         mPreference = new SwitchPreference(mContext);
     }
 

@@ -16,6 +16,7 @@
 
 package com.android.settings.security;
 
+import static com.android.internal.widget.LockDomain.Primary;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertNull;
@@ -92,7 +93,7 @@ public class ScreenLockPreferenceDetailsUtilsTest {
         when(featureFactory.securityFeatureProvider.getLockPatternUtils(mContext))
                  .thenReturn(mLockPatternUtils);
 
-        mScreenLockPreferenceDetailsUtils = new ScreenLockPreferenceDetailsUtils(mContext, true);
+        mScreenLockPreferenceDetailsUtils = new ScreenLockPreferenceDetailsUtils(mContext, Primary);
     }
 
     @Test

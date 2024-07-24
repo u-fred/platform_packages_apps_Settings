@@ -32,6 +32,7 @@ import android.content.Context;
 import androidx.preference.SwitchPreference;
 
 import com.android.internal.widget.LockPatternUtils;
+import com.android.internal.widget.WrappedLockPatternUtils;
 
 import org.junit.Before;
 import org.junit.Ignore;
@@ -57,7 +58,7 @@ public class PinPrivacyPreferenceControllerTest {
     private static final int TEST_USER_ID = 0;
 
     @Mock
-    private LockPatternUtils mLockPatternUtils;
+    private WrappedLockPatternUtils mLockPatternUtils;
     private Context mContext;
     private PinPrivacyPreferenceController mController;
     private SwitchPreference mPreference;
@@ -67,14 +68,13 @@ public class PinPrivacyPreferenceControllerTest {
         MockitoAnnotations.initMocks(this);
         mContext = RuntimeEnvironment.application;
         mController =
-                new PinPrivacyPreferenceController(mContext, TEST_USER_ID, mLockPatternUtils,
-                        mPrimary);
+                new PinPrivacyPreferenceController(mContext, TEST_USER_ID, mLockPatternUtils);
         mPreference = new SwitchPreference(mContext);
     }
 
     @Test
     public void isAvailable_lockSetToPin_shouldReturnTrue() {
-        when(mLockPatternUtils.getCredentialTypeForUser(TEST_USER_ID, mPrimary ? Primary : Secondary)).thenReturn(
+        when(mLockPatternUtils.getCredentialTypeForUser(TEST_USER_ID)).thenReturn(
                 CREDENTIAL_TYPE_PIN);
         assertThat(mController.isAvailable()).isTrue();
     }
@@ -82,28 +82,28 @@ public class PinPrivacyPreferenceControllerTest {
     @Ignore("b/313612259")
     @Test
     public void isAvailable_lockSetToPinOrPw_shouldReturnTrue() {
-        when(mLockPatternUtils.getCredentialTypeForUser(TEST_USER_ID, mPrimary ? Primary : Secondary)).thenReturn(
+        when(mLockPatternUtils.getCredentialTypeForUser(TEST_USER_ID)).thenReturn(
                 CREDENTIAL_TYPE_PASSWORD_OR_PIN);
         assertThat(mController.isAvailable()).isTrue();
     }
 
     @Test
     public void isAvailable_lockSetToOther_shouldReturnFalse() {
-        when(mLockPatternUtils.getCredentialTypeForUser(TEST_USER_ID, mPrimary ? Primary : Secondary)).thenReturn(
+        when(mLockPatternUtils.getCredentialTypeForUser(TEST_USER_ID)).thenReturn(
                 CREDENTIAL_TYPE_PATTERN);
         assertThat(mController.isAvailable()).isFalse();
     }
 
     @Test
     public void updateState_shouldSetPref() {
-        when(mLockPatternUtils.isPinEnhancedPrivacyEnabled(TEST_USER_ID, mPrimary ? Primary : Secondary)).thenReturn(true);
+        when(mLockPatternUtils.isPinEnhancedPrivacyEnabled(TEST_USER_ID)).thenReturn(true);
         mController.updateState(mPreference);
         assertThat(mPreference.isChecked()).isTrue();
     }
 
     @Test
     public void updateState_shouldSetPref_false() {
-        when(mLockPatternUtils.isPinEnhancedPrivacyEnabled(TEST_USER_ID, mPrimary ? Primary : Secondary)).thenReturn(
+        when(mLockPatternUtils.isPinEnhancedPrivacyEnabled(TEST_USER_ID)).thenReturn(
                 false);
         mController.updateState(mPreference);
         assertThat(mPreference.isChecked()).isFalse();
@@ -112,7 +112,7 @@ public class PinPrivacyPreferenceControllerTest {
     @Test
     public void onPreferenceChange_shouldUpdateLockPatternUtils() {
         mController.onPreferenceChange(mPreference, true);
-        verify(mLockPatternUtils).setPinEnhancedPrivacyEnabled(true, TEST_USER_ID, mPrimary ? Primary : Secondary);
+        verify(mLockPatternUtils).setPinEnhancedPrivacyEnabled(true, TEST_USER_ID);
     }
 
     @Test

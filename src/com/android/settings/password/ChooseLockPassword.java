@@ -58,6 +58,7 @@ import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.Parcelable;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.text.Editable;
@@ -86,6 +87,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.widget.LockDomain;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockscreenCredential;
 import com.android.internal.widget.PasswordValidationError;
@@ -182,9 +184,9 @@ public class ChooseLockPassword extends SettingsActivity {
             return this;
         }
 
-        public IntentBuilder setIsPrimaryCredential(boolean isPrimaryCredential) {
-            mIntent.putExtra(ChooseLockSettingsHelper.EXTRA_KEY_PRIMARY_CREDENTIAL,
-                    isPrimaryCredential);
+        public IntentBuilder setLockDomain(LockDomain lockDomain) {
+            mIntent.putExtra(ChooseLockSettingsHelper.EXTRA_KEY_LOCK_DOMAIN,
+                    (Parcelable) (lockDomain));
             return this;
         }
 
@@ -240,8 +242,8 @@ public class ChooseLockPassword extends SettingsActivity {
 
         private static final int MIN_AUTO_PIN_REQUIREMENT_LENGTH = 6;
 
-        // Whether we are setting a primary or secondary credential.
-        private boolean mPrimaryCredential;
+        // Whether setting primary or secondary credential.
+        private LockDomain mLockDomain;
         // This is always the primary credential, even if we are setting secondary credential.
         private LockscreenCredential mCurrentCredential;
         private LockscreenCredential mChosenPassword;
@@ -492,12 +494,10 @@ public class ChooseLockPassword extends SettingsActivity {
                 throw new SecurityException("Fragment contained in wrong activity");
             }
 
-            // TODO: Convert to EXTRA_KEY_LOCK_DOMAIN.
-            // TODO: Remove mPrimaryCredential and add WLPU#getLockDomain.
-            mPrimaryCredential = intent.getBooleanExtra(
-                    ChooseLockSettingsHelper.EXTRA_KEY_PRIMARY_CREDENTIAL, true);
-            mLockPatternUtils = new WrappedLockPatternUtils(getActivity(),
-                    mPrimaryCredential ? Primary : Secondary);
+            mLockDomain = intent.getParcelableExtra(
+                    ChooseLockSettingsHelper.EXTRA_KEY_LOCK_DOMAIN, LockDomain.class);
+            mLockDomain = mLockDomain == null ? Primary : mLockDomain;
+            mLockPatternUtils = new WrappedLockPatternUtils(getActivity(), mLockDomain);
 
             // Only take this argument into account if it belongs to the current profile.
             mUserId = Utils.getUserIdFromBundle(getActivity(), intent.getExtras());
@@ -736,7 +736,7 @@ public class ChooseLockPassword extends SettingsActivity {
         @Override
         public void onStop() {
             super.onStop();
-            if (!mPrimaryCredential && !getActivity().isChangingConfigurations()) {
+            if (mLockDomain == Secondary && !getActivity().isChangingConfigurations()) {
                 getActivity().setResult(RESULT_TIMEOUT);
                 getActivity().finish();
             }
@@ -795,7 +795,7 @@ public class ChooseLockPassword extends SettingsActivity {
          * @return whether password satisfies all the requirements.
          */
         @VisibleForTesting
-        boolean validatePassword(LockscreenCredential credential, boolean primary) {
+        boolean validatePassword(LockscreenCredential credential) {
             mValidationErrors = PasswordMetrics.validateCredential(mMinMetrics, mMinComplexity,
                     credential);
             if (mValidationErrors.isEmpty() && mLockPatternUtils.checkPasswordHistory(
@@ -829,7 +829,7 @@ public class ChooseLockPassword extends SettingsActivity {
             mChosenPassword = mIsAlphaMode ? LockscreenCredential.createPassword(passwordText)
                     : LockscreenCredential.createPin(passwordText);
             if (mUiStage == Stage.Introduction) {
-                if (validatePassword(mChosenPassword, mPrimaryCredential)) {
+                if (validatePassword(mChosenPassword)) {
                     mFirstPassword = mChosenPassword;
                     mPasswordEntry.setText("");
                     updateStage(Stage.NeedToConfirm);
@@ -1006,7 +1006,7 @@ public class ChooseLockPassword extends SettingsActivity {
             final int length = password.size();
             if (mUiStage == Stage.Introduction) {
                 mPasswordRestrictionView.setVisibility(View.VISIBLE);
-                final boolean passwordCompliant = validatePassword(password, mPrimaryCredential);
+                final boolean passwordCompliant = validatePassword(password);
                 String[] messages = convertErrorCodeToMessages();
                 // Update the fulfillment of requirements.
                 mPasswordRequirementAdapter.setRequirements(messages);

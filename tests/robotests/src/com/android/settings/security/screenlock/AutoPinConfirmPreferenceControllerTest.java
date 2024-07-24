@@ -27,6 +27,7 @@ import android.content.Context;
 import androidx.preference.SwitchPreference;
 import androidx.test.core.app.ApplicationProvider;
 
+import com.android.internal.widget.LockDomain;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.WrappedLockPatternUtils;
 import com.android.settingslib.core.lifecycle.ObservablePreferenceFragment;
@@ -45,10 +46,10 @@ import java.util.Collection;
 
 @RunWith(ParameterizedRobolectricTestRunner.class)
 public class AutoPinConfirmPreferenceControllerTest {
-    @Parameter public boolean mPrimary;
+    @Parameter public boolean mLockDomain;
     @Parameters
-    public static Collection<Boolean> parameters() {
-        return Arrays.asList(true, false);
+    public static Collection<LockDomain> parameters() {
+        return Arrays.asList(Primary, Secondary);
     }
     private static final Integer TEST_USER_ID = 1;
     @Mock
@@ -62,23 +63,24 @@ public class AutoPinConfirmPreferenceControllerTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         Context context = ApplicationProvider.getApplicationContext();
+
         mController =
-                new AutoPinConfirmPreferenceController(context, TEST_USER_ID, mLockPatternUtils,
-                        mParentFragment, mPrimary, null);
+                new AutoPinConfirmPreferenceController(context, TEST_USER_ID,
+                        mLockPatternUtils, mParentFragment, null);
         mPreference = new SwitchPreference(context);
     }
 
     @Test
     public void isAvailable_featureEnabledAndLockSetToNone_shouldReturnFalse() {
-        when(mLockPatternUtils.isSecure(TEST_USER_ID, mPrimary ? Primary : Secondary)).thenReturn(true);
+        when(mLockPatternUtils.isSecure(TEST_USER_ID)).thenReturn(true);
 
         assertThat(mController.isAvailable()).isFalse();
     }
 
     @Test
     public void isAvailable_featureEnabledAndLockSetToPassword_shouldReturnFalse() {
-        when(mLockPatternUtils.isSecure(TEST_USER_ID, mPrimary ? Primary : Secondary)).thenReturn(true);
-        when(mLockPatternUtils.getCredentialTypeForUser(TEST_USER_ID, mPrimary ? Primary : Secondary))
+        when(mLockPatternUtils.isSecure(TEST_USER_ID)).thenReturn(true);
+        when(mLockPatternUtils.getCredentialTypeForUser(TEST_USER_ID))
                 .thenReturn(LockPatternUtils.CREDENTIAL_TYPE_PASSWORD);
 
         assertThat(mController.isAvailable()).isFalse();
@@ -86,19 +88,19 @@ public class AutoPinConfirmPreferenceControllerTest {
 
     @Test
     public void isAvailable_featureEnabledAndLockSetToPIN_lengthLessThanSix_shouldReturnFalse() {
-        when(mLockPatternUtils.getCredentialTypeForUser(TEST_USER_ID, mPrimary ? Primary : Secondary))
+        when(mLockPatternUtils.getCredentialTypeForUser(TEST_USER_ID))
                 .thenReturn(LockPatternUtils.CREDENTIAL_TYPE_PIN);
-        when(mLockPatternUtils.getPinLength(TEST_USER_ID, mPrimary ? Primary : Secondary)).thenReturn(5);
+        when(mLockPatternUtils.getPinLength(TEST_USER_ID)).thenReturn(5);
 
         assertThat(mController.isAvailable()).isFalse();
     }
 
     @Test
     public void isAvailable_featureEnabledAndLockSetToPIN_lengthMoreThanEqSix_shouldReturnTrue() {
-        when(mLockPatternUtils.isSecure(TEST_USER_ID, mPrimary ? Primary : Secondary)).thenReturn(true);
-        when(mLockPatternUtils.getCredentialTypeForUser(TEST_USER_ID, mPrimary ? Primary : Secondary))
+        when(mLockPatternUtils.isSecure(TEST_USER_ID)).thenReturn(true);
+        when(mLockPatternUtils.getCredentialTypeForUser(TEST_USER_ID))
                 .thenReturn(LockPatternUtils.CREDENTIAL_TYPE_PIN);
-        when(mLockPatternUtils.getPinLength(TEST_USER_ID, mPrimary ? Primary : Secondary)).thenReturn(6);
+        when(mLockPatternUtils.getPinLength(TEST_USER_ID)).thenReturn(6);
 
         assertThat(mController.isAvailable()).isTrue();
     }
@@ -106,12 +108,12 @@ public class AutoPinConfirmPreferenceControllerTest {
     @Test
     public void updateState_ChangingSettingState_shouldSetPreferenceToAppropriateCheckedState() {
         // When auto_pin_confirm setting is disabled, switchPreference is unchecked
-        when(mLockPatternUtils.isAutoPinConfirmEnabled(TEST_USER_ID, mPrimary ? Primary : Secondary)).thenReturn(false);
+        when(mLockPatternUtils.isAutoPinConfirmEnabled(TEST_USER_ID)).thenReturn(false);
         mController.updateState(mPreference);
         assertThat(mPreference.isChecked()).isFalse();
 
         // When auto_pin_confirm setting is enabled, switchPreference is checked
-        when(mLockPatternUtils.isAutoPinConfirmEnabled(TEST_USER_ID, mPrimary ? Primary : Secondary)).thenReturn(true);
+        when(mLockPatternUtils.isAutoPinConfirmEnabled(TEST_USER_ID)).thenReturn(true);
         mController.updateState(mPreference);
         assertThat(mPreference.isChecked()).isTrue();
     }
