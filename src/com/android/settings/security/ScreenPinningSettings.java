@@ -180,7 +180,6 @@ public class ScreenPinningSettings extends SettingsPreferenceFragment
         }
     }
 
-
     private static int getCurrentSecurityTitle(LockPatternUtils lockPatternUtils) {
         int quality = lockPatternUtils.getKeyguardStoredPasswordQuality(UserHandle.myUserId());
         switch (quality) {
