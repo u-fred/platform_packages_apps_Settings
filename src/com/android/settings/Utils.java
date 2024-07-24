@@ -24,9 +24,6 @@ import static android.os.UserManager.USER_TYPE_PROFILE_PRIVATE;
 import static android.text.format.DateUtils.FORMAT_ABBREV_MONTH;
 import static android.text.format.DateUtils.FORMAT_SHOW_DATE;
 
-import static com.android.internal.widget.LockDomain.Primary;
-import static com.android.internal.widget.LockDomain.Secondary;
-
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -777,9 +774,9 @@ public final class Utils extends com.android.settingslib.Utils {
      * Returns the credential type of the given user id.
      */
     public static @LockPatternUtils.CredentialType int getCredentialType(Context context,
-            int userId, boolean primary) {
+            int userId) {
         final LockPatternUtils lpu = new LockPatternUtils(context);
-        return lpu.getCredentialTypeForUser(userId, primary ? Primary : Secondary);
+        return lpu.getCredentialTypeForUser(userId);
     }
 
     /**
