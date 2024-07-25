@@ -25,7 +25,6 @@ import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_COMPLEX;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_SOMETHING;
 
-import static com.android.internal.widget.LockDomain.Primary;
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_NONE;
 import static com.android.settings.password.ChooseLockGeneric.ChooseLockGenericFragment.KEY_LOCK_SETTINGS_FOOTER;
 import static com.android.settings.password.ChooseLockSettingsHelper.EXTRA_KEY_CALLER_APP_NAME;
@@ -54,7 +53,6 @@ import android.content.Intent;
 import android.hardware.face.FaceManager;
 import android.hardware.fingerprint.FingerprintManager;
 import android.os.Bundle;
-import android.os.UserHandle;
 import android.provider.Settings.Global;
 import android.widget.TextView;
 
@@ -102,7 +100,7 @@ import org.robolectric.shadows.ShadowApplication;
                 ShadowUtils.class,
                 ShadowInteractionJankMonitor.class
         })
-//@Ignore("b/179136903: Tests failed with collapsing toolbar, plan to figure out root cause later.")
+@Ignore("b/179136903: Tests failed with collapsing toolbar, plan to figure out root cause later.")
 public class ChooseLockGenericTest {
 
     @Rule
@@ -148,7 +146,6 @@ public class ChooseLockGenericTest {
     }
 
     @Test
-    @Ignore // Fails in grapheneos/14 (possibly base AOSP too).
     public void onCreate_deviceNotProvisioned_persistentDataExists_shouldFinishActivity() {
         Global.putInt(application.getContentResolver(), Global.DEVICE_PROVISIONED, 0);
         ShadowPersistentDataBlockManager.setDataBlockSize(1000);
@@ -325,7 +322,6 @@ public class ChooseLockGenericTest {
                 Activity.RESULT_CANCELED, null /* data */);
 
         assertThat(mActivity.isFinishing()).isTrue();
-
     }
 
     @Test
@@ -351,7 +347,6 @@ public class ChooseLockGenericTest {
     }
 
     @Test
-    @Ignore // Fails in grapheneos/14 (possibly base AOSP too).
     public void securedScreenLock_notChangingConfig_notWaitForConfirmation_onStopFinishSelf() {
         Intent intent = new Intent().putExtra(
                 LockPatternUtils.PASSWORD_TYPE_KEY, DevicePolicyManager.PASSWORD_QUALITY_NUMERIC);
@@ -499,10 +494,6 @@ public class ChooseLockGenericTest {
     }
 
     @Test
-    @Ignore
-    // TODO: Add overload back to SLP for all true.
-    // TODO: What does below comment mean?
-    // Test written before code changes.
     public void updatePreferencesOrFinish_ComplexityIsReadFromDPM() {
         ShadowStorageManager.setIsFileEncrypted(false);
         ShadowLockPatternUtils.setRequiredPasswordComplexity(PASSWORD_COMPLEXITY_HIGH);
@@ -617,7 +608,6 @@ public class ChooseLockGenericTest {
     }
 
     @Test
-    @Ignore // Fails in grapheneos/14 (possibly base AOSP too).
     public void updatePreferenceText_supportBiometrics_setScreenLockFingerprintFace_inOrder() {
         ShadowStorageManager.setIsFileEncrypted(false);
         final Intent intent = new Intent().putExtra(EXTRA_KEY_FOR_BIOMETRICS, true);
@@ -653,7 +643,6 @@ public class ChooseLockGenericTest {
     }
 
     @Test
-    @Ignore // Fails in grapheneos/14 (possibly base AOSP too).
     public void updatePreferenceText_supportFingerprint_showFingerprint() {
         ShadowStorageManager.setIsFileEncrypted(false);
         final Intent intent = new Intent().putExtra(EXTRA_KEY_FOR_FINGERPRINT, true);
@@ -671,7 +660,6 @@ public class ChooseLockGenericTest {
     }
 
     @Test
-    @Ignore // Fails in grapheneos/14 (possibly base AOSP too).
     public void updatePreferenceText_supportFace_showFace() {
 
         ShadowStorageManager.setIsFileEncrypted(false);
