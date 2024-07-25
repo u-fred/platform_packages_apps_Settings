@@ -327,7 +327,6 @@ public class ChooseLockGeneric extends SettingsActivity {
                     .setProfileToUnify(mUnificationProfileId)
                     .setHideInsecureScreenLockTypes(alwaysHideInsecureScreenLockTypes()
                             || intent.getBooleanExtra(HIDE_INSECURE_OPTIONS, false));
-                   // .setLockDomain(mLockDomain);
             mController = controllerBuilder.build();
 
             // If the complexity is provided by the admin, do not get the caller app's name.
