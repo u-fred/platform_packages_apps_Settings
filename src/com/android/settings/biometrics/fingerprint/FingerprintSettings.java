@@ -740,6 +740,7 @@ public class FingerprintSettings extends SubSettings {
                 updateBiometricSecondFactorVisibility();
                 return true;
             });
+            keyguardFingerprintPref.setVisible(mFingerprintKeyguardController.isAvailable());
         }
 
         private void updateAddPreference() {

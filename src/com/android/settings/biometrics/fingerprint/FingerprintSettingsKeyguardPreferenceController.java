@@ -43,7 +43,7 @@ public class FingerprintSettingsKeyguardPreferenceController extends TogglePrefe
 
     protected RestrictedLockUtils.EnforcedAdmin getRestrictingAdmin() {
         return RestrictedLockUtilsInternal.checkIfKeyguardFeaturesDisabled(mContext,
-                DevicePolicyManager.KEYGUARD_DISABLE_BIOMETRICS, mUserId);
+                DevicePolicyManager.KEYGUARD_DISABLE_FINGERPRINT, mUserId);
     }
 
     public void setUserId(int userId) {
