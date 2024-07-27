@@ -61,6 +61,10 @@ public class ScreenLockPreferenceDetailsUtils {
     private final UserManager mUm;
     private LockDomain mLockDomain;
 
+    public ScreenLockPreferenceDetailsUtils(Context context) {
+        this(context, Primary);
+    }
+
     public ScreenLockPreferenceDetailsUtils(Context context, LockDomain lockDomain) {
         mContext = context;
         mUm = context.getSystemService(UserManager.class);

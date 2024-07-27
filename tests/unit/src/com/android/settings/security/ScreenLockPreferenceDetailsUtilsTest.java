@@ -93,7 +93,7 @@ public class ScreenLockPreferenceDetailsUtilsTest {
         when(featureFactory.securityFeatureProvider.getLockPatternUtils(mContext))
                  .thenReturn(mLockPatternUtils);
 
-        mScreenLockPreferenceDetailsUtils = new ScreenLockPreferenceDetailsUtils(mContext, Primary);
+        mScreenLockPreferenceDetailsUtils = new ScreenLockPreferenceDetailsUtils(mContext);
     }
 
     @Test

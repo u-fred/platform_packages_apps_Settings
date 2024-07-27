@@ -119,7 +119,7 @@ public final class LockScreenSafetySource {
     public static void onLockScreenChange(Context context) {
         setSafetySourceData(
                 context,
-                new ScreenLockPreferenceDetailsUtils(context, Primary),
+                new ScreenLockPreferenceDetailsUtils(context),
                 new SafetyEvent.Builder(SAFETY_EVENT_TYPE_SOURCE_STATE_CHANGED).build());
 
         // Also send refreshed safety center data for biometrics, since changing lockscreen settings
