@@ -21,6 +21,7 @@ import static android.app.admin.DevicePolicyResources.Strings.Settings.FINGERPRI
 import static android.app.admin.DevicePolicyResources.Strings.Settings.WORK_PROFILE_FINGERPRINT_LAST_DELETE_MESSAGE;
 import static android.app.admin.DevicePolicyResources.UNDEFINED;
 
+import static com.android.internal.widget.LockDomain.Secondary;
 import static com.android.settings.Utils.SETTINGS_PACKAGE_NAME;
 import static com.android.settings.biometrics.BiometricEnrollBase.EXTRA_FROM_SETTINGS_SUMMARY;
 import static com.android.settings.biometrics.BiometricEnrollBase.EXTRA_KEY_CHALLENGE;
@@ -192,7 +193,7 @@ public class FingerprintSettings extends SubSettings {
                     KEY_FINGERPRINTS_ENROLLED_CATEGORY));
             controllers.add(new FingerprintSettingsKeyguardPreferenceController(context,
                     KEY_FINGERPRINT_ENABLE_KEYGUARD_TOGGLE));
-            controllers.add(new ChangeScreenLockPreferenceController(context, host, false));
+            controllers.add(new ChangeScreenLockPreferenceController(context, host, Secondary));
             return controllers;
         }
 

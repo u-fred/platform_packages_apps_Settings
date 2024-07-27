@@ -30,6 +30,7 @@ import androidx.annotation.Nullable;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceScreen;
 
+import com.android.internal.widget.LockDomain;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockscreenCredential;
 import com.android.settings.SettingsPreferenceFragment;
@@ -60,11 +61,15 @@ public class ChangeScreenLockPreferenceController extends AbstractPreferenceCont
     private final ScreenLockPreferenceDetailsUtils mScreenLockPreferenceDetailUtils;
 
     protected RestrictedPreference mPreference;
-    private final boolean mIsForPrimaryScreenLock;
+    private final LockDomain mLockDomain;
     @Nullable private LockscreenCredential mUserPassword;
 
+    public ChangeScreenLockPreferenceController(Context context, SettingsPreferenceFragment host) {
+        this(context, host, Primary);
+    }
+
     public ChangeScreenLockPreferenceController(Context context, SettingsPreferenceFragment host,
-                boolean isForPrimaryScreenLock) {
+                LockDomain lockDomain) {
         super(context);
         mUm = (UserManager) context.getSystemService(Context.USER_SERVICE);
         mLockPatternUtils = FeatureFactory.getFeatureFactory()
@@ -73,10 +78,10 @@ public class ChangeScreenLockPreferenceController extends AbstractPreferenceCont
         mHost = host;
         mProfileChallengeUserId = Utils.getManagedProfileId(mUm, mUserId);
         mMetricsFeatureProvider = FeatureFactory.getFeatureFactory().getMetricsFeatureProvider();
-        mIsForPrimaryScreenLock = isForPrimaryScreenLock;
-        mScreenLockPreferenceDetailUtils = new ScreenLockPreferenceDetailsUtils(context,
-                isForPrimaryScreenLock ? Primary : Secondary);
+        mLockDomain = lockDomain;
+        mScreenLockPreferenceDetailUtils = new ScreenLockPreferenceDetailsUtils(context, lockDomain);
         mEffectiveUserId = mUserId;
+
     }
 
     public void setUserPassword(LockscreenCredential password) {
@@ -108,7 +113,7 @@ public class ChangeScreenLockPreferenceController extends AbstractPreferenceCont
         // In FingerprintSettings all the preferences are removed and added back, but
         // displayResourceTilesToScreen() (which calls displayPreference()) is only called the first
         // time.
-        if (!mIsForPrimaryScreenLock && TextUtils.equals(preference.getKey(), getPreferenceKey())) {
+        if (mLockDomain == Secondary && TextUtils.equals(preference.getKey(), getPreferenceKey())) {
             mPreference = ((GearPreference) preference);
         }
 
@@ -130,7 +135,7 @@ public class ChangeScreenLockPreferenceController extends AbstractPreferenceCont
         updateSummary(preference, mEffectiveUserId);
 
         // There is no way to manage biometric second factor password quality.
-        if (mIsForPrimaryScreenLock) {
+        if (mLockDomain == Primary) {
             disableIfPasswordQualityManaged(mUserId);
             if (!mLockPatternUtils.isSeparateProfileChallengeEnabled(mProfileChallengeUserId)) {
                 // PO may disallow to change password for the profile, but screen lock and managed
@@ -145,7 +150,7 @@ public class ChangeScreenLockPreferenceController extends AbstractPreferenceCont
         if (TextUtils.equals(p.getKey(), getPreferenceKey())) {
             mMetricsFeatureProvider.logClickedPreference(p,
                     p.getExtras().getInt(DashboardFragment.CATEGORY));
-            if (mIsForPrimaryScreenLock) {
+            if (mLockDomain == Primary) {
                 mScreenLockPreferenceDetailUtils.openScreenLockSettings(mHost.getMetricsCategory(),
                         null, 0);
             } else {
@@ -162,7 +167,7 @@ public class ChangeScreenLockPreferenceController extends AbstractPreferenceCont
             return super.handlePreferenceTreeClick(preference);
         }
 
-        if (mIsForPrimaryScreenLock) {
+        if (mLockDomain == Primary) {
             return mScreenLockPreferenceDetailUtils.openChooseLockGenericFragment(
                     mHost.getMetricsCategory(), null, null, 0);
         } else {
