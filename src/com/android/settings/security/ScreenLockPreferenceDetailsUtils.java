@@ -80,7 +80,6 @@ public class ScreenLockPreferenceDetailsUtils {
     /**
      * Returns whether the screen lock settings entity should be shown.
      */
-    // TODO: Overload this to reduce calls.
     public boolean isAvailable(int userId) {
         if (!mContext.getResources().getBoolean(R.bool.config_show_unlock_set_or_change)) {
             return false;
@@ -89,11 +88,7 @@ public class ScreenLockPreferenceDetailsUtils {
         } else if (!mLockPatternUtils.checkUserSupportsBiometricSecondFactor(userId, false)) {
            return false;
         } else {
-            return Settings.Secure.getIntForUser(
-                    mContext.getContentResolver(),
-                    BIOMETRIC_KEYGUARD_ENABLED,
-                    FingerprintSettingsKeyguardPreferenceController.DEFAULT,
-                    mUserId) == FingerprintSettingsKeyguardPreferenceController.ON;
+            return mLockPatternUtils.isBiometricKeyguardEnabled(userId);
         }
     }
 
