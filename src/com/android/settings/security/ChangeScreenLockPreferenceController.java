@@ -18,8 +18,6 @@ package com.android.settings.security;
 
 import static com.android.internal.widget.LockDomain.Primary;
 import static com.android.internal.widget.LockDomain.Secondary;
-import static com.android.settings.biometrics.fingerprint.FingerprintSettings.FingerprintSettingsFragment.BIOMETRIC_SECOND_FACTOR_SETTINGS_REQUEST;
-import static com.android.settings.biometrics.fingerprint.FingerprintSettings.FingerprintSettingsFragment.CHOOSE_BIOMETRIC_SECOND_FACTOR_REQUEST;
 
 import android.content.Context;
 import android.os.UserHandle;
@@ -56,13 +54,20 @@ public class ChangeScreenLockPreferenceController extends AbstractPreferenceCont
 
     protected final int mUserId = UserHandle.myUserId();
     protected final int mProfileChallengeUserId;
+    // For Primary LockDomain this should always be mUserId as there is a separate controller
+    // for profiles. For Secondary it should either be mUserId or mProfileChallengeUserId.
     private int mEffectiveUserId;
     private final MetricsFeatureProvider mMetricsFeatureProvider;
     private final ScreenLockPreferenceDetailsUtils mScreenLockPreferenceDetailUtils;
 
     protected RestrictedPreference mPreference;
+
     private final LockDomain mLockDomain;
+    // These values are not used when LockDomain is Primary.
     @Nullable private LockscreenCredential mUserPassword;
+    private int mSecondaryScreenLockSettingsRequestCode;
+    private int mSecondaryChooseLockRequestCode;
+    @Nullable private SettingsPreferenceFragment mSecondaryResultListener;
 
     public ChangeScreenLockPreferenceController(Context context, SettingsPreferenceFragment host) {
         this(context, host, Primary);
@@ -81,15 +86,26 @@ public class ChangeScreenLockPreferenceController extends AbstractPreferenceCont
         mLockDomain = lockDomain;
         mScreenLockPreferenceDetailUtils = new ScreenLockPreferenceDetailsUtils(context, lockDomain);
         mEffectiveUserId = mUserId;
+    }
 
+    public void setEffectiveUserId(int userId) {
+        mEffectiveUserId = userId;
     }
 
     public void setUserPassword(LockscreenCredential password) {
         mUserPassword = password;
     }
 
-    public void setEffectiveUserId(int userId) {
-        mEffectiveUserId = userId;
+    public void setSecondaryScreenLockSettingsRequestCode(int value) {
+        mSecondaryScreenLockSettingsRequestCode = value;
+    }
+
+    public void setSecondaryChooseLockRequestCode(int value) {
+        mSecondaryChooseLockRequestCode = value;
+    }
+
+    public void setSecondaryResultListener(SettingsPreferenceFragment value) {
+        mSecondaryResultListener = value;
     }
 
     @Override
@@ -130,8 +146,8 @@ public class ChangeScreenLockPreferenceController extends AbstractPreferenceCont
             }
         }
 
-        // updateState() is only called if preference is available so no error will be thrown here
-        // if updateSummary() assumes userId supports second factor when !mIsForPrimaryScreenLock.
+        // updateState() is only called if preference is available so we can be sure
+        // mEffectiveUserId supports second factor if mLockDomain is Secondary.
         updateSummary(preference, mEffectiveUserId);
 
         // There is no way to manage biometric second factor password quality.
@@ -155,9 +171,8 @@ public class ChangeScreenLockPreferenceController extends AbstractPreferenceCont
                         null, 0);
             } else {
                 mScreenLockPreferenceDetailUtils.openScreenLockSettings(mHost.getMetricsCategory(),
-                        mHost, BIOMETRIC_SECOND_FACTOR_SETTINGS_REQUEST);
+                        mSecondaryResultListener, mSecondaryScreenLockSettingsRequestCode);
             }
-
         }
     }
 
@@ -172,8 +187,8 @@ public class ChangeScreenLockPreferenceController extends AbstractPreferenceCont
                     mHost.getMetricsCategory(), null, null, 0);
         } else {
             return mScreenLockPreferenceDetailUtils.openChooseLockGenericFragment(
-                    mHost.getMetricsCategory(), mUserPassword, mHost,
-                    CHOOSE_BIOMETRIC_SECOND_FACTOR_REQUEST);
+                    mHost.getMetricsCategory(), mUserPassword,
+                    mSecondaryResultListener, mSecondaryChooseLockRequestCode);
         }
 
     }
