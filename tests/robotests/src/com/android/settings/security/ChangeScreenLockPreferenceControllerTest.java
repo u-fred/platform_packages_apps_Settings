@@ -16,6 +16,7 @@
 
 package com.android.settings.security;
 
+import static com.android.internal.widget.LockDomain.Primary;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -28,6 +29,7 @@ import static org.mockito.Mockito.when;
 
 import android.app.admin.DevicePolicyManager;
 import android.content.Context;
+import android.content.pm.UserInfo;
 import android.os.UserManager;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -71,6 +73,7 @@ public class ChangeScreenLockPreferenceControllerTest {
     private Context mContext;
     private FakeFeatureFactory mFeatureFactory;
     private ChangeScreenLockPreferenceController mController;
+    private ChangeScreenLockPreferenceController mControllerSecondary;
     private View mGearView;
     private GearPreference mGearPreference;
     private PreferenceViewHolder mPreferenceViewHolder;
@@ -88,6 +91,20 @@ public class ChangeScreenLockPreferenceControllerTest {
         final SettingsPreferenceFragment host = mock(SettingsPreferenceFragment.class);
         when(host.getMetricsCategory()).thenReturn(METRICS_CATEGORY);
         mController = new ChangeScreenLockPreferenceController(mContext, host);
+
+        when(mLockPatternUtils.checkUserSupportsBiometricSecondFactorIfSecondary(
+                anyInt(), eq(Primary))).thenReturn(true);
+
+        // Make RestrictedLockUtilsInternal#checkIfKeyguardFeaturesDisabled and
+        // RestrictedLockUtilsInternal#checkIfPasswordQualityIsSet work.
+        when(mContext.getSystemService(Context.DEVICE_POLICY_SERVICE)).thenReturn(null);
+        UserManager um = mock(UserManager.class);
+        when(mContext.getSystemService(Context.USER_SERVICE)).thenReturn(um);
+        UserInfo userInfo = mock(UserInfo.class);
+        when(userInfo.isManagedProfile()).thenReturn(false);
+        when(um.getUserInfo(anyInt())).thenReturn(userInfo);
+
+
     }
 
     @Test
