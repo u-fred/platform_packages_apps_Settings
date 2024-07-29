@@ -194,7 +194,14 @@ public class FingerprintSettings extends SubSettings {
                     KEY_FINGERPRINTS_ENROLLED_CATEGORY));
             controllers.add(new FingerprintSettingsKeyguardPreferenceController(context,
                     KEY_FINGERPRINT_ENABLE_KEYGUARD_TOGGLE));
-            controllers.add(new ChangeScreenLockPreferenceController(context, host, Secondary));
+
+            ChangeScreenLockPreferenceController c =
+                    new ChangeScreenLockPreferenceController(context, host, Secondary);
+            c.setScreenLockSettingsRequestCode(BIOMETRIC_SECOND_FACTOR_SETTINGS_REQUEST);
+            c.setChooseLockRequestCode(CHOOSE_BIOMETRIC_SECOND_FACTOR_REQUEST);
+            c.setResultListener(host);
+            controllers.add(c);
+
             return controllers;
         }
 
