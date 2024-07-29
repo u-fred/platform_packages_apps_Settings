@@ -63,11 +63,10 @@ public class ChangeScreenLockPreferenceController extends AbstractPreferenceCont
     protected RestrictedPreference mPreference;
 
     private final LockDomain mLockDomain;
-    // These values are not used when LockDomain is Primary.
     @Nullable private LockscreenCredential mUserPassword;
-    private int mSecondaryScreenLockSettingsRequestCode;
-    private int mSecondaryChooseLockRequestCode;
-    @Nullable private SettingsPreferenceFragment mSecondaryResultListener;
+    private int mScreenLockSettingsRequestCode;
+    private int mChooseLockRequestCode;
+    @Nullable private SettingsPreferenceFragment mResultListener;
 
     public ChangeScreenLockPreferenceController(Context context, SettingsPreferenceFragment host) {
         this(context, host, Primary);
@@ -96,16 +95,16 @@ public class ChangeScreenLockPreferenceController extends AbstractPreferenceCont
         mUserPassword = password;
     }
 
-    public void setSecondaryScreenLockSettingsRequestCode(int value) {
-        mSecondaryScreenLockSettingsRequestCode = value;
+    public void setScreenLockSettingsRequestCode(int value) {
+        mScreenLockSettingsRequestCode = value;
     }
 
-    public void setSecondaryChooseLockRequestCode(int value) {
-        mSecondaryChooseLockRequestCode = value;
+    public void setChooseLockRequestCode(int value) {
+        mChooseLockRequestCode = value;
     }
 
-    public void setSecondaryResultListener(SettingsPreferenceFragment value) {
-        mSecondaryResultListener = value;
+    public void setResultListener(SettingsPreferenceFragment value) {
+        mResultListener = value;
     }
 
     @Override
@@ -126,9 +125,9 @@ public class ChangeScreenLockPreferenceController extends AbstractPreferenceCont
 
     @Override
     public void updateState(Preference preference) {
-        // In FingerprintSettings all the preferences are removed and added back, but
-        // displayResourceTilesToScreen() (which calls displayPreference()) is only called the first
-        // time.
+        // Need to set mPreference here for Secondary as FingerprintSettings removes all the prefs
+        // then adds them back. displayResourceTilesToScreen() which calls displayPreference() is
+        // only called the first time.
         if (mLockDomain == Secondary && TextUtils.equals(preference.getKey(), getPreferenceKey())) {
             mPreference = ((GearPreference) preference);
         }
@@ -147,7 +146,7 @@ public class ChangeScreenLockPreferenceController extends AbstractPreferenceCont
         }
 
         // updateState() is only called if preference is available so we can be sure
-        // mEffectiveUserId supports second factor if mLockDomain is Secondary.
+        // mEffectiveUserId supports second factor if this is a Secondary controller.
         updateSummary(preference, mEffectiveUserId);
 
         // There is no way to manage biometric second factor password quality.
@@ -166,13 +165,8 @@ public class ChangeScreenLockPreferenceController extends AbstractPreferenceCont
         if (TextUtils.equals(p.getKey(), getPreferenceKey())) {
             mMetricsFeatureProvider.logClickedPreference(p,
                     p.getExtras().getInt(DashboardFragment.CATEGORY));
-            if (mLockDomain == Primary) {
-                mScreenLockPreferenceDetailUtils.openScreenLockSettings(mHost.getMetricsCategory(),
-                        null, 0);
-            } else {
-                mScreenLockPreferenceDetailUtils.openScreenLockSettings(mHost.getMetricsCategory(),
-                        mSecondaryResultListener, mSecondaryScreenLockSettingsRequestCode);
-            }
+            mScreenLockPreferenceDetailUtils.openScreenLockSettings(mHost.getMetricsCategory(),
+                    mResultListener, mScreenLockSettingsRequestCode);
         }
     }
 
@@ -182,15 +176,8 @@ public class ChangeScreenLockPreferenceController extends AbstractPreferenceCont
             return super.handlePreferenceTreeClick(preference);
         }
 
-        if (mLockDomain == Primary) {
-            return mScreenLockPreferenceDetailUtils.openChooseLockGenericFragment(
-                    mHost.getMetricsCategory(), null, null, 0);
-        } else {
-            return mScreenLockPreferenceDetailUtils.openChooseLockGenericFragment(
-                    mHost.getMetricsCategory(), mUserPassword,
-                    mSecondaryResultListener, mSecondaryChooseLockRequestCode);
-        }
-
+        return mScreenLockPreferenceDetailUtils.openChooseLockGenericFragment(
+                mHost.getMetricsCategory(), mUserPassword, mResultListener, mChooseLockRequestCode);
     }
 
     protected void updateSummary(Preference preference, int userId) {
