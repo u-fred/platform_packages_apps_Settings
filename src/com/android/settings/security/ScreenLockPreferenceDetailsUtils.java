@@ -16,8 +16,6 @@
 
 package com.android.settings.security;
 
-import static android.provider.Settings.Secure.BIOMETRIC_KEYGUARD_ENABLED;
-
 import static com.android.internal.widget.LockDomain.Primary;
 import static com.android.internal.widget.LockDomain.Secondary;
 
@@ -28,7 +26,6 @@ import android.os.Bundle;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.StorageManager;
-import android.provider.Settings;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
@@ -41,19 +38,20 @@ import com.android.internal.widget.WrappedLockPatternUtils;
 import com.android.settings.R;
 import com.android.settings.SettingsPreferenceFragment;
 import com.android.settings.Utils;
-import com.android.settings.biometrics.fingerprint.FingerprintSettingsKeyguardPreferenceController;
 import com.android.settings.core.SubSettingLauncher;
 import com.android.settings.overlay.FeatureFactory;
 import com.android.settings.password.ChooseLockGeneric.ChooseLockGenericFragment;
 import com.android.settings.password.ChooseLockSettingsHelper;
 import com.android.settings.security.screenlock.ScreenLockSettings;
 import com.android.settingslib.RestrictedLockUtils;
+import com.android.settingslib.RestrictedLockUtilsInternal;
 import com.android.settingslib.transition.SettingsTransitionHelper;
 
 /**
  * Utilities for screen lock details shared between Security Settings and Safety Center.
  */
 public class ScreenLockPreferenceDetailsUtils {
+
     private final int mUserId = UserHandle.myUserId();
     private final Context mContext;
     private final WrappedLockPatternUtils mLockPatternUtils;
@@ -74,7 +72,11 @@ public class ScreenLockPreferenceDetailsUtils {
                 .getLockPatternUtils(context);
         mLockPatternUtils = new WrappedLockPatternUtils(inner, lockDomain);
         mProfileChallengeUserId = Utils.getManagedProfileId(mUm, mUserId);
+    }
 
+    protected boolean isFingerprintKeyguardDisabledByAdmin(int userId) {
+        return RestrictedLockUtilsInternal.checkIfKeyguardFeaturesDisabled(mContext,
+                DevicePolicyManager.KEYGUARD_DISABLE_FINGERPRINT, userId) != null;
     }
 
     /**
@@ -88,7 +90,8 @@ public class ScreenLockPreferenceDetailsUtils {
         } else if (!mLockPatternUtils.checkUserSupportsBiometricSecondFactor(userId, false)) {
            return false;
         } else {
-            return mLockPatternUtils.isBiometricKeyguardEnabled(userId);
+            return mLockPatternUtils.isBiometricKeyguardEnabled(userId) &&
+                    !isFingerprintKeyguardDisabledByAdmin(userId);
         }
     }
 
@@ -100,17 +103,13 @@ public class ScreenLockPreferenceDetailsUtils {
         return summaryResId != null ? mContext.getResources().getString(summaryResId) : null;
     }
 
-
     /**
      * Returns whether the password quality is managed by device admin.
      */
     public boolean isPasswordQualityManaged(int userId, RestrictedLockUtils.EnforcedAdmin admin) {
-        if (mLockDomain == Secondary) {
-            return false;
-        }
         final DevicePolicyManager dpm = (DevicePolicyManager) mContext
                 .getSystemService(Context.DEVICE_POLICY_SERVICE);
-        return admin != null && dpm.getPasswordQuality(admin.component, userId)
+        return admin != null && dpm.getPasswordQuality(admin.component, userId, mLockDomain)
                 == DevicePolicyManager.PASSWORD_QUALITY_MANAGED;
     }
 
@@ -147,7 +146,6 @@ public class ScreenLockPreferenceDetailsUtils {
     public Intent getLaunchScreenLockSettingsIntent(int sourceMetricsCategory) {
         Bundle extras = new Bundle();
         if (mLockDomain == Secondary) {
-            // TODO: Should these constants be defined in this class?
             extras.putParcelable(ChooseLockSettingsHelper.EXTRA_KEY_LOCK_DOMAIN, Secondary);
             extras.putBoolean(ChooseLockSettingsHelper.EXTRA_KEY_FOREGROUND_ONLY, true);
         }
@@ -168,7 +166,6 @@ public class ScreenLockPreferenceDetailsUtils {
             @Nullable LockscreenCredential password,
             @Nullable SettingsPreferenceFragment resultListener,
             int requestCode) {
-        // TODO: Review this.
         final Intent quietModeDialogIntent = getQuietModeDialogIntent();
         if (quietModeDialogIntent != null) {
             mContext.startActivity(quietModeDialogIntent);
@@ -185,7 +182,6 @@ public class ScreenLockPreferenceDetailsUtils {
         return true;
     }
 
-
     /**
      * Returns {@link Intent} to launch an appropriate Settings screen.
      *
@@ -193,14 +189,17 @@ public class ScreenLockPreferenceDetailsUtils {
      * to disable the Quiet Mode, otherwise returns {@link Intent} to launch
      * {@link ChooseLockGenericFragment}.
      */
-    // TODO: Test quiet mode.
     public Intent getLaunchChooseLockGenericFragmentIntent(int sourceMetricsCategory) {
         final Intent quietModeDialogIntent = getQuietModeDialogIntent();
         return quietModeDialogIntent != null ? quietModeDialogIntent
                 : getChooseLockGenericFragmentIntent(sourceMetricsCategory, null);
     }
 
-    protected Intent getQuietModeDialogIntent() {
+    private Intent getQuietModeDialogIntent() {
+        if (mLockDomain == Secondary) {
+            return null;
+        }
+
         // TODO(b/35930129): Remove once existing password can be passed into vold directly.
         // Currently we need this logic to ensure that the QUIET_MODE is off for any work
         // profile with unified challenge on FBE-enabled devices. Otherwise, vold would not be
@@ -225,7 +224,6 @@ public class ScreenLockPreferenceDetailsUtils {
 
         Bundle args = new Bundle();
         if (password != null) {
-            // TODO: Test if user password is not set. Make sure it doesn't happen.
             args.putObject(ChooseLockSettingsHelper.EXTRA_KEY_PASSWORD, password);
         }
 
@@ -240,7 +238,6 @@ public class ScreenLockPreferenceDetailsUtils {
 
     @StringRes
     private Integer getSummaryResId(int userId) {
-        // TODO: Look at base commit when updating this.
         if (!mLockPatternUtils.isSecure(userId)) {
             if (userId == mProfileChallengeUserId
                     || mLockPatternUtils.isLockScreenDisabled(userId)) {
