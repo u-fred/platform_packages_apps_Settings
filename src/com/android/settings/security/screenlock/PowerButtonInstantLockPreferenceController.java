@@ -27,7 +27,6 @@ import androidx.preference.TwoStatePreference;
 
 import com.android.internal.widget.LockDomain;
 import com.android.internal.widget.LockPatternUtils;
-import com.android.internal.widget.WrappedLockPatternUtils;
 import com.android.settings.R;
 import com.android.settings.core.PreferenceControllerMixin;
 import com.android.settings.overlay.FeatureFactory;
@@ -56,7 +55,10 @@ public class PowerButtonInstantLockPreferenceController extends AbstractPreferen
 
     @Override
     public boolean isAvailable() {
-        if (!mLockPatternUtils.isSecure(mUserId) || mLockDomain == Secondary) {
+        if (mLockDomain == Secondary) {
+            return false;
+        }
+        if (!mLockPatternUtils.isSecure(mUserId)) {
             return false;
         }
         switch (mLockPatternUtils.getKeyguardStoredPasswordQuality(mUserId)) {
