@@ -19,6 +19,7 @@ package com.android.settings.security.screenlock;
 import static android.provider.Settings.System.SCREEN_OFF_TIMEOUT;
 
 import static com.android.internal.widget.LockDomain.Primary;
+import static com.android.internal.widget.LockDomain.Secondary;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.Mockito.mock;
@@ -64,6 +65,7 @@ public class LockAfterTimeoutPreferenceControllerTest {
 
     private Context mContext;
     private LockAfterTimeoutPreferenceController mController;
+    private LockAfterTimeoutPreferenceController mControllerSecondary;
     private FakeFeatureFactory mFeatureFactory;
 
     @Before
@@ -76,6 +78,13 @@ public class LockAfterTimeoutPreferenceControllerTest {
 
         mController = new LockAfterTimeoutPreferenceController(
                 mContext, TEST_USER_ID, mLockPatternUtils, Primary);
+        mControllerSecondary = new LockAfterTimeoutPreferenceController(
+                mContext, TEST_USER_ID, mLockPatternUtils, Secondary);
+    }
+
+    @Test
+    public void isAvailable_secondary_returnsFalse() {
+        assertThat(mControllerSecondary.isAvailable()).isFalse();
     }
 
     @Test
