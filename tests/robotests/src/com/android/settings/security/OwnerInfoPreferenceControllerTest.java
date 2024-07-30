@@ -16,6 +16,7 @@
 package com.android.settings.security;
 
 import static com.android.internal.widget.LockDomain.Primary;
+import static com.android.internal.widget.LockDomain.Secondary;
 import static com.android.settings.security.OwnerInfoPreferenceController.KEY_OWNER_INFO;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -77,6 +78,7 @@ public class OwnerInfoPreferenceControllerTest {
 
     private Context mContext;
     private OwnerInfoPreferenceController mController;
+    private OwnerInfoPreferenceController mControllerSecondary;
 
     @Before
     public void setUp() {
@@ -94,11 +96,19 @@ public class OwnerInfoPreferenceControllerTest {
         mController = spy(new OwnerInfoPreferenceController(mContext, mFragment, Primary));
         when(mScreen.findPreference(mController.getPreferenceKey())).thenReturn(mPreference);
         ReflectionHelpers.setField(mController, "mLockPatternUtils", mLockPatternUtils);
+
+        mControllerSecondary = spy(new OwnerInfoPreferenceController(mContext, mFragment,
+                Secondary));
     }
 
     @Test
     public void isAvailable_shouldReturnTrue() {
         assertThat(mController.isAvailable()).isTrue();
+    }
+
+    @Test
+    public void isAvailable_secondary_returnsFalse() {
+        assertThat(mControllerSecondary.isAvailable()).isFalse();
     }
 
     @Test
