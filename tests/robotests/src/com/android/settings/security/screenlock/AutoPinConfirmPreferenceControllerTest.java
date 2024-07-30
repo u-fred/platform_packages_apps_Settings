@@ -16,8 +16,6 @@
 
 package com.android.settings.security.screenlock;
 
-import static com.android.internal.widget.LockDomain.Primary;
-import static com.android.internal.widget.LockDomain.Secondary;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.Mockito.when;
@@ -27,7 +25,6 @@ import android.content.Context;
 import androidx.preference.SwitchPreference;
 import androidx.test.core.app.ApplicationProvider;
 
-import com.android.internal.widget.LockDomain;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.WrappedLockPatternUtils;
 import com.android.settingslib.core.lifecycle.ObservablePreferenceFragment;
@@ -37,20 +34,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.robolectric.ParameterizedRobolectricTestRunner;
-import org.robolectric.ParameterizedRobolectricTestRunner.Parameter;
-import org.robolectric.ParameterizedRobolectricTestRunner.Parameters;
+import org.robolectric.RobolectricTestRunner;
 
-import java.util.Arrays;
-import java.util.Collection;
-
-@RunWith(ParameterizedRobolectricTestRunner.class)
+@RunWith(RobolectricTestRunner.class)
 public class AutoPinConfirmPreferenceControllerTest {
-    @Parameter public boolean mLockDomain;
-    @Parameters
-    public static Collection<LockDomain> parameters() {
-        return Arrays.asList(Primary, Secondary);
-    }
     private static final Integer TEST_USER_ID = 1;
     @Mock
     private WrappedLockPatternUtils mLockPatternUtils;
@@ -63,10 +50,9 @@ public class AutoPinConfirmPreferenceControllerTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         Context context = ApplicationProvider.getApplicationContext();
-
         mController =
-                new AutoPinConfirmPreferenceController(context, TEST_USER_ID,
-                        mLockPatternUtils, mParentFragment, null);
+                new AutoPinConfirmPreferenceController(context, TEST_USER_ID, mLockPatternUtils,
+                        mParentFragment);
         mPreference = new SwitchPreference(context);
     }
 
