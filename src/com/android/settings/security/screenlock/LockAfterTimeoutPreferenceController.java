@@ -18,7 +18,6 @@ package com.android.settings.security.screenlock;
 
 import static android.app.admin.DevicePolicyResources.Strings.Settings.DISABLED_BY_IT_ADMIN_TITLE;
 import static android.provider.Settings.System.SCREEN_OFF_TIMEOUT;
-
 import static com.android.internal.widget.LockDomain.Secondary;
 
 import android.app.admin.DevicePolicyManager;
@@ -32,7 +31,6 @@ import androidx.preference.Preference;
 
 import com.android.internal.widget.LockDomain;
 import com.android.internal.widget.LockPatternUtils;
-import com.android.internal.widget.WrappedLockPatternUtils;
 import com.android.settings.R;
 import com.android.settings.core.PreferenceControllerMixin;
 import com.android.settings.display.TimeoutListPreference;
@@ -54,7 +52,7 @@ public class LockAfterTimeoutPreferenceController extends AbstractPreferenceCont
     private final LockDomain mLockDomain;
 
     public LockAfterTimeoutPreferenceController(Context context, int userId,
-           LockPatternUtils lockPatternUtils, LockDomain lockDomain) {
+            LockPatternUtils lockPatternUtils, LockDomain lockDomain) {
         super(context);
         mUserId = userId;
         mLockPatternUtils = lockPatternUtils;
@@ -66,7 +64,10 @@ public class LockAfterTimeoutPreferenceController extends AbstractPreferenceCont
 
     @Override
     public boolean isAvailable() {
-        if (!mLockPatternUtils.isSecure(mUserId) || mLockDomain == Secondary) {
+        if (mLockDomain == Secondary) {
+            return false;
+        }
+        if (!mLockPatternUtils.isSecure(mUserId)) {
             return false;
         }
         switch (mLockPatternUtils.getKeyguardStoredPasswordQuality(mUserId)) {
