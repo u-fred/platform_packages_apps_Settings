@@ -83,7 +83,8 @@ public class ChangeScreenLockPreferenceController extends AbstractPreferenceCont
         mProfileChallengeUserId = Utils.getManagedProfileId(mUm, mUserId);
         mMetricsFeatureProvider = FeatureFactory.getFeatureFactory().getMetricsFeatureProvider();
         mLockDomain = lockDomain;
-        mScreenLockPreferenceDetailUtils = new ScreenLockPreferenceDetailsUtils(context, lockDomain);
+        mScreenLockPreferenceDetailUtils = new ScreenLockPreferenceDetailsUtils(context,
+                lockDomain);
         mEffectiveUserId = mUserId;
     }
 
