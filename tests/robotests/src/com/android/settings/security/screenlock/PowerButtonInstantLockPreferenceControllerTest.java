@@ -17,6 +17,7 @@
 package com.android.settings.security.screenlock;
 
 import static com.android.internal.widget.LockDomain.Primary;
+import static com.android.internal.widget.LockDomain.Secondary;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.Mockito.verify;
@@ -52,6 +53,7 @@ public class PowerButtonInstantLockPreferenceControllerTest {
 
     private Context mContext;
     private PowerButtonInstantLockPreferenceController mController;
+    private PowerButtonInstantLockPreferenceController mControllerSecondary;
     private SwitchPreference mPreference;
     private FakeFeatureFactory mFeatureFactory;
 
@@ -66,6 +68,13 @@ public class PowerButtonInstantLockPreferenceControllerTest {
         mPreference = new SwitchPreference(mContext);
         mController = new PowerButtonInstantLockPreferenceController(
                 mContext, TEST_USER_ID, mLockPatternUtils, Primary);
+        mControllerSecondary = new PowerButtonInstantLockPreferenceController(
+                mContext, TEST_USER_ID, mLockPatternUtils, Secondary);
+    }
+
+    @Test
+    public void isAvailable_secondary_returnsFalse() {
+        assertThat(mControllerSecondary.isAvailable()).isFalse();
     }
 
     @Test
