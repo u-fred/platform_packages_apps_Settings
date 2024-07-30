@@ -20,9 +20,9 @@ import static android.app.Activity.RESULT_FIRST_USER;
 import static android.app.Activity.RESULT_OK;
 import static com.android.internal.widget.LockDomain.Primary;
 import static com.android.internal.widget.LockDomain.Secondary;
-import static com.android.settings.security.screenlock.AutoPinConfirmPreferenceController.AutoPinConfirmSettingChangeCallback;
 import static com.android.settings.security.screenlock.AutoPinConfirmPreferenceController.PREF_KEY_PIN_AUTO_CONFIRM;
 
+import android.app.Activity;
 import android.app.settings.SettingsEnums;
 import android.content.Context;
 import android.content.Intent;
@@ -32,6 +32,7 @@ import android.os.UserHandle;
 import androidx.annotation.Nullable;
 
 import com.android.internal.widget.LockDomain;
+import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.WrappedLockPatternUtils;
 import com.android.settings.R;
 import com.android.settings.dashboard.DashboardFragment;
@@ -46,7 +47,8 @@ import java.util.List;
 
 @SearchIndexable
 public class ScreenLockSettings extends DashboardFragment
-        implements OwnerInfoPreferenceController.OwnerInfoCallback {
+        implements OwnerInfoPreferenceController.OwnerInfoCallback,
+        AutoPinConfirmPreferenceController.AutoPinConfirmCallback {
 
     private static final String TAG = "ScreenLockSettings";
 
@@ -70,18 +72,20 @@ public class ScreenLockSettings extends DashboardFragment
 
     @Override
     public void onAttach(Context context) {
+        // This must be set here so that createPreferenceControllers() can access it.
         mLockDomain = getIntent().getParcelableExtra(
                 ChooseLockSettingsHelper.EXTRA_KEY_LOCK_DOMAIN, LockDomain.class);
         mLockDomain = mLockDomain == null ? Primary : mLockDomain;
-
-        mForegroundOnly = getIntent().getBooleanExtra(
-                ChooseLockSettingsHelper.EXTRA_KEY_FOREGROUND_ONLY, false);
         super.onAttach(context);
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        mForegroundOnly = getIntent().getBooleanExtra(
+                ChooseLockSettingsHelper.EXTRA_KEY_FOREGROUND_ONLY, false);
+
         if (savedInstanceState != null) {
             mLaunchedConfirm = savedInstanceState.getBoolean(KEY_LAUNCHED_CONFIRM);
             mCredentialConfirmed = savedInstanceState.getBoolean(KEY_CREDENTIAL_CONFIRMED);
@@ -89,21 +93,19 @@ public class ScreenLockSettings extends DashboardFragment
 
         if (mLockDomain == Secondary) {
             if (!mLaunchedConfirm && !mCredentialConfirmed) {
-                // Need the LockscreenCredential in LSS.mUserBiometricSecondFactorMetrics, otherwise
-                // will get failure when calling LSS#refreshStoredPinLength on auto-confirm disable.
-                // This is the only existing call that we can use to check. Alternatively could
-                // introduce new Binder call or just prompt every time.
-
-                // If the second factor LockscreenCredential is not contained within
-                // LSS.mUserBiometricSecondFactorMetrics then
-                if (!mLockPatternUtils.refreshStoredPinLength(MY_USER_ID)) {
+                // isPinLock() will always be be true with current implementation of second factor.
+                if (LockPatternUtils.isAutoPinConfirmFeatureAvailable() && isPinLock() &&
+                        !mLockPatternUtils.refreshStoredPinLength(MY_USER_ID)) {
                     mLaunchedConfirm = true;
                     confirmBiometricSecondFactor();
                 }
             }
-        } else {
-            mCredentialConfirmed = true;
         }
+    }
+
+    private boolean isPinLock() {
+        return mLockPatternUtils.getCredentialTypeForUser(MY_USER_ID)
+                == LockPatternUtils.CREDENTIAL_TYPE_PIN;
     }
 
     public void confirmBiometricSecondFactor() {
@@ -137,7 +139,7 @@ public class ScreenLockSettings extends DashboardFragment
     protected List<AbstractPreferenceController> createPreferenceControllers(Context context) {
         mLockPatternUtils = new WrappedLockPatternUtils(context, mLockDomain);
         List<AbstractPreferenceController> controllers =  buildPreferenceControllers(context,
-                this /* parent */, mLockPatternUtils, this::onAutoPinConfirmSettingChange);
+                this /* parent */, mLockPatternUtils);
         for (AbstractPreferenceController controller : controllers) {
             if (controller.getPreferenceKey() == PREF_KEY_PIN_AUTO_CONFIRM) {
                 mAutoPinConfirmPreferenceController =
@@ -168,8 +170,7 @@ public class ScreenLockSettings extends DashboardFragment
     }
 
     private static List<AbstractPreferenceController> buildPreferenceControllers(Context context,
-            DashboardFragment parent, WrappedLockPatternUtils lockPatternUtils,
-            AutoPinConfirmSettingChangeCallback callback) {
+            DashboardFragment parent, WrappedLockPatternUtils lockPatternUtils) {
 
         final List<AbstractPreferenceController> controllers = new ArrayList<>();
         controllers.add(new PatternVisiblePreferenceController(
@@ -181,7 +182,7 @@ public class ScreenLockSettings extends DashboardFragment
         controllers.add(new LockAfterTimeoutPreferenceController(
                 context, MY_USER_ID, lockPatternUtils.getInner(), lockPatternUtils.getLockDomain()));
         controllers.add(new AutoPinConfirmPreferenceController(
-                context, MY_USER_ID, lockPatternUtils, parent, callback));
+                context, MY_USER_ID, lockPatternUtils, parent));
         controllers.add(new OwnerInfoPreferenceController(context, parent,
                 lockPatternUtils.getLockDomain()));
         return controllers;
@@ -194,27 +195,28 @@ public class ScreenLockSettings extends DashboardFragment
                 public List<AbstractPreferenceController> createPreferenceControllers(
                         Context context) {
                     return buildPreferenceControllers(context, null /* parent */,
-                            // Primary here does not matter.
-                            new WrappedLockPatternUtils(context, Primary), null);
+                            new WrappedLockPatternUtils(context, null));
                 }
             };
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         if (requestCode == AUTO_PIN_SETTING_ENABLING_REQUEST_CODE) {
-            if (resultCode == RESULT_OK) {
+            if (resultCode == Activity.RESULT_OK) {
                 onAutoPinConfirmSettingChange(/* newState= */ true);
             }
         } else if (requestCode == AUTO_PIN_SETTING_DISABLING_REQUEST_CODE) {
-            if (resultCode == RESULT_OK) {
+            if (resultCode == Activity.RESULT_OK) {
                 onAutoPinConfirmSettingChange(/* newState= */ false);
             }
         } else if (requestCode == REQUEST_CONFIRM_CREDENTIAL) {
             mLaunchedConfirm = false;
             if (resultCode == RESULT_OK) {
-                // Requires biometric second factor metrics to be cached in LockSettingService.
+                mCredentialConfirmed = true;
+                // This was originally not available, but confirming credential may have changed
+                // it. Try to display it again.
                 mAutoPinConfirmPreferenceController.displayPreference(getPreferenceScreen());
-            } else if (resultCode == RESULT_NOT_FOREGROUND){
+            } else if (resultCode == RESULT_NOT_FOREGROUND) {
                 setResult(RESULT_NOT_FOREGROUND);
                 finish();
             } else {
@@ -224,7 +226,7 @@ public class ScreenLockSettings extends DashboardFragment
         }
     }
 
-    private void onAutoPinConfirmSettingChange(boolean newState) {
+    public void onAutoPinConfirmSettingChange(boolean newState) {
         // update the auto pin confirm setting.
         mLockPatternUtils.setAutoPinConfirm(newState, MY_USER_ID);
         // store the pin length info to disk; If it fails, reset the setting to prev state.
