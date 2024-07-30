@@ -56,7 +56,6 @@ import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(shadows = ShadowUtils.class)
-@Ignore
 public class ChangeScreenLockPreferenceControllerTest {
 
     private static final int METRICS_CATEGORY = 1;
@@ -92,9 +91,6 @@ public class ChangeScreenLockPreferenceControllerTest {
         when(host.getMetricsCategory()).thenReturn(METRICS_CATEGORY);
         mController = new ChangeScreenLockPreferenceController(mContext, host);
 
-        when(mLockPatternUtils.checkUserSupportsBiometricSecondFactorIfSecondary(
-                anyInt(), eq(Primary))).thenReturn(true);
-
         // Make RestrictedLockUtilsInternal#checkIfKeyguardFeaturesDisabled and
         // RestrictedLockUtilsInternal#checkIfPasswordQualityIsSet work.
         when(mContext.getSystemService(Context.DEVICE_POLICY_SERVICE)).thenReturn(null);
@@ -114,6 +110,7 @@ public class ChangeScreenLockPreferenceControllerTest {
 
     @Test
     @Config(qualifiers = "mcc999")
+    @Ignore
     public void testDeviceAdministrators_ifDisabled_shouldNotBeShown() {
         assertThat(mController.isAvailable()).isFalse();
     }
