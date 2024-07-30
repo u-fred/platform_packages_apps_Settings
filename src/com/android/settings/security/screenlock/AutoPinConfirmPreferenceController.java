@@ -17,7 +17,6 @@
 package com.android.settings.security.screenlock;
 
 import static com.android.internal.widget.LockDomain.Primary;
-import static com.android.internal.widget.LockDomain.Secondary;
 import static com.android.internal.widget.LockPatternUtils.MIN_AUTO_PIN_REQUIREMENT_LENGTH;
 
 import android.content.Context;
@@ -25,7 +24,6 @@ import android.content.Context;
 import androidx.preference.Preference;
 import androidx.preference.TwoStatePreference;
 
-import com.android.internal.widget.LockDomain;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.WrappedLockPatternUtils;
 import com.android.settings.R;
@@ -45,25 +43,23 @@ public class AutoPinConfirmPreferenceController extends AbstractPreferenceContro
     private final int mUserId;
     private final WrappedLockPatternUtils mLockPatternUtils;
     private final ObservablePreferenceFragment mParentFragment;
-    private final AutoPinConfirmSettingChangeCallback mCallback;
 
     public AutoPinConfirmPreferenceController(Context context, int userId,
             WrappedLockPatternUtils lockPatternUtils,
-            ObservablePreferenceFragment parentFragment,
-            AutoPinConfirmSettingChangeCallback callback) {
+            ObservablePreferenceFragment parentFragment) {
         super(context);
         mUserId = userId;
         mLockPatternUtils = lockPatternUtils;
         mParentFragment = parentFragment;
-        mCallback = callback;
     }
 
     @Override
     public boolean onPreferenceChange(Preference preference, Object newValue) {
         if (mLockPatternUtils.getLockDomain() == Primary) {
             launchPinConfirmActivity((boolean) newValue);
-        } else if (mCallback != null) {
-            mCallback.call((boolean) newValue);
+        } else if (mParentFragment instanceof AutoPinConfirmCallback) {
+            ((AutoPinConfirmCallback)mParentFragment).onAutoPinConfirmSettingChange(
+                    (boolean) newValue);
         }
         return true;
     }
@@ -75,8 +71,8 @@ public class AutoPinConfirmPreferenceController extends AbstractPreferenceContro
 
     @Override
     public boolean isAvailable() {
-        return LockPatternUtils.isAutoPinConfirmFeatureAvailable() &&
-                isPinLock() && isPinLengthEligibleForAutoConfirmation();
+        return LockPatternUtils.isAutoPinConfirmFeatureAvailable() && isPinLock()
+                && isPinLengthEligibleForAutoConfirmation();
     }
 
     @Override
@@ -85,7 +81,6 @@ public class AutoPinConfirmPreferenceController extends AbstractPreferenceContro
     }
 
     private boolean isPinLock() {
-        // TODO: Make sure mUserId supports second factor if secondary.
         return mLockPatternUtils.getCredentialTypeForUser(mUserId)
                 == LockPatternUtils.CREDENTIAL_TYPE_PIN;
     }
@@ -116,7 +111,7 @@ public class AutoPinConfirmPreferenceController extends AbstractPreferenceContro
                 .show();
     }
 
-    public interface AutoPinConfirmSettingChangeCallback {
-        void call(boolean newState);
+    public interface AutoPinConfirmCallback {
+        void onAutoPinConfirmSettingChange(boolean newState);
     }
 }
