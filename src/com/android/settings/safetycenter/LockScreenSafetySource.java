@@ -18,8 +18,6 @@ package com.android.settings.safetycenter;
 
 import static android.safetycenter.SafetyEvent.SAFETY_EVENT_TYPE_SOURCE_STATE_CHANGED;
 
-import static com.android.internal.widget.LockDomain.Primary;
-
 import android.app.PendingIntent;
 import android.app.settings.SettingsEnums;
 import android.content.Context;
@@ -64,7 +62,7 @@ public final class LockScreenSafetySource {
             return; // LockScreen source only supports primary profile.
         }
 
-        if (!screenLockPreferenceDetailsUtils.isAvailable(context.getUserId())) {
+        if (!screenLockPreferenceDetailsUtils.isAvailable()) {
             SafetyCenterManagerWrapper.get()
                     .setSafetySourceData(
                             context, SAFETY_SOURCE_ID, /* safetySourceData= */ null, safetyEvent);

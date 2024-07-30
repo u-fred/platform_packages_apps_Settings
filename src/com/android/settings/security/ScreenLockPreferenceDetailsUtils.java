@@ -79,8 +79,14 @@ public class ScreenLockPreferenceDetailsUtils {
                 DevicePolicyManager.KEYGUARD_DISABLE_FINGERPRINT, userId) != null;
     }
 
+    public boolean isAvailable() {
+        return isAvailable(-1 /** ignored **/);
+    }
+
     /**
      * Returns whether the screen lock settings entity should be shown.
+     *
+     * @param userId The user for which to check availability. Ignored if mLockDomain is Primary.
      */
     public boolean isAvailable(int userId) {
         if (!mContext.getResources().getBoolean(R.bool.config_show_unlock_set_or_change)) {
