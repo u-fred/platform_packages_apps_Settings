@@ -20,9 +20,6 @@ import android.content.Context
 import android.provider.Settings
 import androidx.preference.Preference
 import androidx.preference.TwoStatePreference
-import com.android.internal.widget.LockDomain.Primary
-import com.android.internal.widget.LockDomain.Secondary
-import com.android.internal.widget.LockPatternUtils
 import com.android.internal.widget.LockPatternUtils.*
 import com.android.internal.widget.WrappedLockPatternUtils
 import com.android.settings.core.PreferenceControllerMixin
@@ -40,7 +37,6 @@ class PinPrivacyPreferenceController(
     }
 
     override fun isAvailable(): Boolean {
-        // TODO: Make sure user supports second factor if secondary.
         val credentialType = lockPatternUtils.getCredentialTypeForUser(userId)
         return credentialType == CREDENTIAL_TYPE_PIN
     }
