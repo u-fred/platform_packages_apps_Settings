@@ -291,7 +291,7 @@ public class ChooseLockPassword extends SettingsActivity {
 
         private static final int CONFIRM_EXISTING_REQUEST = 58;
         static final int RESULT_FINISHED = RESULT_FIRST_USER;
-        public static final int RESULT_TIMEOUT = RESULT_FIRST_USER + 1;
+        public static final int RESULT_NOT_FOREGROUND = RESULT_FIRST_USER + 1;
 
         /** Used to store the profile type for which pin/password is being set */
         protected enum ProfileType {
@@ -745,7 +745,7 @@ public class ChooseLockPassword extends SettingsActivity {
         public void onStop() {
             super.onStop();
             if (mLockDomain == Secondary && !getActivity().isChangingConfigurations()) {
-                getActivity().setResult(RESULT_TIMEOUT);
+                getActivity().setResult(RESULT_NOT_FOREGROUND);
                 getActivity().finish();
             }
         }
