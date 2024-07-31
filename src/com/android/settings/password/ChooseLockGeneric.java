@@ -166,7 +166,7 @@ public class ChooseLockGeneric extends SettingsActivity {
         @VisibleForTesting
         static final int SKIP_FINGERPRINT_REQUEST = 104;
 
-        public static final int RESULT_TIMEOUT = RESULT_FIRST_USER;
+        public static final int RESULT_NOT_FOREGROUND = RESULT_FIRST_USER;
 
         private WrappedLockPatternUtils mLockPatternUtils;
         private DevicePolicyManager mDpm;
@@ -527,8 +527,8 @@ public class ChooseLockGeneric extends SettingsActivity {
             } else if (requestCode == CHOOSE_LOCK_REQUEST) {
                 mWaitingForChooseLockRequest = false;
                 if (resultCode ==
-                        ChooseLockPassword.ChooseLockPasswordFragment.RESULT_TIMEOUT) {
-                    getActivity().setResult(RESULT_TIMEOUT, data);
+                        ChooseLockPassword.ChooseLockPasswordFragment.RESULT_NOT_FOREGROUND) {
+                    getActivity().setResult(RESULT_NOT_FOREGROUND, data);
                 } else if (resultCode != RESULT_CANCELED) {
                     if (mLockDomain == Primary) {
                         getActivity().setResult(resultCode, data);
@@ -949,7 +949,7 @@ public class ChooseLockGeneric extends SettingsActivity {
                 if (mLockDomain == Primary && hasCredential) {
                     getActivity().finish();
                 } else if (mLockDomain == Secondary && !mWaitingForChooseLockRequest) {
-                    getActivity().setResult(RESULT_TIMEOUT);
+                    getActivity().setResult(RESULT_NOT_FOREGROUND);
                     getActivity().finish();
                 }
             }
