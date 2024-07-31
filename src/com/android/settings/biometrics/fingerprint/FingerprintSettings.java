@@ -1197,6 +1197,7 @@ public class FingerprintSettings extends SubSettings {
                         true);
                 intent.putExtra(Intent.EXTRA_USER_ID, mUserId);
                 intent.putExtra(ChooseLockSettingsHelper.EXTRA_KEY_REQUEST_GK_PW_HANDLE, true);
+                intent.putExtra(ChooseLockSettingsHelper.EXTRA_KEY_RETURN_CREDENTIALS, true);
                 intent.putExtra(ChooseLockSettingsHelper.EXTRA_KEY_FOR_FINGERPRINT, true);
                 startActivityForResult(intent, CHOOSE_LOCK_GENERIC_REQUEST);
             }
