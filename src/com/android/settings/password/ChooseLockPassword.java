@@ -1164,7 +1164,7 @@ public class ChooseLockPassword extends SettingsActivity {
 
             mPasswordEntry.setText("");
 
-            if (!wasSecureBefore) {
+            if (!wasSecureBefore && mLockDomain == Primary) {
                 Intent intent = getRedactionInterstitialIntent(getActivity());
                 if (intent != null) {
                     startActivity(intent);
