@@ -18,6 +18,8 @@ package com.android.settings.password;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.junit.Assert.assertThrows;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -28,13 +30,91 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockscreenCredential;
 import com.android.internal.widget.VerifyCredentialResponse;
+import com.android.internal.widget.WrappedLockPatternUtils;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @RunWith(AndroidJUnit4.class)
 public class SaveAndFinishWorkerTest {
-    // Test primay with writereparimdoe?
+    @Test
+    public void saveAndVerifyInBackground_returnCredentialsTrue_returnsCredentials() {
+        int userId = 0;
+        var chosenCredential = LockscreenCredential.createPassword("1234");
+        var currentCredential = LockscreenCredential.createNone();
+        var worker = new SaveAndFinishWorker();
+        var lpu = mock(WrappedLockPatternUtils.class);
+
+        when(lpu.setLockCredential(chosenCredential, currentCredential, userId)).thenReturn(true);
+
+        worker.setReturnCredentials(true);
+        worker.prepare(lpu, chosenCredential, currentCredential, userId);
+        var result = worker.saveAndVerifyInBackground();
+
+        verify(lpu).setLockCredential(chosenCredential, currentCredential, userId);
+        assertThat(result.first).isTrue();
+        assertThat(result.second.getParcelableExtra(
+                ChooseLockSettingsHelper.EXTRA_KEY_PASSWORD, LockscreenCredential.class))
+                .isEqualTo(chosenCredential);
+    }
+
+    @Test
+    public void saveAndVerifyInBackground_returnCredentialsFalse_notReturnCredentials() {
+        int userId = 0;
+        var chosenCredential = LockscreenCredential.createPassword("1234");
+        var currentCredential = LockscreenCredential.createNone();
+        var worker = new SaveAndFinishWorker();
+        var lpu = mock(WrappedLockPatternUtils.class);
+
+        when(lpu.setLockCredential(chosenCredential, currentCredential, userId)).thenReturn(true);
+
+        worker.prepare(lpu, chosenCredential, currentCredential, userId);
+        var result = worker.saveAndVerifyInBackground();
+
+        verify(lpu).setLockCredential(chosenCredential, currentCredential, userId);
+        assertThat(result.first).isTrue();
+        assertThat(result.second).isNull();
+    }
+
+    @Test
+    public void saveAndVerifyCredential_secondaryWithUnificationProfile_throwsException() {
+        int userId = 0;
+        var chosenCredential = LockscreenCredential.createPassword("1234");
+        var currentCredential = LockscreenCredential.createNone();
+        int unificationProfileId = 10;
+        var unificationCredential = LockscreenCredential.createPassword("4321");
+        var worker = new SaveAndFinishWorker();
+        var lpu = mock(WrappedLockPatternUtils.class);
+
+        when(lpu.setLockCredential(chosenCredential, currentCredential, userId)).thenReturn(true);
+        doThrow(IllegalStateException.class).when(lpu).setSeparateProfileChallengeEnabled(
+                unificationProfileId, false, unificationCredential);
+
+        worker.setProfileToUnify(unificationProfileId, unificationCredential);
+        worker.prepare(lpu, chosenCredential, currentCredential, userId);
+
+        assertThrows(IllegalStateException.class, worker::saveAndVerifyInBackground);
+    }
+
+    @Test
+    public void saveAndVerifyCredential_secondaryWithFlags_throwsException() {
+        int userId = 0;
+        int flags = LockPatternUtils.VERIFY_FLAG_REQUEST_GK_PW_HANDLE;
+        var chosenCredential = LockscreenCredential.createPassword("1234");
+        var currentCredential = LockscreenCredential.createNone();
+        var worker = new SaveAndFinishWorker();
+        var lpu = mock(WrappedLockPatternUtils.class);
+
+        worker.setRequestGatekeeperPasswordHandle(true);
+        when(lpu.setLockCredential(chosenCredential, currentCredential, userId)).thenReturn(true);
+        doThrow(IllegalArgumentException.class).when(lpu).verifyCredential(
+                chosenCredential, userId, flags);
+
+        worker.prepare(lpu, chosenCredential, currentCredential, userId);
+
+        assertThrows(IllegalArgumentException.class, worker::saveAndVerifyInBackground);
+    }
+
     @Test
     public void testSetRequestWriteRepairModePassword_setLockCredentialFail() {
         int userId = 0;
@@ -42,12 +122,12 @@ public class SaveAndFinishWorkerTest {
         var chosenCredential = LockscreenCredential.createPassword("1234");
         var currentCredential = LockscreenCredential.createNone();
         var worker = new SaveAndFinishWorker();
-        var lpu = mock(LockPatternUtils.class);
+        var lpu = mock(WrappedLockPatternUtils.class);
 
         when(lpu.setLockCredential(chosenCredential, currentCredential, userId)).thenReturn(false);
 
         worker.setRequestWriteRepairModePassword(true);
-        worker.prepare(lpu, chosenCredential, currentCredential, true, userId);
+        worker.prepare(lpu, chosenCredential, currentCredential, userId);
         var result = worker.saveAndVerifyInBackground();
 
         verify(lpu).setLockCredential(chosenCredential, currentCredential, userId);
@@ -62,14 +142,14 @@ public class SaveAndFinishWorkerTest {
         var chosenCredential = LockscreenCredential.createPassword("1234");
         var currentCredential = LockscreenCredential.createNone();
         var worker = new SaveAndFinishWorker();
-        var lpu = mock(LockPatternUtils.class);
+        var lpu = mock(WrappedLockPatternUtils.class);
         var response = VerifyCredentialResponse.fromError();
 
         when(lpu.setLockCredential(chosenCredential, currentCredential, userId)).thenReturn(true);
         when(lpu.verifyCredential(chosenCredential, userId, flags)).thenReturn(response);
 
         worker.setRequestWriteRepairModePassword(true);
-        worker.prepare(lpu, chosenCredential, currentCredential, true, userId);
+        worker.prepare(lpu, chosenCredential, currentCredential, userId);
         var result = worker.saveAndVerifyInBackground();
 
         verify(lpu).setLockCredential(chosenCredential, currentCredential, userId);
@@ -87,14 +167,14 @@ public class SaveAndFinishWorkerTest {
         var chosenCredential = LockscreenCredential.createPassword("1234");
         var currentCredential = LockscreenCredential.createNone();
         var worker = new SaveAndFinishWorker();
-        var lpu = mock(LockPatternUtils.class);
+        var lpu = mock(WrappedLockPatternUtils.class);
         var response = new VerifyCredentialResponse.Builder().build();
 
         when(lpu.setLockCredential(chosenCredential, currentCredential, userId)).thenReturn(true);
         when(lpu.verifyCredential(chosenCredential, userId, flags)).thenReturn(response);
 
         worker.setRequestWriteRepairModePassword(true);
-        worker.prepare(lpu, chosenCredential, currentCredential, true, userId);
+        worker.prepare(lpu, chosenCredential, currentCredential, userId);
         var result = worker.saveAndVerifyInBackground();
 
         verify(lpu).setLockCredential(chosenCredential, currentCredential, userId);
@@ -113,7 +193,7 @@ public class SaveAndFinishWorkerTest {
         var chosenCredential = LockscreenCredential.createPassword("1234");
         var currentCredential = LockscreenCredential.createNone();
         var worker = new SaveAndFinishWorker();
-        var lpu = mock(LockPatternUtils.class);
+        var lpu = mock(WrappedLockPatternUtils.class);
         var response = new VerifyCredentialResponse.Builder().build();
 
         when(lpu.setLockCredential(chosenCredential, currentCredential, userId)).thenReturn(true);
@@ -121,7 +201,7 @@ public class SaveAndFinishWorkerTest {
 
         worker.setRequestWriteRepairModePassword(true);
         worker.setRequestGatekeeperPasswordHandle(true);
-        worker.prepare(lpu, chosenCredential, currentCredential, true, userId);
+        worker.prepare(lpu, chosenCredential, currentCredential, userId);
         var result = worker.saveAndVerifyInBackground();
 
         verify(lpu).setLockCredential(chosenCredential, currentCredential, userId);
