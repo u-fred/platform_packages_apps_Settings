@@ -174,7 +174,9 @@ public class SaveAndFinishWorker extends Fragment {
         if (mUnificationProfileCredential != null) {
             mUnificationProfileCredential.zeroize();
         }
-        LockScreenSafetySource.onLockScreenChange(getContext());
+        if (mUtils.getLockDomain() == Primary) {
+            LockScreenSafetySource.onLockScreenChange(getContext());
+        }
     }
 
     public SaveAndFinishWorker setRequestGatekeeperPasswordHandle(boolean value) {
