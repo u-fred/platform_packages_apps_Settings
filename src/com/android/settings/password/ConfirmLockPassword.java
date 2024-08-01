@@ -544,8 +544,8 @@ public class ConfirmLockPassword extends ConfirmDeviceCredentialBaseActivity {
             mPendingLockCheck = (localEffectiveUserId == localUserId)
                     ? LockPatternChecker.verifyCredential(mLockPatternUtils, credential,
                             localUserId, flags, onVerifyCallback)
-                    : LockPatternChecker.verifyTiedProfileChallenge(mLockPatternUtils,
-                            credential, localUserId, flags, onVerifyCallback);
+                    : LockPatternChecker.verifyTiedProfileChallenge(mLockPatternUtils, credential,
+                            localUserId, flags, onVerifyCallback);
         }
 
         private void startCheckPassword(final LockscreenCredential credential,
@@ -602,9 +602,8 @@ public class ConfirmLockPassword extends ConfirmDeviceCredentialBaseActivity {
             mPasswordEntryInputDisabler.setInputEnabled(true);
             if (matched) {
                 if (newResult) {
-                    ConfirmDeviceCredentialUtils.reportSuccessfulAttempt(
-                            mLockPatternUtils.getInner(), mUserManager, mDevicePolicyManager,
-                            mEffectiveUserId, mLockPatternUtils.getLockDomain(),
+                    ConfirmDeviceCredentialUtils.reportSuccessfulAttempt(mLockPatternUtils,
+                            mUserManager, mDevicePolicyManager, mEffectiveUserId,
                             /* isStrongAuth */ true);
                 }
                 startDisappearAnimation(intent);
