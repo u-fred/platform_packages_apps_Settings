@@ -557,9 +557,6 @@ public class ConfirmLockPattern extends ConfirmDeviceCredentialBaseActivity {
                                         ChooseLockSettingsHelper.EXTRA_KEY_CHALLENGE_TOKEN,
                                         response.getGatekeeperHAT());
                             }
-                            // TODO: Review this. Adding to make consistent with
-                            //  ConfirmLockPassword.
-                            intent.putExtra(ChooseLockSettingsHelper.EXTRA_KEY_PASSWORD, pattern);
                         }
                         mCredentialCheckResultTracker.setResult(matched, intent, timeoutMs,
                                 localEffectiveUserId);
@@ -569,7 +566,7 @@ public class ConfirmLockPattern extends ConfirmDeviceCredentialBaseActivity {
                                 mLockPatternUtils, pattern, localUserId, flags,
                                 onVerifyCallback)
                         : LockPatternChecker.verifyTiedProfileChallenge(
-                                mLockPatternUtils.getInner(), pattern, localUserId, flags,
+                                mLockPatternUtils, pattern, localUserId, flags,
                                 onVerifyCallback);
             }
 
