@@ -37,7 +37,6 @@ import android.view.WindowInsetsController;
 import androidx.annotation.NonNull;
 
 import com.android.internal.widget.LockDomain;
-import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.WrappedLockPatternUtils;
 
 /** Class containing methods shared between CDCA and CDCBA */
@@ -88,6 +87,10 @@ public class ConfirmDeviceCredentialUtils {
                 }
             }
         } else {
+            if (lockDomain == Secondary) {
+                throw new IllegalArgumentException(
+                        "Secondary LockDomain only supports strong auth");
+            }
             dpm.reportSuccessfulBiometricAttempt(userId);
         }
         if (lockDomain == Primary && !isBiometricUnlockEnabledForPrivateSpace()) {
