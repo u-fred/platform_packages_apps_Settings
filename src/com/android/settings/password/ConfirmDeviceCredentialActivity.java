@@ -53,6 +53,7 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentActivity;
 
 import com.android.internal.widget.LockPatternUtils;
+import com.android.internal.widget.WrappedLockPatternUtils;
 import com.android.settings.R;
 import com.android.settings.Utils;
 
@@ -121,8 +122,9 @@ public class ConfirmDeviceCredentialActivity extends FragmentActivity {
             mTrustManager.setDeviceLockedForUser(mUserId, false);
             final boolean isStrongAuth = result.getAuthenticationType()
                     == BiometricPrompt.AUTHENTICATION_RESULT_TYPE_DEVICE_CREDENTIAL;
-            ConfirmDeviceCredentialUtils.reportSuccessfulAttempt(mLockPatternUtils, mUserManager,
-                    mDevicePolicyManager, mUserId, Primary, isStrongAuth);
+            ConfirmDeviceCredentialUtils.reportSuccessfulAttempt(
+                    new WrappedLockPatternUtils(mLockPatternUtils, Primary), mUserManager,
+                    mDevicePolicyManager, mUserId, isStrongAuth);
             ConfirmDeviceCredentialUtils.checkForPendingIntent(
                     ConfirmDeviceCredentialActivity.this);
 

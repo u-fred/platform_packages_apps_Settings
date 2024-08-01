@@ -38,6 +38,7 @@ import androidx.annotation.NonNull;
 
 import com.android.internal.widget.LockDomain;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.internal.widget.WrappedLockPatternUtils;
 
 /** Class containing methods shared between CDCA and CDCBA */
 public class ConfirmDeviceCredentialUtils {
@@ -70,10 +71,11 @@ public class ConfirmDeviceCredentialUtils {
         }
     }
 
-    public static void reportSuccessfulAttempt(LockPatternUtils utils, UserManager userManager,
-            DevicePolicyManager dpm, int userId, LockDomain lockDomain, boolean isStrongAuth) {
+    public static void reportSuccessfulAttempt(WrappedLockPatternUtils utils,
+            UserManager userManager, DevicePolicyManager dpm, int userId, boolean isStrongAuth) {
+        LockDomain lockDomain = utils.getLockDomain();
         if (isStrongAuth) {
-            utils.reportSuccessfulPasswordAttempt(userId, lockDomain, false);
+            utils.reportSuccessfulPasswordAttempt(userId, false);
             if (lockDomain == Primary && isBiometricUnlockEnabledForPrivateSpace()) {
                 final UserInfo userInfo = userManager.getUserInfo(userId);
                 if (userInfo != null) {
