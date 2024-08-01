@@ -60,7 +60,6 @@ import com.android.internal.widget.WrappedLockPatternUtils;
 import com.android.settings.R;
 import com.android.settings.Utils;
 import com.android.settings.core.InstrumentedFragment;
-
 import com.google.android.setupdesign.GlifLayout;
 
 /**
@@ -183,18 +182,31 @@ public abstract class ConfirmDeviceCredentialBaseFragment extends InstrumentedFr
             }
         }
 
+        mLockDomain = intent.getParcelableExtra(
+                ChooseLockSettingsHelper.EXTRA_KEY_LOCK_DOMAIN, LockDomain.class);
+        mLockDomain = mLockDomain == null ? Primary : mLockDomain;
+        mLockPatternUtils = new WrappedLockPatternUtils(getActivity(), mLockDomain);
+
         // Only take this argument into account if it belongs to the current profile.
+        // TODO: There are internal versions of each subclass of this Fragment, which implies the
+        //  external versions are available for use by other apps. The manifest doesn't have them
+        //  listed as exported, but maybe I'm missing something. Would want to check second factor
+        //  support here instead of relying on ChooseLockSettingsHelper if that is the case.
         mUserId = Utils.getUserIdFromBundle(getActivity(), intent.getExtras(),
                 isInternalActivity());
         mFrp = (mUserId == LockPatternUtils.USER_FRP);
         mRepairMode = (mUserId == LockPatternUtils.USER_REPAIR_MODE);
         mUserManager = UserManager.get(getActivity());
-        mEffectiveUserId = mUserManager.getCredentialOwnerProfile(mUserId);
-
-        mLockDomain = intent.getParcelableExtra(
-                ChooseLockSettingsHelper.EXTRA_KEY_LOCK_DOMAIN, LockDomain.class);
-        mLockDomain = mLockDomain == null ? Primary : mLockDomain;
-        mLockPatternUtils = new WrappedLockPatternUtils(getActivity(), mLockDomain);
+        if (mLockDomain == Primary) {
+            mEffectiveUserId = mUserManager.getCredentialOwnerProfile(mUserId);
+        } else {
+            // ChooseLockSettingsHelper has verified that mUserId supports second factor, so this
+            // is not needed as the only user types that support are non-profile users. However,
+            // in future there could be a profile user that does not have shareable credentials and
+            // then this would be needed. Upstream would also probably break for primary validation
+            // in this case.
+            mEffectiveUserId = mUserId;
+        }
 
         mDevicePolicyManager = (DevicePolicyManager) getActivity().getSystemService(
                 Context.DEVICE_POLICY_SERVICE);
