@@ -197,16 +197,12 @@ public abstract class ConfirmDeviceCredentialBaseFragment extends InstrumentedFr
         mFrp = (mUserId == LockPatternUtils.USER_FRP);
         mRepairMode = (mUserId == LockPatternUtils.USER_REPAIR_MODE);
         mUserManager = UserManager.get(getActivity());
-        if (mLockDomain == Primary) {
-            mEffectiveUserId = mUserManager.getCredentialOwnerProfile(mUserId);
-        } else {
-            // ChooseLockSettingsHelper has verified that mUserId supports second factor, so this
-            // is not needed as the only user types that support are non-profile users. However,
-            // in future there could be a profile user that does not have shareable credentials and
-            // then this would be needed. Upstream would also probably break for primary validation
-            // in this case.
-            mEffectiveUserId = mUserId;
-        }
+        // ChooseLockSettingsHelper has verified that mUserId supports second factor, so
+        // with all current user types that support second factor, mEffectiveUserId will always
+        // be equal to mUserId. However, this will not be the case if there is a profile user
+        // type without shareable credentials. Upstream would also probably break for primary
+        // validation in this case. Refer to UserTypeFactory for all user type information.
+        mEffectiveUserId = mUserManager.getCredentialOwnerProfile(mUserId);
 
         mDevicePolicyManager = (DevicePolicyManager) getActivity().getSystemService(
                 Context.DEVICE_POLICY_SERVICE);
