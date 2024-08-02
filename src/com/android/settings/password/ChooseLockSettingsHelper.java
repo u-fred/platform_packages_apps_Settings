@@ -53,14 +53,6 @@ import java.util.Optional;
 
 public final class ChooseLockSettingsHelper {
 
-    public class SecondaryChooseLockSettingsHelper {
-        private ChooseLockSettingsHelper mInner;
-
-        public SecondaryChooseLockSettingsHelper(ChooseLockSettingsHelper inner) {
-            mInner = inner;
-        }
-    }
-
     private static final String TAG = "ChooseLockSettingsHelper";
 
     public static final String EXTRA_KEY_PASSWORD = "password";
