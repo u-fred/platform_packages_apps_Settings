@@ -53,6 +53,14 @@ import java.util.Optional;
 
 public final class ChooseLockSettingsHelper {
 
+    public class SecondaryChooseLockSettingsHelper {
+        private ChooseLockSettingsHelper mInner;
+
+        public SecondaryChooseLockSettingsHelper(ChooseLockSettingsHelper inner) {
+            mInner = inner;
+        }
+    }
+
     private static final String TAG = "ChooseLockSettingsHelper";
 
     public static final String EXTRA_KEY_PASSWORD = "password";
@@ -71,8 +79,10 @@ public final class ChooseLockSettingsHelper {
     // For the paths where setup biometrics in suw flow
     public static final String EXTRA_KEY_IS_SUW = "is_suw";
     public static final String EXTRA_KEY_FOREGROUND_ONLY = "foreground_only";
-    // Result code to return when finished due to not being in foreground. Only applies if
-    // foreground only is set.
+    /**
+     * Intent extra for specifying the result code to return when a foreground-only Activity goes
+     * to background.
+     */
     public static final String EXTRA_KEY_NOT_FOREGROUND_RESULT_CODE =
             "not_foreground_result_code";
     public static final String EXTRA_KEY_REQUEST_GK_PW_HANDLE = "request_gk_pw_handle";
@@ -134,7 +144,10 @@ public final class ChooseLockSettingsHelper {
     public static final String EXTRA_KEY_CHOOSE_LOCK_SCREEN_DESCRIPTION =
             "choose_lock_setup_screen_description";
 
-    // Whether doing an operation involving the primary or secondary lock.
+    /**
+     * Intent extra for specifying whether doing an operation involving primary or secondary lock
+     * domain.
+     */
     public static final String EXTRA_KEY_LOCK_DOMAIN = "lock_domain";
 
     @VisibleForTesting @NonNull LockPatternUtils mLockPatternUtils;
@@ -394,6 +407,11 @@ public final class ChooseLockSettingsHelper {
             return this;
         }
 
+        @NonNull public Builder setLockDomain(LockDomain lockDomain) {
+            mLockDomain = lockDomain;
+            return this;
+        }
+
         @NonNull public ChooseLockSettingsHelper build() {
             if (!mAllowAnyUserId && mUserId != LockPatternUtils.USER_FRP
                     && mUserId != LockPatternUtils.USER_REPAIR_MODE) {
@@ -419,10 +437,8 @@ public final class ChooseLockSettingsHelper {
 
             LockPatternUtils lpu = new LockPatternUtils(mActivity.getApplicationContext());
             lpu.checkUserSupportsBiometricSecondFactorIfSecondary(mUserId, mLockDomain);
-            // TODO: This will fall out of sync as time goes on. We would prefer an inclusion list.
-            //  Could only include certain fields for secondary in #launchConfirmationActivity, but
-            //  then it's all getting a bit messy. Likelihood and impact of issue is low, so I
-            //  think this is fine.
+            // TODO: This will fall out of sync as time goes on. Easiest option is to remove these
+            //  checks and require caller to get it right. Safest option is to create a wrapper.
             if (mLockDomain == Secondary
                     && (mRemoteLockscreenValidation
                     || mRemoteLockscreenValidationSession != null
@@ -435,11 +451,6 @@ public final class ChooseLockSettingsHelper {
 
             return new ChooseLockSettingsHelper(this, mActivity, mFragment,
                     mActivityResultLauncher);
-        }
-
-        @NonNull public Builder setLockDomain(LockDomain lockDomain) {
-            mLockDomain = lockDomain;
-            return this;
         }
 
         public boolean show() {
