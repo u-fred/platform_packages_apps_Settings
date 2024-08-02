@@ -255,6 +255,7 @@ public class ChooseLockPassword extends SettingsActivity {
         private LockscreenCredential mChosenPassword;
         private boolean mRequestGatekeeperPassword;
         private boolean mRequestWriteRepairModePassword;
+        private boolean mReturnCredentials;
         private ImeAwareEditText mPasswordEntry;
         private TextViewInputDisabler mPasswordEntryInputDisabler;
 
@@ -316,6 +317,7 @@ public class ChooseLockPassword extends SettingsActivity {
                     R.string.lockpassword_choose_your_password_header_for_biometrics,
                     R.string.private_space_choose_your_password_header, // private space password
                     R.string.lockpassword_choose_your_pin_header, // pin
+                    R.string.lockpassword_choose_your_biometric_second_factor_pin_header,
                     SET_WORK_PROFILE_PIN_HEADER,
                     R.string.lockpassword_choose_your_profile_pin_header,
                     R.string.lockpassword_choose_your_pin_header_for_fingerprint,
@@ -335,6 +337,7 @@ public class ChooseLockPassword extends SettingsActivity {
                     R.string.lockpassword_confirm_your_password_header,
                     R.string.lockpassword_confirm_your_password_header,
                     R.string.lockpassword_confirm_your_pin_header,
+                    R.string.lockpassword_confirm_your_biometric_second_factor_pin_header,
                     REENTER_WORK_PROFILE_PIN_HEADER,
                     R.string.lockpassword_reenter_your_profile_pin_header,
                     R.string.lockpassword_confirm_your_pin_header,
@@ -354,6 +357,7 @@ public class ChooseLockPassword extends SettingsActivity {
                     R.string.lockpassword_confirm_passwords_dont_match,
                     R.string.lockpassword_confirm_passwords_dont_match,
                     R.string.lockpassword_confirm_pins_dont_match,
+                    R.string.lockpassword_confirm_pins_dont_match,
                     UNDEFINED,
                     R.string.lockpassword_confirm_pins_dont_match,
                     R.string.lockpassword_confirm_pins_dont_match,
@@ -372,6 +376,7 @@ public class ChooseLockPassword extends SettingsActivity {
                     int hintInAlphaForBiometrics,
                     int hintInAlphaForPrivateProfile,
                     int hintInNumeric,
+                    int hintInNumericForBiometricSecondFactor,
                     String hintOverrideInNumericForProfile,
                     int hintInNumericForProfile,
                     int hintInNumericForFingerprint,
@@ -391,6 +396,7 @@ public class ChooseLockPassword extends SettingsActivity {
                 this.alphaHintForPrivateProfile = hintInAlphaForPrivateProfile;
 
                 this.numericHint = hintInNumeric;
+                this.numericHintForBiometricSecondFactor = hintInNumericForBiometricSecondFactor;
                 this.numericHintOverrideForProfile = hintOverrideInNumericForProfile;
                 this.numericHintForManagedProfile = hintInNumericForProfile;
                 this.numericHintForFingerprint = hintInNumericForFingerprint;
@@ -420,6 +426,7 @@ public class ChooseLockPassword extends SettingsActivity {
 
             // PIN header
             public final int numericHint;
+            public final int numericHintForBiometricSecondFactor;
             public final int numericHintForPrivateProfile;
             public final String numericHintOverrideForProfile;
             public final int numericHintForManagedProfile;
@@ -435,7 +442,8 @@ public class ChooseLockPassword extends SettingsActivity {
 
             public final int buttonText;
 
-            public String getHint(Context context, boolean isAlpha, int type, ProfileType profile) {
+            public String getHint(Context context, boolean isAlpha, int type, ProfileType profile,
+                    LockDomain lockDomain) {
                 if (isAlpha) {
                     if (android.os.Flags.allowPrivateProfile()
                             && profile.equals(ProfileType.Private)) {
@@ -454,7 +462,9 @@ public class ChooseLockPassword extends SettingsActivity {
                         return context.getString(alphaHint);
                     }
                 } else {
-                    if (android.os.Flags.allowPrivateProfile()
+                    if (lockDomain == Secondary) {
+                        return context.getString(numericHintForBiometricSecondFactor);
+                    } else if (android.os.Flags.allowPrivateProfile()
                             && profile.equals(ProfileType.Private)) {
                         return context.getString(numericHintForPrivateProfile);
                     } else if (type == TYPE_FINGERPRINT) {
@@ -656,7 +666,7 @@ public class ChooseLockPassword extends SettingsActivity {
             if (activity instanceof SettingsActivity) {
                 final SettingsActivity sa = (SettingsActivity) activity;
                 String title = Stage.Introduction.getHint(
-                        getContext(), mIsAlphaMode, getStageType(), mProfileType);
+                        getContext(), mIsAlphaMode, getStageType(), mProfileType, mLockDomain);
                 sa.setTitle(title);
                 mLayout.setHeaderText(title);
             }
@@ -1026,7 +1036,7 @@ public class ChooseLockPassword extends SettingsActivity {
                 // Hide password requirement view when we are just asking user to confirm the pw.
                 mPasswordRestrictionView.setVisibility(View.GONE);
                 setHeaderText(mUiStage.getHint(getContext(), mIsAlphaMode, getStageType(),
-                        mProfileType));
+                        mProfileType, mLockDomain));
                 setNextEnabled(canInput && length >= LockPatternUtils.MIN_LOCK_PASSWORD_SIZE);
                 mSkipOrClearButton.setVisibility(toVisibility(canInput && length > 0));
 
@@ -1155,6 +1165,7 @@ public class ChooseLockPassword extends SettingsActivity {
             if (mChosenPassword != null) {
                 mChosenPassword.zeroize();
             }
+
             if (mCurrentCredential != null) {
                 mCurrentCredential.zeroize();
             }
