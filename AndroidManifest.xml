@@ -2658,9 +2658,11 @@
         </activity>
 
         <activity android:name=".password.ConfirmLockPattern"
+            android:enableOnBackInvokedCallback="false"
             android:theme="@style/GlifTheme.Light"/>
 
         <activity android:name=".password.ConfirmLockPassword"
+            android:enableOnBackInvokedCallback="false"
             android:windowSoftInputMode="stateHidden|adjustResize"
             android:theme="@style/GlifTheme.Light"/>
 
@@ -2828,11 +2830,13 @@
 
         <!-- Note this must not be exported since it returns the password in the intent -->
         <activity android:name=".password.ConfirmLockPassword$InternalActivity"
+            android:enableOnBackInvokedCallback="false"
             android:exported="false"
             android:windowSoftInputMode="adjustResize"
             android:theme="@style/GlifTheme.Light"/>
 
         <activity android:name=".password.SetupChooseLockGeneric"
+            android:enableOnBackInvokedCallback="false"
             android:theme="@style/GlifTheme.Light"
             android:exported="true"
             android:label="@string/lock_settings_picker_title">
@@ -2843,15 +2847,18 @@
         </activity>
 
         <activity android:name=".password.SetupChooseLockGeneric$InternalActivity"
+            android:enableOnBackInvokedCallback="false"
             android:exported="false"
             android:excludeFromRecents="true" />
 
         <activity android:name=".password.ChooseLockGeneric"
+            android:enableOnBackInvokedCallback="false"
             android:label="@string/lockpassword_choose_lock_generic_header"
             android:excludeFromRecents="true"
             android:exported="false" />
 
         <activity android:name=".password.SetNewPasswordActivity"
+            android:enableOnBackInvokedCallback="false"
             android:theme="@android:style/Theme.NoDisplay"
             android:exported="true"
             android:excludeFromRecents="true" >
@@ -2917,24 +2924,29 @@
         </activity>
 
         <activity android:name=".password.ChooseLockGeneric$InternalActivity"
+            android:enableOnBackInvokedCallback="false"
             android:exported="false"
             android:label="@string/lockpassword_choose_lock_generic_header"
             android:excludeFromRecents="true" />
 
         <activity android:name=".password.SetupChooseLockPattern"
+            android:enableOnBackInvokedCallback="false"
             android:exported="false"
             android:theme="@style/GlifTheme.Light" />
 
         <activity android:name=".password.ChooseLockPattern"
+            android:enableOnBackInvokedCallback="false"
             android:exported="false"
             android:theme="@style/GlifTheme.Light" />
 
         <activity android:name=".password.SetupChooseLockPassword"
+            android:enableOnBackInvokedCallback="false"
             android:exported="false"
             android:theme="@style/GlifTheme.Light"
             android:windowSoftInputMode="stateVisible|adjustResize" />
 
         <activity android:name=".password.ChooseLockPassword"
+            android:enableOnBackInvokedCallback="false"
             android:exported="false"
             android:theme="@style/GlifTheme.Light"
             android:windowSoftInputMode="stateVisible|adjustResize"/>
