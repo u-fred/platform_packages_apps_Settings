@@ -23,6 +23,11 @@
             android:summaryOn="@string/sim_lock_on"
             android:summaryOff="@string/sim_lock_off"/>
 
+    <SwitchPreferenceCompat
+            android:key="sim_scramble_pin_layout"
+            android:dependency="sim_toggle"
+            android:title="@string/scramble_pin_title"/>
+
     <com.android.settings.EditPinPreference
             android:key="sim_pin"
             android:dependency="sim_toggle"
