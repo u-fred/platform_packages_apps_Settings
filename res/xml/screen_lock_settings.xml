@@ -34,6 +34,11 @@
         android:summary="@string/lock_screen_auto_pin_confirm_summary" />
 
     <SwitchPreferenceCompat
+        android:key="scramble_pin_layout"
+        android:title="@string/scramble_pin_title"
+        settings:controller="com.android.settings.security.screenlock.PinScramblingPrefController" />
+
+    <SwitchPreferenceCompat
         android:key="enhancedPinPrivacy"
         android:title="@string/lockpattern_settings_enhanced_pin_privacy_title"
         android:summary="@string/lockpattern_settings_enhanced_pin_privacy_summary" />
