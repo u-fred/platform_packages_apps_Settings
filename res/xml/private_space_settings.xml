@@ -68,6 +68,11 @@
             android:summary="@string/private_space_sensitive_notifications_description"
             settings:controller="com.android.settings.privatespace.HidePrivateSpaceSensitiveNotificationsController" />
 
+        <Preference
+            android:key="sandboxed_google_play_private_space"
+            android:title="@string/sandboxed_google_play"
+            settings:controller="com.android.settings.applications.GmsCompatAppController"/>
+
     </PreferenceCategory>
 
     <PreferenceCategory
