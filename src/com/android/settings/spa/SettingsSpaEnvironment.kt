@@ -104,6 +104,7 @@ open class SettingsSpaEnvironment(context: Context) : SpaEnvironment(context) {
         com.android.settings.applications.AswAdapterUseMemoryTagging.makeAppListPageProvider(),
         com.android.settings.applications.AswAdapterUseExtendedVaSpace.makeAppListPageProvider(),
         com.android.settings.applications.AswAdapterNativeDebugging.makeAppListPageProvider(),
+        com.android.settings.applications.AswAdapterWebViewDynCodeLoading.makeAppListPageProvider(),
         com.android.settings.applications.AswAdapterMemoryDynCodeLoading.makeAppListPageProvider(),
         com.android.settings.applications.AswAdapterStorageDynCodeLoading.makeAppListPageProvider(),
         AllAppListPageProvider,
