@@ -187,6 +187,7 @@ private fun AppInfoSettings(packageInfoPresenter: PackageInfoPresenter) {
             com.android.settings.applications.AppMemtagPreference(app)
             com.android.settings.applications.AppExtendedVaSpacePreference(app)
             com.android.settings.applications.AppNativeDebuggingPreference(app)
+            com.android.settings.applications.AppWebViewDynCodeLoadingPreference(app)
             com.android.settings.applications.AppMemoryDynCodeLoadingPreference(app)
             com.android.settings.applications.AppStorageDynCodeLoadingPreference(app)
         }
