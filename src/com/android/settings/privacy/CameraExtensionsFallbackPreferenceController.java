@@ -48,6 +48,10 @@ public class CameraExtensionsFallbackPreferenceController extends TogglePreferen
 
     @Override
     public int getAvailabilityStatus() {
+        if (!com.android.internal.camera.flags.Flags.concertMode()) {
+            // this toggle is a no-op when concert_mode flag is off
+            return CONDITIONALLY_UNAVAILABLE;
+        }
         return AVAILABLE;
     }
 
