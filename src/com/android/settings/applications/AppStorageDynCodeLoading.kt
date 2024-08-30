@@ -42,6 +42,13 @@ class AppStorageDynCodeLoadingFragment : AswExploitProtectionFragment<AswRestric
 
     override fun getTitle() = getText(R.string.aep_storage_dcl_short)
 
+    override fun getSummaryForDefaultValueReason(dvr: Int): CharSequence? {
+        if (dvr == AppSwitch.DVR_DEFAULT_SETTING) {
+            return ""
+        }
+        return super.getSummaryForDefaultValueReason(dvr)
+    }
+
     override fun getSummaryForImmutabilityReason(ir: Int): CharSequence? {
         val id = when (ir) {
             AppSwitch.IR_IS_SYSTEM_APP -> R.string.aep_storage_dcl_dvr_is_system_app
@@ -60,6 +67,8 @@ class AppDefaultStorageDynCodeLoadingPrefController(ctx: Context, key: String) :
 
     override fun getSummaryOn() = resText(R.string.aep_default_summary_restricted)
     override fun getSummaryOff() = resText(R.string.aep_default_summary_allowed_for_3p_apps)
+
+    override fun getAvailabilityStatus() = CONDITIONALLY_UNAVAILABLE
 }
 
 class AppDefaultStorageDynCodeLoadingFragment : BoolSettingFragment() {
@@ -85,6 +94,5 @@ class AppDefaultStorageDynCodeLoadingFragment : BoolSettingFragment() {
 class StorageDynCodeLoadingAppListPrefController(context: Context, preferenceKey: String) :
     AswAppListPrefController(context, preferenceKey, AswAdapterStorageDynCodeLoading) {
 
-    override fun getAvailabilityStatus() = ExtSettingControllerHelper
-        .getSecondaryUserOnlySettingAvailability(mContext)
+    override fun getAvailabilityStatus() = AVAILABLE
 }
