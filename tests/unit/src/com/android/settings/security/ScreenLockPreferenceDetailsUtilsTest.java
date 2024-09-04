@@ -113,7 +113,7 @@ public class ScreenLockPreferenceDetailsUtilsTest {
     public void isAvailable_whenEnabled_shouldReturnTrue() {
         whenConfigShowUnlockSetOrChangeIsEnabled(true);
 
-        assertThat(mScreenLockPreferenceDetailsUtils.isAvailable().isTrue();
+        assertThat(mScreenLockPreferenceDetailsUtils.isAvailable()).isTrue();
     }
 
     @Test

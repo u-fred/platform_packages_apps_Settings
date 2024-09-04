@@ -76,12 +76,25 @@ public class ScreenLockSettings extends DashboardFragment
         mLockDomain = getIntent().getParcelableExtra(
                 ChooseLockSettingsHelper.EXTRA_KEY_LOCK_DOMAIN, LockDomain.class);
         mLockDomain = mLockDomain == null ? Primary : mLockDomain;
+
         super.onAttach(context);
+    }
+
+    @Override
+    public void onActivityCreated (Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        getActivity().setTitle(mLockDomain == Primary ?
+                R.string.unlock_set_unlock_launch_picker_title :
+                R.string.unlock_set_unlock_launch_picker_title_biometric_second_factor);
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        getPreferenceScreen().setTitle(mLockDomain == Primary ?
+                R.string.unlock_set_unlock_launch_picker_title :
+                R.string.unlock_set_unlock_launch_picker_title_biometric_second_factor);
 
         mForegroundOnly = getIntent().getBooleanExtra(
                 ChooseLockSettingsHelper.EXTRA_KEY_FOREGROUND_ONLY, false);

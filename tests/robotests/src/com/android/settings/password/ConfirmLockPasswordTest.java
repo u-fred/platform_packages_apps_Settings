@@ -45,6 +45,7 @@ import android.app.KeyguardManager;
 import android.app.admin.ManagedSubscriptionsPolicy;
 import android.content.Context;
 import android.content.Intent;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.service.remotelockscreenvalidation.IRemoteLockscreenValidationCallback;
 import android.service.remotelockscreenvalidation.RemoteLockscreenValidationClient;
@@ -100,6 +101,8 @@ public class ConfirmLockPasswordTest {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+
+        SystemProperties.set("setupwizard.theme", "val");
 
         mContext = ApplicationProvider.getApplicationContext();
         mLockPatternUtils = new LockPatternUtils(mContext);

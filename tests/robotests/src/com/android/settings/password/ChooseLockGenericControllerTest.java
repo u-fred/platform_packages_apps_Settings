@@ -93,6 +93,7 @@ public class ChooseLockGenericControllerTest {
         mControllerSecondary = createBuilder(Secondary).build();
 
         // These values are constant for secondary, so mock them in setUp().
+        // TODO: Create an mLockPatternUtilsSecondary as WLPU. Update WLPU to use mLockDomain calls instead of if(primary).
         when(mLockPatternUtils.isCredentialsDisabledForUser(anyInt(), eq(Secondary)))
                 .thenReturn(false);
         when(mLockPatternUtils.getRequestedPasswordMetrics(anyInt(), eq(Secondary),

@@ -1011,8 +1011,6 @@
     <string name="biometric_settings_category_ways_to_unlock">Ways to unlock</string>
     <!-- Text shown on a preference for creating/changing a biometric second factor screen lock. [CHAR LIMIT=60] -->
     <string name="biometric_settings_second_factor_title">Biometric second factor</string>
-    <!-- Text shown on a slider for enabling/disabling use of second factor screen lock with fingerprint. [CHAR LIMIT=60] -->
-    <string name="biometric_settings_second_factor_screen_lock_fingerprint_title">Enabled for fingerprint</string>
     <!-- Biometric category title - biometric options for unlocking the device. [CHAR LIMIT=60] -->
     <string name="biometric_settings_category_use_face_fingerprint">Use face or fingerprint to</string>
     <!-- Text shown on a toggle which allows or disallows the device to use biometric for unlocking the device. [CHAR LIMIT=50] -->
@@ -1492,6 +1490,9 @@
     <!--  Title for PreferenceScreen to launch picker for security method when there is none [CHAR LIMIT=22] -->
     <string name="unlock_set_unlock_launch_picker_title">Screen lock</string>
 
+    <!--  Biometric second factor screen lock settings title [CHAR LIMIT=22] --><skip />
+    <string name="unlock_set_unlock_launch_picker_title_biometric_second_factor">Second factor unlock</string>
+
     <!--  Profile Security lock settings --><skip />
     <!--  Title for PreferenceScreen to launch picker for security method for the managed profile when there is none [CHAR LIMIT=22] -->
     <string name="unlock_set_unlock_launch_picker_title_profile">Work profile lock</string>
@@ -1507,6 +1508,9 @@
 
     <!-- Title for preference that guides the user through creating an unlock PIN (Personal Identification Number) [CHAR LIMIT=22] -->
     <string name="unlock_set_unlock_pin_title">PIN</string>
+
+    <!-- Title for preference that guides the user through creating a biometric second factor PIN (Personal Identification Number) [CHAR LIMIT=22] -->
+    <string name="unlock_set_unlock_biometric_second_factor_pin_title">Second factor PIN</string>
 
     <!-- Title for preference that guides the user through creating an unlock password [CHAR LIMIT=22] -->
     <string name="unlock_set_unlock_password_title">Password</string>
@@ -1568,7 +1572,7 @@
     <!-- Content of the dialog shown when the user removes the device lock pattern and the user has face authentication and fingerprint enrolled [CHAR LIMIT=NONE] -->
     <string name="unlock_disable_frp_warning_content_pattern_face_fingerprint">"A pattern protects your phone if it\u2019s lost or stolen.<xliff:g id="empty_line">\n\n</xliff:g>This deletes the fingerprint model stored on your device. Your face model will also be permanently and securely deleted. You won\u2019t be able to use your face or fingerprint for authentication in apps."</string>
     <!-- Content of the dialog shown when the user removes the biometric second factor PIN [CHAR LIMIT=NONE] -->
-    <string name="unlock_disable_biometric_second_factor_warning_content">"A second factor provides stronger protection for your phone if it\u2019s lost or stolen."</string>
+    <string name="unlock_disable_biometric_second_factor_warning_content">"A fingerprint alone does not provide strong protection for your device."</string>
     <!-- Content of the dialog shown when the user removes the device lock PIN [CHAR LIMIT=NONE] -->
     <string name="unlock_disable_frp_warning_content_pin">"A PIN protects your phone if it\u2019s lost or stolen"</string>
     <!-- Content of the dialog shown when the user removes the device lock PIN and there are apps with auth-bound keys that will be affected [CHAR LIMIT=NONE] -->
@@ -3738,6 +3742,8 @@
     <string name="lockpassword_choose_your_profile_password_header">Set a work password</string>
     <!-- Header on first screen of choose device PIN flow [CHAR LIMIT=40] -->
     <string name="lockpassword_choose_your_pin_header">Set a PIN</string>
+    <!-- Header on first screen of choose biometric second factor PIN flow [CHAR LIMIT=40] -->
+    <string name="lockpassword_choose_your_biometric_second_factor_pin_header">Set a second factor PIN</string>
     <!-- Header on first screen of choose work profile PIN flow [CHAR LIMIT=40] -->
     <string name="lockpassword_choose_your_profile_pin_header">Set a work PIN</string>
     <!-- Header on first screen of choose device pattern flow [CHAR LIMIT=40] -->
@@ -3768,7 +3774,7 @@
     <!-- Header on password confirm screen [CHAR LIMIT=40] -->
     <string name="lockpassword_confirm_your_pin_header">Re-enter your PIN</string>
     <!-- Header on biometric second factor confirm screen [CHAR LIMIT=40] -->
-    <string name="lockpassword_confirm_your_biometric_second_factor_header">Re-enter your biometric PIN</string>
+    <string name="lockpassword_confirm_your_biometric_second_factor_pin_header">Re-enter your second factor PIN</string>
     <!-- Header on work profile password confirm screen [CHAR LIMIT=40] -->
     <string name="lockpassword_reenter_your_profile_pin_header">Re-enter your work PIN</string>
     <!-- Header on password confirm screen for the work profile [CHAR LIMIT=40] -->
@@ -3817,7 +3823,7 @@
     <string name="lockpassword_confirm_your_pin_generic">Enter your PIN to continue</string>
     <!-- Message to be used to explain the users that they need to enter their biometric second
          factor PIN to continue a particular operation. [CHAR LIMIT=70]-->
-    <string name="lockpassword_confirm_your_biometric_second_factor_generic">Enter your biometric PIN to continue</string>
+    <string name="lockpassword_confirm_your_biometric_second_factor_generic">Enter your second factor PIN to continue</string>
     <!-- Message to be used to explain the users that they need to enter their password to continue a
          particular operation. [CHAR LIMIT=70]-->
     <string name="lockpassword_confirm_your_password_generic">Enter your password to continue</string>
@@ -3900,6 +3906,9 @@
     <!-- Security & location settings screen, change security method screen instruction if user
          enters incorrect PIN [CHAR LIMIT=30] -->
     <string name="lockpassword_invalid_pin">Wrong PIN</string>
+    <!-- Security & location settings screen, change security method screen instruction if user
+         enters incorrect biometric second factor PIN [CHAR LIMIT=30] -->
+    <string name="lockpassword_invalid_biometric_second_factor_pin">Wrong second factor PIN</string>
     <!-- Security & location settings screen, change security method screen instruction if user
          enters incorrect password [CHAR LIMIT=30] -->
     <string name="lockpassword_invalid_password">Wrong password</string>
