@@ -52,6 +52,10 @@ public class CameraExtensionsFallbackPreferenceController extends TogglePreferen
             // this toggle is a no-op when concert_mode flag is off
             return CONDITIONALLY_UNAVAILABLE;
         }
+        if (mContext.getString(com.android.internal.R.string.config_extensionFallbackPackageName).isEmpty()) {
+            // this toggle is a no-op when there's no fallback camera extension package
+            return CONDITIONALLY_UNAVAILABLE;
+        }
         return AVAILABLE;
     }
 
