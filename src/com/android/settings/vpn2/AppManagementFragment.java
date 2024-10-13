@@ -65,6 +65,7 @@ public class AppManagementFragment extends SettingsPreferenceFragment
     private static final String KEY_VERSION = "version";
     private static final String KEY_ALWAYS_ON_VPN = "always_on_vpn";
     private static final String KEY_LOCKDOWN_VPN = "lockdown_vpn";
+    private static final String KEY_VPN_DNS_COMPAT_MODE = "vpn_dns_compat_mode";
     private static final String KEY_FORGET_VPN = "forget_vpn";
 
     private PackageManager mPackageManager;
@@ -82,6 +83,7 @@ public class AppManagementFragment extends SettingsPreferenceFragment
     private Preference mPreferenceVersion;
     private RestrictedSwitchPreference mPreferenceAlwaysOn;
     private RestrictedSwitchPreference mPreferenceLockdown;
+    private RestrictedSwitchPreference mPreferenceDnsCompatMode;
     private RestrictedPreference mPreferenceForget;
 
     // Listener
@@ -128,10 +130,13 @@ public class AppManagementFragment extends SettingsPreferenceFragment
         mPreferenceVersion = findPreference(KEY_VERSION);
         mPreferenceAlwaysOn = (RestrictedSwitchPreference) findPreference(KEY_ALWAYS_ON_VPN);
         mPreferenceLockdown = (RestrictedSwitchPreference) findPreference(KEY_LOCKDOWN_VPN);
+        mPreferenceDnsCompatMode = (RestrictedSwitchPreference)
+                findPreference(KEY_VPN_DNS_COMPAT_MODE);
         mPreferenceForget = (RestrictedPreference) findPreference(KEY_FORGET_VPN);
 
         mPreferenceAlwaysOn.setOnPreferenceChangeListener(this);
         mPreferenceLockdown.setOnPreferenceChangeListener(this);
+        mPreferenceDnsCompatMode.setOnPreferenceClickListener(this);
         mPreferenceForget.setOnPreferenceClickListener(this);
     }
 
@@ -235,9 +240,12 @@ public class AppManagementFragment extends SettingsPreferenceFragment
             final boolean alwaysOn = isVpnAlwaysOn();
             final boolean lockdown = alwaysOn
                     && VpnUtils.isAnyLockdownActive(getActivity());
+            final boolean dnsCompatMode = lockdown && VpnUtils.isDnsCompatModeEnabled(
+                    getActivity());
 
             mPreferenceAlwaysOn.setChecked(alwaysOn);
             mPreferenceLockdown.setChecked(lockdown);
+            mPreferenceDnsCompatMode.setChecked(dnsCompatMode);
             updateRestrictedViews();
         }
     }
@@ -277,6 +285,7 @@ public class AppManagementFragment extends SettingsPreferenceFragment
             } else {
                 mPreferenceAlwaysOn.setEnabled(false);
                 mPreferenceLockdown.setEnabled(false);
+                mPreferenceDnsCompatMode.setEnabled(false);
                 mPreferenceAlwaysOn.setSummary(R.string.vpn_always_on_summary_not_supported);
             }
         }
