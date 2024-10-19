@@ -61,6 +61,8 @@ public class SettingsApplication extends Application {
     public void onCreate() {
         super.onCreate();
 
+        VanadiumLibraryCleanup.maybeRun(this);
+
         BackupRestoreStorageManager.getInstance(this)
                 .add(
                         new BatterySettingsStorage(this),
