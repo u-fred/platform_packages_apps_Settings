@@ -24,7 +24,7 @@ import java.util.List;
 public class VanadiumLibraryCleanup {
     private static final String TAG = VanadiumLibraryCleanup.class.getSimpleName();
 
-    private static final String MARKER_FILE_NAME = "vanadium_trichrome_library_cleanup_done";
+    private static final String MARKER_FILE_NAME = "vanadium_trichrome_library_cleanup_done2";
 
     public static void maybeRun(Context ctx) {
         if (ctx.getUserId() != UserHandle.USER_SYSTEM) {
@@ -47,9 +47,12 @@ public class VanadiumLibraryCleanup {
             return;
         }
 
+        // MATCH_ANY_USER is needed in case the user has manually uninstalled these entries in USER_SYSTEM
+        int baseFlags = PackageManager.MATCH_ANY_USER | PackageManager.MATCH_UNINSTALLED_PACKAGES;
+
         PackageManager pm = ctx.getPackageManager();
         List<ApplicationInfo> installedPkgs =
-                pm.getInstalledApplications(PackageManager.MATCH_UNINSTALLED_PACKAGES);
+                pm.getInstalledApplications(baseFlags);
 
         byte[] vanadiumCertDigest = HexFormat.of()
                 .parseHex("c6adb8b83c6d4c17d292afde56fd488a51d316ff8f2c11c5410223bff8a7dbb3");
@@ -67,8 +70,7 @@ public class VanadiumLibraryCleanup {
             Log.d(TAG, "processing " + pkgName);
             PackageInfo pkgInfo;
             try {
-                pkgInfo = pm.getPackageInfo(pkgName, PackageManager.GET_SIGNING_CERTIFICATES |
-                        PackageManager.MATCH_UNINSTALLED_PACKAGES);
+                pkgInfo = pm.getPackageInfo(pkgName, baseFlags | PackageManager.GET_SIGNING_CERTIFICATES);
             } catch (PackageManager.NameNotFoundException e) {
                 Log.e(TAG, "", e);
                 continue;
