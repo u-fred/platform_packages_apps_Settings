@@ -65,6 +65,7 @@ public class AppManagementFragment extends SettingsPreferenceFragment
     private static final String KEY_VERSION = "version";
     private static final String KEY_ALWAYS_ON_VPN = "always_on_vpn";
     private static final String KEY_LOCKDOWN_VPN = "lockdown_vpn";
+    private static final String KEY_VPN_DNS_COMPAT_MODE = "vpn_dns_compat_mode";
     private static final String KEY_FORGET_VPN = "forget_vpn";
 
     private PackageManager mPackageManager;
@@ -82,6 +83,7 @@ public class AppManagementFragment extends SettingsPreferenceFragment
     private Preference mPreferenceVersion;
     private RestrictedSwitchPreference mPreferenceAlwaysOn;
     private RestrictedSwitchPreference mPreferenceLockdown;
+    private RestrictedSwitchPreference mPreferenceDnsCompatMode;
     private RestrictedPreference mPreferenceForget;
 
     // Listener
@@ -91,7 +93,7 @@ public class AppManagementFragment extends SettingsPreferenceFragment
         public void onForget() {
             // Unset always-on-vpn when forgetting the VPN
             if (isVpnAlwaysOn()) {
-                setAlwaysOnVpn(false, false);
+                setAlwaysOnVpn(false, false, false);
             }
             // Also dismiss and go back to VPN list
             finish();
@@ -128,10 +130,13 @@ public class AppManagementFragment extends SettingsPreferenceFragment
         mPreferenceVersion = findPreference(KEY_VERSION);
         mPreferenceAlwaysOn = (RestrictedSwitchPreference) findPreference(KEY_ALWAYS_ON_VPN);
         mPreferenceLockdown = (RestrictedSwitchPreference) findPreference(KEY_LOCKDOWN_VPN);
+        mPreferenceDnsCompatMode = (RestrictedSwitchPreference)
+                findPreference(KEY_VPN_DNS_COMPAT_MODE);
         mPreferenceForget = (RestrictedPreference) findPreference(KEY_FORGET_VPN);
 
         mPreferenceAlwaysOn.setOnPreferenceChangeListener(this);
         mPreferenceLockdown.setOnPreferenceChangeListener(this);
+        mPreferenceDnsCompatMode.setOnPreferenceClickListener(this);
         mPreferenceForget.setOnPreferenceClickListener(this);
     }
 
@@ -164,9 +169,14 @@ public class AppManagementFragment extends SettingsPreferenceFragment
     public boolean onPreferenceChange(Preference preference, Object newValue) {
         switch (preference.getKey()) {
             case KEY_ALWAYS_ON_VPN:
-                return onAlwaysOnVpnClick((Boolean) newValue, mPreferenceLockdown.isChecked());
+                return onAlwaysOnVpnClick((Boolean) newValue, mPreferenceLockdown.isChecked(),
+                        mPreferenceDnsCompatMode.isChecked());
             case KEY_LOCKDOWN_VPN:
-                return onAlwaysOnVpnClick(mPreferenceAlwaysOn.isChecked(), (Boolean) newValue);
+                return onAlwaysOnVpnClick(mPreferenceAlwaysOn.isChecked(), (Boolean) newValue,
+                        mPreferenceDnsCompatMode.isChecked());
+            case KEY_VPN_DNS_COMPAT_MODE:
+                return onAlwaysOnVpnClick(mPreferenceAlwaysOn.isChecked(),
+                        mPreferenceLockdown.isChecked(), (Boolean) newValue);
             default:
                 Log.w(TAG, "unknown key is clicked: " + preference.getKey());
                 return false;
@@ -188,26 +198,33 @@ public class AppManagementFragment extends SettingsPreferenceFragment
         return true;
     }
 
-    private boolean onAlwaysOnVpnClick(final boolean alwaysOnSetting, final boolean lockdown) {
+    private boolean onAlwaysOnVpnClick(final boolean alwaysOnSetting, final boolean lockdown,
+            boolean dnsCompatModeEnabled) {
         final boolean replacing = isAnotherVpnActive();
         final boolean wasLockdown = VpnUtils.isAnyLockdownActive(getActivity());
+        dnsCompatModeEnabled = dnsCompatModeEnabled && !replacing;
         if (ConfirmLockdownFragment.shouldShow(replacing, wasLockdown, lockdown)) {
             // Place a dialog to confirm that traffic should be locked down.
             final Bundle options = null;
+            // dnsCompatModeEnabled should always be false if we're here, but hardcode it to be
+            // explicit and safe.
             ConfirmLockdownFragment.show(
-                    this, replacing, alwaysOnSetting, wasLockdown, lockdown, options);
+                    this, replacing, alwaysOnSetting, wasLockdown, lockdown,
+                    dnsCompatModeEnabled, options);
             return false;
         }
         // No need to show the dialog. Change the setting straight away.
-        return setAlwaysOnVpnByUI(alwaysOnSetting, lockdown);
+        return setAlwaysOnVpnByUI(alwaysOnSetting, lockdown, dnsCompatModeEnabled);
     }
 
     @Override
-    public void onConfirmLockdown(Bundle options, boolean isEnabled, boolean isLockdown) {
-        setAlwaysOnVpnByUI(isEnabled, isLockdown);
+    public void onConfirmLockdown(Bundle options, boolean isEnabled, boolean isLockdown,
+            boolean dnsCompatModeEnabled) {
+        setAlwaysOnVpnByUI(isEnabled, isLockdown, dnsCompatModeEnabled);
     }
 
-    private boolean setAlwaysOnVpnByUI(boolean isEnabled, boolean isLockdown) {
+    private boolean setAlwaysOnVpnByUI(boolean isEnabled, boolean isLockdown,
+            boolean dnsCompatModeEnabled) {
         updateRestrictedViews();
         if (!mPreferenceAlwaysOn.isEnabled()) {
             return false;
@@ -216,7 +233,7 @@ public class AppManagementFragment extends SettingsPreferenceFragment
         if (mUserId == UserHandle.USER_SYSTEM) {
             VpnUtils.clearLockdownVpn(getContext());
         }
-        final boolean success = setAlwaysOnVpn(isEnabled, isLockdown);
+        final boolean success = setAlwaysOnVpn(isEnabled, isLockdown, dnsCompatModeEnabled);
         if (isEnabled && (!success || !isVpnAlwaysOn())) {
             CannotConnectFragment.show(this, mVpnLabel);
         } else {
@@ -225,9 +242,11 @@ public class AppManagementFragment extends SettingsPreferenceFragment
         return success;
     }
 
-    private boolean setAlwaysOnVpn(boolean isEnabled, boolean isLockdown) {
+    private boolean setAlwaysOnVpn(boolean isEnabled, boolean isLockdown,
+            boolean dnsCompatModeEnabled) {
         return mVpnManager.setAlwaysOnVpnPackageForUser(mUserId,
-                isEnabled ? mPackageName : null, isLockdown, /* lockdownAllowlist */ null);
+                isEnabled ? mPackageName : null, isLockdown, /* lockdownAllowlist */ null,
+                dnsCompatModeEnabled);
     }
 
     private void updateUI() {
@@ -235,15 +254,20 @@ public class AppManagementFragment extends SettingsPreferenceFragment
             final boolean alwaysOn = isVpnAlwaysOn();
             final boolean lockdown = alwaysOn
                     && VpnUtils.isAnyLockdownActive(getActivity());
+            final boolean dnsCompatMode = lockdown && VpnUtils.isDnsCompatModeEnabled(
+                    getActivity());
 
             mPreferenceAlwaysOn.setChecked(alwaysOn);
             mPreferenceLockdown.setChecked(lockdown);
+            mPreferenceDnsCompatMode.setChecked(dnsCompatMode);
             updateRestrictedViews();
         }
     }
 
     @VisibleForTesting
     void updateRestrictedViews() {
+        // TODO: Review this method. What happens when disabled and setEnable(false)?
+        //  Look at method definitions and easy to understand, but test it.
         if (mFeatureProvider.isAdvancedVpnSupported(getContext())
                 && !mFeatureProvider.isAdvancedVpnRemovable()
                 && TextUtils.equals(mPackageName, mFeatureProvider.getAdvancedVpnPackageName())) {
@@ -277,6 +301,7 @@ public class AppManagementFragment extends SettingsPreferenceFragment
             } else {
                 mPreferenceAlwaysOn.setEnabled(false);
                 mPreferenceLockdown.setEnabled(false);
+                mPreferenceDnsCompatMode.setEnabled(false);
                 mPreferenceAlwaysOn.setSummary(R.string.vpn_always_on_summary_not_supported);
             }
         }

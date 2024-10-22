@@ -41,6 +41,15 @@
                 settings:useAdditionalSummary="true"
                 settings:restrictedSwitchSummary="@string/disabled_by_admin_summary_text" />
 
+        <com.android.settingslib.RestrictedSwitchPreference
+                android:key="vpn_dns_compat_mode"
+                android:title="@string/vpn_dns_compat_mode"
+                android:defaultValue="false"
+                android:dependency="lockdown_vpn"
+                settings:userRestriction="no_config_vpn"
+                settings:useAdditionalSummary="true"
+                settings:restrictedSwitchSummary="@string/disabled_by_admin_summary_text" />
+
         <com.android.settingslib.RestrictedPreference
                 android:key="forget_vpn"
                 android:title="@string/vpn_forget_long"

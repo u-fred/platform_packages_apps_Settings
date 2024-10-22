@@ -29,7 +29,8 @@ import com.android.settings.core.instrumentation.InstrumentedDialogFragment;
 public class ConfirmLockdownFragment extends InstrumentedDialogFragment
         implements DialogInterface.OnClickListener {
     public interface ConfirmLockdownListener {
-        public void onConfirmLockdown(Bundle options, boolean isEnabled, boolean isLockdown);
+        public void onConfirmLockdown(Bundle options, boolean isEnabled, boolean isLockdown,
+                boolean dnsCompatModeEnabled);
     }
 
     private static final String TAG = "ConfirmLockdown";
@@ -43,6 +44,7 @@ public class ConfirmLockdownFragment extends InstrumentedDialogFragment
     private static final String ARG_ALWAYS_ON = "always_on";
     private static final String ARG_LOCKDOWN_SRC = "lockdown_old";
     private static final String ARG_LOCKDOWN_DST = "lockdown_new";
+    private static final String ARG_DNS_COMPAT_MODE_ENABLED = "dns_compat_mode_enabled";
     private static final String ARG_OPTIONS = "options";
 
     public static boolean shouldShow(boolean replacing, boolean fromLockdown, boolean toLockdown) {
@@ -53,7 +55,7 @@ public class ConfirmLockdownFragment extends InstrumentedDialogFragment
     }
 
     public static void show(Fragment parent, boolean replacing, boolean alwaysOn,
-            boolean fromLockdown, boolean toLockdown, Bundle options) {
+            boolean fromLockdown, boolean toLockdown, boolean dnsCompatModeEnabled, Bundle options) {
         if (parent.getFragmentManager().findFragmentByTag(TAG) != null) {
             // Already exists. Don't show it twice.
             return;
@@ -63,6 +65,7 @@ public class ConfirmLockdownFragment extends InstrumentedDialogFragment
         args.putBoolean(ARG_ALWAYS_ON, alwaysOn);
         args.putBoolean(ARG_LOCKDOWN_SRC, fromLockdown);
         args.putBoolean(ARG_LOCKDOWN_DST, toLockdown);
+        args.putBoolean(ARG_DNS_COMPAT_MODE_ENABLED, dnsCompatModeEnabled);
         args.putParcelable(ARG_OPTIONS, options);
 
         final ConfirmLockdownFragment frag = new ConfirmLockdownFragment();
@@ -108,7 +111,8 @@ public class ConfirmLockdownFragment extends InstrumentedDialogFragment
             ((ConfirmLockdownListener) getTargetFragment()).onConfirmLockdown(
                     getArguments().getParcelable(ARG_OPTIONS),
                     getArguments().getBoolean(ARG_ALWAYS_ON),
-                    getArguments().getBoolean(ARG_LOCKDOWN_DST));
+                    getArguments().getBoolean(ARG_LOCKDOWN_DST),
+                    getArguments().getBoolean(ARG_DNS_COMPAT_MODE_ENABLED));
         }
     }
 }

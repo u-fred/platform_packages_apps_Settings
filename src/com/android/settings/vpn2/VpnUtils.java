@@ -65,6 +65,13 @@ public class VpnUtils {
                         Settings.Secure.ALWAYS_ON_VPN_LOCKDOWN, /* default */ 0, userId) != 0;
     }
 
+    public static boolean isDnsCompatModeEnabled(Context context) {
+        final int userId = context.getUserId();
+        return isAnyLockdownActive(context)
+                && Settings.Secure.getIntForUser(context.getContentResolver(),
+                Settings.Secure.VPN_DNS_COMPAT_MODE_ENABLED, /* default */ 0, userId) == 1;
+    }
+
     public static boolean isVpnActive(Context context) throws RemoteException {
         return getVpnManager(context).getVpnConfig(context.getUserId()) != null;
     }

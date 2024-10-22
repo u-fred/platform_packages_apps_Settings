@@ -40,7 +40,8 @@ import com.android.settings.core.instrumentation.InstrumentedDialogFragment;
 /**
  * Fragment wrapper around a {@link ConfigDialog}.
  */
-public class ConfigDialogFragment extends InstrumentedDialogFragment implements
+public
+class ConfigDialogFragment extends InstrumentedDialogFragment implements
         DialogInterface.OnClickListener, DialogInterface.OnShowListener, View.OnClickListener,
         ConfirmLockdownFragment.ConfirmLockdownListener {
     private static final String TAG_CONFIG_DIALOG = "vpnconfigdialog";
@@ -108,7 +109,8 @@ public class ConfigDialogFragment extends InstrumentedDialogFragment implements
     }
 
     @Override
-    public void onConfirmLockdown(Bundle options, boolean isAlwaysOn, boolean isLockdown) {
+    public void onConfirmLockdown(Bundle options, boolean isAlwaysOn, boolean isLockdown,
+            boolean dnsCompatModeEnabled) {
         VpnProfile profile = (VpnProfile) options.getParcelable(ARG_PROFILE);
         connect(profile, isAlwaysOn);
         dismiss();
@@ -135,7 +137,7 @@ public class ConfigDialogFragment extends InstrumentedDialogFragment implements
                     final Bundle opts = new Bundle();
                     opts.putParcelable(ARG_PROFILE, profile);
                     ConfirmLockdownFragment.show(this, replace, /* alwaysOn */ shouldLockdown,
-                           /* from */  wasLockdown, /* to */ shouldLockdown, opts);
+                           /* from */  wasLockdown, /* to */ shouldLockdown, false, opts);
                 } else if (shouldConnect) {
                     connect(profile, shouldLockdown);
                 } else {
