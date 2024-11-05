@@ -20,6 +20,7 @@ package com.android.settings.password;
 import static android.app.Activity.RESULT_FIRST_USER;
 import static android.app.admin.DevicePolicyResources.Strings.Settings.WORK_PROFILE_LOCK_ATTEMPTS_FAILED;
 
+import static com.android.internal.widget.LockDomain.Primary;
 import static com.android.settings.Utils.SETTINGS_PACKAGE_NAME;
 
 import android.app.Dialog;
@@ -53,12 +54,13 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentManager;
 
+import com.android.internal.widget.LockDomain;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockscreenCredential;
+import com.android.internal.widget.WrappedLockPatternUtils;
 import com.android.settings.R;
 import com.android.settings.Utils;
 import com.android.settings.core.InstrumentedFragment;
-
 import com.google.android.setupdesign.GlifLayout;
 
 /**
@@ -100,7 +102,7 @@ public abstract class ConfirmDeviceCredentialBaseFragment extends InstrumentedFr
     protected int mEffectiveUserId;
     protected int mUserId;
     protected UserManager mUserManager;
-    protected LockPatternUtils mLockPatternUtils;
+    protected WrappedLockPatternUtils mLockPatternUtils;
     protected DevicePolicyManager mDevicePolicyManager;
     protected TextView mErrorTextView;
     protected final Handler mHandler = new Handler();
@@ -110,6 +112,8 @@ public abstract class ConfirmDeviceCredentialBaseFragment extends InstrumentedFr
     protected boolean mRepairMode;
     protected CharSequence mAlternateButtonText;
     protected BiometricManager mBiometricManager;
+    protected LockDomain mLockDomain;
+
     @Nullable protected RemoteLockscreenValidationSession mRemoteLockscreenValidationSession;
     /** Credential saved so the credential can be set for device if remote validation passes */
     @Nullable protected RemoteLockscreenValidationClient mRemoteLockscreenValidationClient;
@@ -179,14 +183,28 @@ public abstract class ConfirmDeviceCredentialBaseFragment extends InstrumentedFr
             }
         }
 
+        mLockDomain = intent.getParcelableExtra(
+                ChooseLockSettingsHelper.EXTRA_KEY_LOCK_DOMAIN, LockDomain.class);
+        mLockDomain = mLockDomain == null ? Primary : mLockDomain;
+        mLockPatternUtils = new WrappedLockPatternUtils(getActivity(), mLockDomain);
+
         // Only take this argument into account if it belongs to the current profile.
+        // TODO: There are internal versions of each subclass of this Fragment, which implies the
+        //  external versions are available for use by other apps. The manifest doesn't have them
+        //  listed as exported, but maybe I'm missing something. Would want to check second factor
+        //  support here instead of relying on ChooseLockSettingsHelper if that is the case.
         mUserId = Utils.getUserIdFromBundle(getActivity(), intent.getExtras(),
                 isInternalActivity());
         mFrp = (mUserId == LockPatternUtils.USER_FRP);
         mRepairMode = (mUserId == LockPatternUtils.USER_REPAIR_MODE);
         mUserManager = UserManager.get(getActivity());
+        // ChooseLockSettingsHelper has verified that mUserId supports second factor, so
+        // with all current user types that support second factor, mEffectiveUserId will always
+        // be equal to mUserId. However, this will not be the case if there is a profile user
+        // type without shareable credentials. Upstream would also probably break for primary
+        // validation in this case. Refer to UserTypeFactory for all user type information.
         mEffectiveUserId = mUserManager.getCredentialOwnerProfile(mUserId);
-        mLockPatternUtils = new LockPatternUtils(getActivity());
+
         mDevicePolicyManager = (DevicePolicyManager) getActivity().getSystemService(
                 Context.DEVICE_POLICY_SERVICE);
         mBiometricManager = getActivity().getSystemService(BiometricManager.class);

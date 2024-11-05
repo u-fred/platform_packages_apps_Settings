@@ -70,7 +70,7 @@ public class ScreenPinningSettingsTest {
     @Test
     public void getDynamicRawDataToIndex_numericPassword_shouldIndexUnlockPinTitle() {
         ShadowLockPatternUtils.setKeyguardStoredPasswordQuality(
-                DevicePolicyManager.PASSWORD_QUALITY_NUMERIC);
+                DevicePolicyManager.PASSWORD_QUALITY_NUMERIC, true);
 
         final List<SearchIndexableRaw> indexRaws =
                 ScreenPinningSettings.SEARCH_INDEX_DATA_PROVIDER.getDynamicRawDataToIndex(
@@ -84,7 +84,7 @@ public class ScreenPinningSettingsTest {
     @Test
     public void getDynamicRawDataToIndex_alphabeticPassword_shouldIndexUnlockPasswordTitle() {
         ShadowLockPatternUtils.setKeyguardStoredPasswordQuality(
-                DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC);
+                DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC, true);
 
         final List<SearchIndexableRaw> indexRaws =
                 ScreenPinningSettings.SEARCH_INDEX_DATA_PROVIDER.getDynamicRawDataToIndex(
@@ -98,7 +98,7 @@ public class ScreenPinningSettingsTest {
     @Test
     public void getDynamicRawDataToIndex_patternPassword_shouldIndexUnlockPatternTitle() {
         ShadowLockPatternUtils.setKeyguardStoredPasswordQuality(
-                DevicePolicyManager.PASSWORD_QUALITY_SOMETHING);
+                DevicePolicyManager.PASSWORD_QUALITY_SOMETHING, true);
         ShadowLockPatternUtils.setIsLockPatternEnabled(
                 UserHandle.myUserId(), /* isLockPatternEnabled= */ true);
 
@@ -114,7 +114,7 @@ public class ScreenPinningSettingsTest {
     @Test
     public void getDynamicRawDataToIndex_nonePassword_shouldIndexUnlockNoneTitle() {
         ShadowLockPatternUtils.setKeyguardStoredPasswordQuality(
-                DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED);
+                DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED, true);
 
         final List<SearchIndexableRaw> indexRaws =
                 ScreenPinningSettings.SEARCH_INDEX_DATA_PROVIDER.getDynamicRawDataToIndex(

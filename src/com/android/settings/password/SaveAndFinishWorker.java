@@ -16,6 +16,9 @@
 
 package com.android.settings.password;
 
+import static com.android.internal.widget.LockDomain.Primary;
+import static com.android.internal.widget.LockDomain.Secondary;
+
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -30,6 +33,7 @@ import androidx.fragment.app.Fragment;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockscreenCredential;
 import com.android.internal.widget.VerifyCredentialResponse;
+import com.android.internal.widget.WrappedLockPatternUtils;
 import com.android.settings.R;
 import com.android.settings.safetycenter.LockScreenSafetySource;
 
@@ -44,9 +48,10 @@ public class SaveAndFinishWorker extends Fragment {
     private boolean mFinished;
     private Intent mResultData;
 
-    private LockPatternUtils mUtils;
+    private WrappedLockPatternUtils mUtils;
     private boolean mRequestGatekeeperPassword;
     private boolean mRequestWriteRepairModePassword;
+    private boolean mReturnCredentials;
     private boolean mWasSecureBefore;
     private int mUserId;
     private int mUnificationProfileId = UserHandle.USER_NULL;
@@ -75,7 +80,7 @@ public class SaveAndFinishWorker extends Fragment {
     }
 
     @VisibleForTesting
-    void prepare(LockPatternUtils utils, LockscreenCredential chosenCredential,
+    void prepare(WrappedLockPatternUtils utils, LockscreenCredential chosenCredential,
             LockscreenCredential currentCredential, int userId) {
         mUtils = utils;
         mUserId = userId;
@@ -89,7 +94,7 @@ public class SaveAndFinishWorker extends Fragment {
                 : LockscreenCredential.createNone();
     }
 
-    public void start(LockPatternUtils utils, LockscreenCredential chosenCredential,
+    public void start(WrappedLockPatternUtils utils, LockscreenCredential chosenCredential,
             LockscreenCredential currentCredential, int userId) {
         prepare(utils, chosenCredential, currentCredential, userId);
         if (mBlocking) {
@@ -128,11 +133,17 @@ public class SaveAndFinishWorker extends Fragment {
         if (mRequestWriteRepairModePassword) {
             flags |= LockPatternUtils.VERIFY_FLAG_WRITE_REPAIR_MODE_PW;
         }
+        Intent result = new Intent();
+        if (mReturnCredentials) {
+            // Need to duplicate as the original gets zeroized. Leaving the duplicate in memory is
+            // unavoidable when it is being returned as result data.
+            result.putExtra(ChooseLockSettingsHelper.EXTRA_KEY_PASSWORD,
+                    mChosenCredential.duplicate());
+        }
         if (flags == 0) {
-            return Pair.create(true, null);
+            return Pair.create(true, mReturnCredentials ? result : null);
         }
 
-        Intent result = new Intent();
         final VerifyCredentialResponse response = mUtils.verifyCredential(mChosenCredential,
                 userId, flags);
         if (response.isMatched()) {
@@ -163,7 +174,9 @@ public class SaveAndFinishWorker extends Fragment {
         if (mUnificationProfileCredential != null) {
             mUnificationProfileCredential.zeroize();
         }
-        LockScreenSafetySource.onLockScreenChange(getContext());
+        if (mUtils.getLockDomain() == Primary) {
+            LockScreenSafetySource.onLockScreenChange(getContext());
+        }
     }
 
     public SaveAndFinishWorker setRequestGatekeeperPasswordHandle(boolean value) {
@@ -173,6 +186,11 @@ public class SaveAndFinishWorker extends Fragment {
 
     public SaveAndFinishWorker setRequestWriteRepairModePassword(boolean value) {
         mRequestWriteRepairModePassword = value;
+        return this;
+    }
+
+    public SaveAndFinishWorker setReturnCredentials(boolean value) {
+        mReturnCredentials = value;
         return this;
     }
 

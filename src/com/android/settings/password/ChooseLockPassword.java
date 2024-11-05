@@ -27,6 +27,8 @@ import static android.app.admin.DevicePolicyResources.Strings.Settings.SET_WORK_
 import static android.app.admin.DevicePolicyResources.UNDEFINED;
 import static android.view.View.ACCESSIBILITY_LIVE_REGION_POLITE;
 
+import static com.android.internal.widget.LockDomain.Primary;
+import static com.android.internal.widget.LockDomain.Secondary;
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_NONE;
 import static com.android.internal.widget.PasswordValidationError.CONTAINS_INVALID_CHARACTERS;
 import static com.android.internal.widget.PasswordValidationError.CONTAINS_SEQUENCE;
@@ -56,6 +58,7 @@ import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.Parcelable;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.text.Editable;
@@ -84,10 +87,12 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.widget.LockDomain;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockscreenCredential;
 import com.android.internal.widget.PasswordValidationError;
 import com.android.internal.widget.TextViewInputDisabler;
+import com.android.internal.widget.WrappedLockPatternUtils;
 import com.android.settings.R;
 import com.android.settings.SettingsActivity;
 import com.android.settings.SetupWizardUtils;
@@ -179,6 +184,18 @@ public class ChooseLockPassword extends SettingsActivity {
             return this;
         }
 
+        public IntentBuilder setLockDomain(LockDomain lockDomain) {
+            mIntent.putExtra(ChooseLockSettingsHelper.EXTRA_KEY_LOCK_DOMAIN,
+                    (Parcelable) (lockDomain));
+            return this;
+        }
+
+        public IntentBuilder setReturnCredentials(boolean returnCredentials) {
+            mIntent.putExtra(ChooseLockSettingsHelper.EXTRA_KEY_RETURN_CREDENTIALS,
+                    returnCredentials);
+            return this;
+        }
+
         /**
          * Configures the launch such that at the end of the password enrollment, one of its
          * managed profile (specified by {@code profileId}) will have its lockscreen unified
@@ -231,10 +248,14 @@ public class ChooseLockPassword extends SettingsActivity {
 
         private static final int MIN_AUTO_PIN_REQUIREMENT_LENGTH = 6;
 
+        // Whether setting primary or secondary credential.
+        private LockDomain mLockDomain;
+        // This is always the primary credential, even if we are setting secondary credential.
         private LockscreenCredential mCurrentCredential;
         private LockscreenCredential mChosenPassword;
         private boolean mRequestGatekeeperPassword;
         private boolean mRequestWriteRepairModePassword;
+        private boolean mReturnCredentials;
         private ImeAwareEditText mPasswordEntry;
         private TextViewInputDisabler mPasswordEntryInputDisabler;
 
@@ -247,7 +268,7 @@ public class ChooseLockPassword extends SettingsActivity {
         private byte[] mPasswordHistoryHashFactor;
         private int mUnificationProfileId = UserHandle.USER_NULL;
 
-        private LockPatternUtils mLockPatternUtils;
+        private WrappedLockPatternUtils mLockPatternUtils;
         private SaveAndFinishWorker mSaveAndFinishWorker;
         private int mPasswordType = DevicePolicyManager.PASSWORD_QUALITY_NUMERIC;
         protected Stage mUiStage = Stage.Introduction;
@@ -271,6 +292,8 @@ public class ChooseLockPassword extends SettingsActivity {
 
         private static final int CONFIRM_EXISTING_REQUEST = 58;
         static final int RESULT_FINISHED = RESULT_FIRST_USER;
+        public static final int RESULT_NOT_FOREGROUND = RESULT_FIRST_USER + 1;
+
         /** Used to store the profile type for which pin/password is being set */
         protected enum ProfileType {
             None,
@@ -294,6 +317,7 @@ public class ChooseLockPassword extends SettingsActivity {
                     R.string.lockpassword_choose_your_password_header_for_biometrics,
                     R.string.private_space_choose_your_password_header, // private space password
                     R.string.lockpassword_choose_your_pin_header, // pin
+                    R.string.lockpassword_choose_your_biometric_second_factor_pin_header,
                     SET_WORK_PROFILE_PIN_HEADER,
                     R.string.lockpassword_choose_your_profile_pin_header,
                     R.string.lockpassword_choose_your_pin_header_for_fingerprint,
@@ -313,6 +337,7 @@ public class ChooseLockPassword extends SettingsActivity {
                     R.string.lockpassword_confirm_your_password_header,
                     R.string.lockpassword_confirm_your_password_header,
                     R.string.lockpassword_confirm_your_pin_header,
+                    R.string.lockpassword_confirm_your_biometric_second_factor_pin_header,
                     REENTER_WORK_PROFILE_PIN_HEADER,
                     R.string.lockpassword_reenter_your_profile_pin_header,
                     R.string.lockpassword_confirm_your_pin_header,
@@ -332,6 +357,7 @@ public class ChooseLockPassword extends SettingsActivity {
                     R.string.lockpassword_confirm_passwords_dont_match,
                     R.string.lockpassword_confirm_passwords_dont_match,
                     R.string.lockpassword_confirm_pins_dont_match,
+                    R.string.lockpassword_confirm_pins_dont_match,
                     UNDEFINED,
                     R.string.lockpassword_confirm_pins_dont_match,
                     R.string.lockpassword_confirm_pins_dont_match,
@@ -350,6 +376,7 @@ public class ChooseLockPassword extends SettingsActivity {
                     int hintInAlphaForBiometrics,
                     int hintInAlphaForPrivateProfile,
                     int hintInNumeric,
+                    int hintInNumericForBiometricSecondFactor,
                     String hintOverrideInNumericForProfile,
                     int hintInNumericForProfile,
                     int hintInNumericForFingerprint,
@@ -369,6 +396,7 @@ public class ChooseLockPassword extends SettingsActivity {
                 this.alphaHintForPrivateProfile = hintInAlphaForPrivateProfile;
 
                 this.numericHint = hintInNumeric;
+                this.numericHintForBiometricSecondFactor = hintInNumericForBiometricSecondFactor;
                 this.numericHintOverrideForProfile = hintOverrideInNumericForProfile;
                 this.numericHintForManagedProfile = hintInNumericForProfile;
                 this.numericHintForFingerprint = hintInNumericForFingerprint;
@@ -398,6 +426,7 @@ public class ChooseLockPassword extends SettingsActivity {
 
             // PIN header
             public final int numericHint;
+            public final int numericHintForBiometricSecondFactor;
             public final int numericHintForPrivateProfile;
             public final String numericHintOverrideForProfile;
             public final int numericHintForManagedProfile;
@@ -413,7 +442,8 @@ public class ChooseLockPassword extends SettingsActivity {
 
             public final int buttonText;
 
-            public String getHint(Context context, boolean isAlpha, int type, ProfileType profile) {
+            public String getHint(Context context, boolean isAlpha, int type, ProfileType profile,
+                    LockDomain lockDomain) {
                 if (isAlpha) {
                     if (android.os.Flags.allowPrivateProfile()
                             && android.multiuser.Flags.enablePrivateSpaceFeatures()
@@ -433,7 +463,9 @@ public class ChooseLockPassword extends SettingsActivity {
                         return context.getString(alphaHint);
                     }
                 } else {
-                    if (android.os.Flags.allowPrivateProfile()
+                    if (lockDomain == Secondary) {
+                        return context.getString(numericHintForBiometricSecondFactor);
+                    } else if (android.os.Flags.allowPrivateProfile()
                             && android.multiuser.Flags.enablePrivateSpaceFeatures()
                             && profile.equals(ProfileType.Private)) {
                         return context.getString(numericHintForPrivateProfile);
@@ -475,11 +507,16 @@ public class ChooseLockPassword extends SettingsActivity {
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
-            mLockPatternUtils = new LockPatternUtils(getActivity());
             Intent intent = getActivity().getIntent();
             if (!(getActivity() instanceof ChooseLockPassword)) {
                 throw new SecurityException("Fragment contained in wrong activity");
             }
+
+            mLockDomain = intent.getParcelableExtra(
+                    ChooseLockSettingsHelper.EXTRA_KEY_LOCK_DOMAIN, LockDomain.class);
+            mLockDomain = mLockDomain == null ? Primary : mLockDomain;
+            mLockPatternUtils = new WrappedLockPatternUtils(getActivity(), mLockDomain);
+
             // Only take this argument into account if it belongs to the current profile.
             mUserId = Utils.getUserIdFromBundle(getActivity(), intent.getExtras());
             mProfileType = getProfileType();
@@ -594,6 +631,8 @@ public class ChooseLockPassword extends SettingsActivity {
                     ChooseLockSettingsHelper.EXTRA_KEY_REQUEST_GK_PW_HANDLE, false);
             mRequestWriteRepairModePassword = intent.getBooleanExtra(
                     ChooseLockSettingsHelper.EXTRA_KEY_REQUEST_WRITE_REPAIR_MODE_PW, false);
+            mReturnCredentials = intent.getBooleanExtra(
+                    ChooseLockSettingsHelper.EXTRA_KEY_RETURN_CREDENTIALS, false);
             if (savedInstanceState == null) {
                 updateStage(Stage.Introduction);
                 if (confirmCredentials) {
@@ -629,7 +668,7 @@ public class ChooseLockPassword extends SettingsActivity {
             if (activity instanceof SettingsActivity) {
                 final SettingsActivity sa = (SettingsActivity) activity;
                 String title = Stage.Introduction.getHint(
-                        getContext(), mIsAlphaMode, getStageType(), mProfileType);
+                        getContext(), mIsAlphaMode, getStageType(), mProfileType, mLockDomain);
                 sa.setTitle(title);
                 mLayout.setHeaderText(title);
             }
@@ -712,6 +751,15 @@ public class ChooseLockPassword extends SettingsActivity {
                 mSaveAndFinishWorker.setListener(null);
             }
             super.onPause();
+        }
+
+        @Override
+        public void onStop() {
+            super.onStop();
+            if (mLockDomain == Secondary && !getActivity().isChangingConfigurations()) {
+                getActivity().setResult(RESULT_NOT_FOREGROUND);
+                getActivity().finish();
+            }
         }
 
         @Override
@@ -990,7 +1038,7 @@ public class ChooseLockPassword extends SettingsActivity {
                 // Hide password requirement view when we are just asking user to confirm the pw.
                 mPasswordRestrictionView.setVisibility(View.GONE);
                 setHeaderText(mUiStage.getHint(getContext(), mIsAlphaMode, getStageType(),
-                        mProfileType));
+                        mProfileType, mLockDomain));
                 setNextEnabled(canInput && length >= LockPatternUtils.MIN_LOCK_PASSWORD_SIZE);
                 mSkipOrClearButton.setVisibility(toVisibility(canInput && length > 0));
 
@@ -1087,7 +1135,8 @@ public class ChooseLockPassword extends SettingsActivity {
             mSaveAndFinishWorker
                     .setListener(this)
                     .setRequestGatekeeperPasswordHandle(mRequestGatekeeperPassword)
-                    .setRequestWriteRepairModePassword(mRequestWriteRepairModePassword);
+                    .setRequestWriteRepairModePassword(mRequestWriteRepairModePassword)
+                    .setReturnCredentials(mReturnCredentials);
 
             getFragmentManager().beginTransaction().add(mSaveAndFinishWorker,
                     FRAGMENT_TAG_SAVE_AND_FINISH).commit();
@@ -1118,6 +1167,7 @@ public class ChooseLockPassword extends SettingsActivity {
             if (mChosenPassword != null) {
                 mChosenPassword.zeroize();
             }
+
             if (mCurrentCredential != null) {
                 mCurrentCredential.zeroize();
             }
@@ -1127,7 +1177,7 @@ public class ChooseLockPassword extends SettingsActivity {
 
             mPasswordEntry.setText("");
 
-            if (!wasSecureBefore) {
+            if (!wasSecureBefore && mLockDomain == Primary) {
                 Intent intent = getRedactionInterstitialIntent(getActivity());
                 if (intent != null) {
                     startActivity(intent);

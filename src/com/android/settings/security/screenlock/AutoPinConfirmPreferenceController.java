@@ -16,6 +16,7 @@
 
 package com.android.settings.security.screenlock;
 
+import static com.android.internal.widget.LockDomain.Primary;
 import static com.android.internal.widget.LockPatternUtils.MIN_AUTO_PIN_REQUIREMENT_LENGTH;
 
 import android.content.Context;
@@ -24,6 +25,7 @@ import androidx.preference.Preference;
 import androidx.preference.TwoStatePreference;
 
 import com.android.internal.widget.LockPatternUtils;
+import com.android.internal.widget.WrappedLockPatternUtils;
 import com.android.settings.R;
 import com.android.settings.core.PreferenceControllerMixin;
 import com.android.settings.password.ChooseLockSettingsHelper;
@@ -36,14 +38,14 @@ import com.android.settingslib.core.lifecycle.ObservablePreferenceFragment;
 public class AutoPinConfirmPreferenceController extends AbstractPreferenceController implements
         PreferenceControllerMixin, Preference.OnPreferenceChangeListener {
 
-    private static final String PREF_KEY_PIN_AUTO_CONFIRM = "auto_pin_confirm";
+    public static final String PREF_KEY_PIN_AUTO_CONFIRM = "auto_pin_confirm";
 
     private final int mUserId;
-    private final LockPatternUtils mLockPatternUtils;
+    private final WrappedLockPatternUtils mLockPatternUtils;
     private final ObservablePreferenceFragment mParentFragment;
 
     public AutoPinConfirmPreferenceController(Context context, int userId,
-            LockPatternUtils lockPatternUtils,
+            WrappedLockPatternUtils lockPatternUtils,
             ObservablePreferenceFragment parentFragment) {
         super(context);
         mUserId = userId;
@@ -53,7 +55,12 @@ public class AutoPinConfirmPreferenceController extends AbstractPreferenceContro
 
     @Override
     public boolean onPreferenceChange(Preference preference, Object newValue) {
-        launchPinConfirmActivity((boolean) newValue);
+        if (mLockPatternUtils.getLockDomain() == Primary) {
+            launchPinConfirmActivity((boolean) newValue);
+        } else if (mParentFragment instanceof AutoPinConfirmCallback) {
+            ((AutoPinConfirmCallback)mParentFragment).onAutoPinConfirmSettingChange(
+                    (boolean) newValue);
+        }
         return true;
     }
 
@@ -102,5 +109,9 @@ public class AutoPinConfirmPreferenceController extends AbstractPreferenceContro
                         : mContext.getString(R.string.auto_confirm_off_pin_verify_description))
                 .setReturnCredentials(true)
                 .show();
+    }
+
+    public interface AutoPinConfirmCallback {
+        void onAutoPinConfirmSettingChange(boolean newState);
     }
 }

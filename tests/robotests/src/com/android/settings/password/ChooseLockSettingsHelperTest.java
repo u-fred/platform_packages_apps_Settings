@@ -9,7 +9,9 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -21,6 +23,7 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.os.UserHandle;
 
+import com.android.internal.widget.LockDomain;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.settings.testutils.shadow.ShadowUserManager;
 import com.android.settings.testutils.shadow.ShadowUtils;
@@ -258,6 +261,8 @@ public class ChooseLockSettingsHelperTest {
         LockPatternUtils mockLockPatternUtils = mock(LockPatternUtils.class);
         when(mockLockPatternUtils.getKeyguardStoredPasswordQuality(anyInt()))
                 .thenReturn(DevicePolicyManager.PASSWORD_QUALITY_SOMETHING);
+        when(mockLockPatternUtils.checkUserSupportsBiometricSecondFactorIfSecondary(anyInt(),
+                any(LockDomain.class))).thenReturn(true);
 
         ChooseLockSettingsHelper helper = builder.build();
         helper.mLockPatternUtils = mockLockPatternUtils;

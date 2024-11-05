@@ -16,6 +16,8 @@
 
 package com.android.settings.password;
 
+import static com.android.internal.widget.LockDomain.Primary;
+
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.settings.SettingsEnums;
@@ -99,7 +101,7 @@ public class ChooseLockTypeDialogFragment extends InstrumentedDialogFragment
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         final int userId = getArguments().getInt(ARG_USER_ID);
-        mController = new ChooseLockGenericController.Builder(getContext(), userId)
+        mController = new ChooseLockGenericController.Builder(getContext(), userId, Primary)
                 .setHideInsecureScreenLockTypes(true)
                 .build();
     }

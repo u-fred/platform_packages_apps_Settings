@@ -16,6 +16,9 @@
 
 package com.android.settings.password;
 
+import static com.android.internal.widget.LockDomain.Primary;
+import static com.android.internal.widget.LockDomain.Secondary;
+
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
@@ -33,7 +36,8 @@ import android.view.WindowInsetsController;
 
 import androidx.annotation.NonNull;
 
-import com.android.internal.widget.LockPatternUtils;
+import com.android.internal.widget.LockDomain;
+import com.android.internal.widget.WrappedLockPatternUtils;
 
 /** Class containing methods shared between CDCA and CDCBA */
 public class ConfirmDeviceCredentialUtils {
@@ -66,11 +70,12 @@ public class ConfirmDeviceCredentialUtils {
         }
     }
 
-    public static void reportSuccessfulAttempt(LockPatternUtils utils, UserManager userManager,
-            DevicePolicyManager dpm, int userId, boolean isStrongAuth) {
+    public static void reportSuccessfulAttempt(WrappedLockPatternUtils utils,
+            UserManager userManager, DevicePolicyManager dpm, int userId, boolean isStrongAuth) {
+        LockDomain lockDomain = utils.getLockDomain();
         if (isStrongAuth) {
-            utils.reportSuccessfulPasswordAttempt(userId);
-            if (isBiometricUnlockEnabledForPrivateSpace()) {
+            utils.reportSuccessfulPasswordAttempt(userId, false);
+            if (lockDomain == Primary && isBiometricUnlockEnabledForPrivateSpace()) {
                 final UserInfo userInfo = userManager.getUserInfo(userId);
                 if (userInfo != null) {
                     if (isProfileThatAlwaysRequiresAuthToDisableQuietMode(userManager, userInfo)
@@ -82,9 +87,13 @@ public class ConfirmDeviceCredentialUtils {
                 }
             }
         } else {
+            if (lockDomain == Secondary) {
+                throw new IllegalArgumentException(
+                        "Secondary LockDomain only supports strong auth");
+            }
             dpm.reportSuccessfulBiometricAttempt(userId);
         }
-        if (!isBiometricUnlockEnabledForPrivateSpace()) {
+        if (lockDomain == Primary && !isBiometricUnlockEnabledForPrivateSpace()) {
             if (userManager.isManagedProfile(userId)) {
                 // Disable StrongAuth for work challenge only here.
                 utils.userPresent(userId);

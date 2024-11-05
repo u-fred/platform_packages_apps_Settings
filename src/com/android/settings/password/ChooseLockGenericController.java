@@ -20,6 +20,8 @@ import static android.app.admin.DevicePolicyManager.PASSWORD_COMPLEXITY_NONE;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
 
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_NONE;
+import static com.android.internal.widget.LockDomain.Primary;
+import static com.android.internal.widget.LockDomain.Secondary;
 
 import android.app.admin.DevicePolicyManager.PasswordComplexity;
 import android.app.admin.PasswordMetrics;
@@ -30,7 +32,9 @@ import android.os.UserManager;
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 
+import com.android.internal.widget.LockDomain;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.internal.widget.WrappedLockPatternUtils;
 import com.android.settings.R;
 
 import java.util.ArrayList;
@@ -58,16 +62,30 @@ public class ChooseLockGenericController {
     private final boolean mDevicePasswordRequirementOnly;
     private final int mUnificationProfileId;
     private final ManagedLockPasswordProvider mManagedPasswordProvider;
-    private final LockPatternUtils mLockPatternUtils;
+    private final WrappedLockPatternUtils mLockPatternUtils;
+    private final LockDomain mLockDomain;
 
     public ChooseLockGenericController(Context context, int userId,
-            ManagedLockPasswordProvider managedPasswordProvider, LockPatternUtils lockPatternUtils,
-            boolean hideInsecureScreenLockTypes, int appRequestedMinComplexity,
-            boolean devicePasswordRequirementOnly, int unificationProfileId) {
+            ManagedLockPasswordProvider managedPasswordProvider,
+            WrappedLockPatternUtils lockPatternUtils, boolean hideInsecureScreenLockTypes,
+            int appRequestedMinComplexity, boolean devicePasswordRequirementOnly,
+            int unificationProfileId) {
+        mLockPatternUtils = lockPatternUtils;
+        mLockDomain = mLockPatternUtils.getLockDomain();
+        if (mLockDomain == Secondary) {
+            mLockPatternUtils.checkUserSupportsBiometricSecondFactor(userId, true);
+            if (unificationProfileId != UserHandle.USER_NULL) {
+                throw new IllegalArgumentException(
+                        "unificationProfileId must be USER_NULL when lockDomain is Secondary");
+            } else if (managedPasswordProvider != null) {
+                throw new IllegalArgumentException(
+                        "managedPasswordProvider must be null when lockDomain is Secondary");
+            }
+        }
+
         mContext = context;
         mUserId = userId;
         mManagedPasswordProvider = managedPasswordProvider;
-        mLockPatternUtils = lockPatternUtils;
         mHideInsecureScreenLockTypes = hideInsecureScreenLockTypes;
         mAppRequestedMinComplexity = appRequestedMinComplexity;
         mDevicePasswordRequirementOnly = devicePasswordRequirementOnly;
@@ -79,19 +97,19 @@ public class ChooseLockGenericController {
         private final Context mContext;
         private final int mUserId;
         private final ManagedLockPasswordProvider mManagedPasswordProvider;
-        private final LockPatternUtils mLockPatternUtils;
+        private final WrappedLockPatternUtils mLockPatternUtils;
 
         private boolean mHideInsecureScreenLockTypes = false;
         @PasswordComplexity private int mAppRequestedMinComplexity = PASSWORD_COMPLEXITY_NONE;
         private boolean mDevicePasswordRequirementOnly = false;
         private int mUnificationProfileId = UserHandle.USER_NULL;
 
-        public Builder(Context context, int userId) {
-            this(context, userId, new LockPatternUtils(context));
+        public Builder(Context context, int userId, LockDomain lockDomain) {
+            this(context, userId, new WrappedLockPatternUtils(context, lockDomain));
         }
 
         public Builder(Context context, int userId,
-                LockPatternUtils lockPatternUtils) {
+                WrappedLockPatternUtils lockPatternUtils) {
             this(
                     context,
                     userId,
@@ -104,7 +122,7 @@ public class ChooseLockGenericController {
                 Context context,
                 int userId,
                 ManagedLockPasswordProvider managedLockPasswordProvider,
-                LockPatternUtils lockPatternUtils) {
+                WrappedLockPatternUtils lockPatternUtils) {
             mContext = context;
             mUserId = userId;
             mManagedPasswordProvider = managedLockPasswordProvider;
@@ -170,18 +188,22 @@ public class ChooseLockGenericController {
                     && !mContext.getResources().getBoolean(R.bool.config_hide_none_security_option)
                     && !managedProfile; // Profiles should use unified challenge instead.
             case SWIPE:
-                return !mHideInsecureScreenLockTypes
+                return mLockDomain == Primary
+                    && !mHideInsecureScreenLockTypes
                     && !mContext.getResources().getBoolean(R.bool.config_hide_swipe_security_option)
                     && !managedProfile; // Swipe doesn't make sense for profiles.
             case MANAGED:
-                return mManagedPasswordProvider.isManagedPasswordChoosable();
+                return mLockDomain == Primary
+                    && mManagedPasswordProvider.isManagedPasswordChoosable();
             case PATTERN:
                 return false;
             case PIN:
-            case PASSWORD:
                 // Hide the secure lock screen options if the device doesn't support the secure lock
                 // screen feature.
                 return mLockPatternUtils.hasSecureLockScreen();
+            case PASSWORD:
+                return mLockDomain == Primary
+                    && mLockPatternUtils.hasSecureLockScreen();
         }
         return true;
     }

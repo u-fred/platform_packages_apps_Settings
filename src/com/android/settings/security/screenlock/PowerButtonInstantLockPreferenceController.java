@@ -16,6 +16,8 @@
 
 package com.android.settings.security.screenlock;
 
+import static com.android.internal.widget.LockDomain.Secondary;
+
 import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.text.TextUtils;
@@ -23,6 +25,7 @@ import android.text.TextUtils;
 import androidx.preference.Preference;
 import androidx.preference.TwoStatePreference;
 
+import com.android.internal.widget.LockDomain;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.settings.R;
 import com.android.settings.core.PreferenceControllerMixin;
@@ -38,18 +41,23 @@ public class PowerButtonInstantLockPreferenceController extends AbstractPreferen
     private final int mUserId;
     private final LockPatternUtils mLockPatternUtils;
     private final TrustAgentManager mTrustAgentManager;
+    private final LockDomain mLockDomain;
 
     public PowerButtonInstantLockPreferenceController(Context context, int userId,
-            LockPatternUtils lockPatternUtils) {
+            LockPatternUtils lockPatternUtils, LockDomain lockDomain) {
         super(context);
         mUserId = userId;
         mLockPatternUtils = lockPatternUtils;
         mTrustAgentManager = FeatureFactory.getFeatureFactory()
                 .getSecurityFeatureProvider().getTrustAgentManager();
+        mLockDomain = lockDomain;
     }
 
     @Override
     public boolean isAvailable() {
+        if (mLockDomain == Secondary) {
+            return false;
+        }
         if (!mLockPatternUtils.isSecure(mUserId)) {
             return false;
         }

@@ -28,9 +28,14 @@ import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_NUMERIC_COM
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_SOMETHING;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
 
+import static com.android.internal.widget.LockDomain.Primary;
+import static com.android.internal.widget.LockDomain.Secondary;
+import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_NONE;
+
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
@@ -39,10 +44,13 @@ import static org.mockito.Mockito.when;
 import static org.robolectric.RuntimeEnvironment.application;
 
 import android.app.admin.DevicePolicyManager;
+import android.app.admin.PasswordMetrics;
 import android.app.admin.PasswordPolicy;
 import android.os.UserHandle;
 
+import com.android.internal.widget.LockDomain;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.internal.widget.WrappedLockPatternUtils;
 import com.android.settings.R;
 import com.android.settings.testutils.shadow.SettingsShadowResources;
 import com.android.settings.testutils.shadow.ShadowUserManager;
@@ -65,6 +73,7 @@ import java.util.regex.Pattern;
 public class ChooseLockGenericControllerTest {
 
     private ChooseLockGenericController mController;
+    private ChooseLockGenericController mControllerSecondary;
 
     @Mock
     private ManagedLockPasswordProvider mManagedLockPasswordProvider;
@@ -77,8 +86,23 @@ public class ChooseLockGenericControllerTest {
         MockitoAnnotations.initMocks(this);
 
         when(mLockPatternUtils.hasSecureLockScreen()).thenReturn(true);
+        when(mLockPatternUtils.checkUserSupportsBiometricSecondFactor(anyInt(), eq(true)))
+                .thenReturn(true);
         setDevicePolicyPasswordQuality(DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED);
         mController = createBuilder().build();
+        mControllerSecondary = createBuilder(Secondary).build();
+
+        // These values are constant for secondary, so mock them in setUp().
+        // TODO: Create an mLockPatternUtilsSecondary as WLPU. Update WLPU to use mLockDomain calls instead of if(primary).
+        when(mLockPatternUtils.isCredentialsDisabledForUser(anyInt(), eq(Secondary)))
+                .thenReturn(false);
+        when(mLockPatternUtils.getRequestedPasswordMetrics(anyInt(), eq(Secondary),
+                anyBoolean()))
+                .thenReturn(new PasswordMetrics(CREDENTIAL_TYPE_NONE));
+        when(mLockPatternUtils.getRequestedPasswordComplexity(anyInt(), eq(Secondary),
+                anyBoolean()))
+                .thenReturn(PASSWORD_COMPLEXITY_NONE);
+
         SettingsShadowResources.overrideResource(R.bool.config_hide_none_security_option, false);
         SettingsShadowResources.overrideResource(R.bool.config_hide_swipe_security_option, false);
     }
@@ -89,11 +113,39 @@ public class ChooseLockGenericControllerTest {
     }
 
     @Test
+    public void constructor_SecondaryForUserNotSupportingSecondary_ThrowsException() {
+        when(mLockPatternUtils.checkUserSupportsBiometricSecondFactor(anyInt(), eq(true)))
+                .thenThrow(IllegalArgumentException.class);
+        ChooseLockGenericController.Builder builder = createBuilder(Secondary);
+
+        assertThrows(IllegalArgumentException.class, builder::build);
+    }
+
+    @Test
+    public void constructor_SecondaryWithUnifiedProfile_ThrowsException() {
+        ChooseLockGenericController.Builder builder = new ChooseLockGenericController.Builder(
+                application, 0, null,
+                new WrappedLockPatternUtils(mLockPatternUtils, Secondary));
+        builder.setProfileToUnify(1);
+
+        assertThrows(IllegalArgumentException.class, builder::build);
+    }
+
+    @Test
+    public void constructor_SecondaryWithManagedPasswordProvider_ThrowsException() {
+        ChooseLockGenericController.Builder builder = new ChooseLockGenericController.Builder(
+                application, 0, mManagedLockPasswordProvider,
+                new WrappedLockPatternUtils(mLockPatternUtils, Secondary));
+
+        assertThrows(IllegalArgumentException.class, builder::build);
+    }
+
+    @Test
     public void isScreenLockVisible_shouldRespectResourceConfig() {
         for (ScreenLockType lock : ScreenLockType.values()) {
-            // All locks except managed defaults to visible
+            // All locks except managed and pattern defaults to visible
             assertWithMessage(lock + " visible").that(mController.isScreenLockVisible(lock))
-                    .isEqualTo(lock != ScreenLockType.MANAGED);
+                    .isEqualTo(lock != ScreenLockType.MANAGED && lock != ScreenLockType.PATTERN);
         }
 
         SettingsShadowResources.overrideResource(R.bool.config_hide_none_security_option, true);
@@ -119,6 +171,68 @@ public class ChooseLockGenericControllerTest {
 
         assertWithMessage("MANAGED visible").that(
                 mController.isScreenLockVisible(ScreenLockType.MANAGED)).isTrue();
+    }
+
+    @Test
+    public void isScreenLockVisible_NoneSecondary_ReturnsTrue() {
+        assertThat(mControllerSecondary.isScreenLockVisible(ScreenLockType.NONE)).isTrue();
+    }
+
+    @Test
+    public void isScreenLockVisible_NoneSecondaryWithResourceConfig_ReturnsFalse() {
+        SettingsShadowResources.overrideResource(R.bool.config_hide_none_security_option, true);
+        assertThat(mControllerSecondary.isScreenLockVisible(ScreenLockType.NONE)).isFalse();
+    }
+
+    @Test
+    public void isScreenLockVisible_SwipeSecondary_ReturnsFalse() {
+        assertThat(mControllerSecondary.isScreenLockVisible(ScreenLockType.SWIPE)).isFalse();
+    }
+
+    @Test
+    public void isScreenLockVisible_SwipeSecondaryWithResourceConfig_ReturnsFalse() {
+        SettingsShadowResources.overrideResource(R.bool.config_hide_swipe_security_option, true);
+        assertThat(mControllerSecondary.isScreenLockVisible(ScreenLockType.SWIPE)).isFalse();
+    }
+
+    @Test
+    public void isScreenLockVisible_PatternSecondary_ReturnsFalse() {
+        assertThat(mControllerSecondary.isScreenLockVisible(ScreenLockType.PATTERN)).isFalse();
+    }
+
+    @Test
+    public void isScreenLockVisible_PINSecondary_ReturnsTrue() {
+        assertThat(mControllerSecondary.isScreenLockVisible(ScreenLockType.PIN)).isTrue();
+    }
+
+    @Test
+    public void isScreenLockVisible_PasswordSecondary_ReturnsFalse() {
+        assertThat(mControllerSecondary.isScreenLockVisible(ScreenLockType.PASSWORD)).isFalse();
+    }
+
+    @Test
+    public void isScreenLockEnabled_SwipeSecondary_ReturnsTrue() {
+        assertThat(mControllerSecondary.isScreenLockEnabled(ScreenLockType.SWIPE)).isTrue();
+    }
+
+    @Test
+    public void isScreenLockEnabled_PatternSecondary_ReturnsTrue() {
+        assertThat(mControllerSecondary.isScreenLockEnabled(ScreenLockType.PATTERN)).isTrue();
+    }
+
+    @Test
+    public void isScreenLockEnabled_PinSecondary_ReturnsTrue() {
+        assertThat(mControllerSecondary.isScreenLockEnabled(ScreenLockType.PIN)).isTrue();
+    }
+
+    @Test
+    public void isScreenLockEnabled_PasswordSecondary_ReturnsTrue() {
+        assertThat(mControllerSecondary.isScreenLockEnabled(ScreenLockType.PASSWORD)).isTrue();
+    }
+
+    @Test
+    public void isScreenLockRestrictedByAdmin_Secondary_ReturnsFalse() {
+        assertThat(mControllerSecondary.isScreenLockRestrictedByAdmin()).isFalse();
     }
 
     @Test
@@ -258,7 +372,6 @@ public class ChooseLockGenericControllerTest {
         mController = createBuilder().setHideInsecureScreenLockTypes(true).build();
         assertThat(mController.getVisibleAndEnabledScreenLockTypes())
                 .isEqualTo(Arrays.asList(
-                        ScreenLockType.PATTERN,
                         ScreenLockType.PIN,
                         ScreenLockType.PASSWORD));
     }
@@ -269,7 +382,6 @@ public class ChooseLockGenericControllerTest {
                 .isEqualTo(Arrays.asList(
                         ScreenLockType.NONE,
                         ScreenLockType.SWIPE,
-                        ScreenLockType.PATTERN,
                         ScreenLockType.PIN,
                         ScreenLockType.PASSWORD));
     }
@@ -370,10 +482,16 @@ public class ChooseLockGenericControllerTest {
     }
 
     private ChooseLockGenericController.Builder createBuilder() {
+        return createBuilder(Primary);
+    }
+
+    private ChooseLockGenericController.Builder createBuilder(LockDomain lockDomain) {
+        ManagedLockPasswordProvider managedLockPasswordProvider = lockDomain == Primary ?
+                mManagedLockPasswordProvider : null;
         return new ChooseLockGenericController.Builder(
                 application,
                 0 /* userId */,
-                mManagedLockPasswordProvider,
-                mLockPatternUtils);
+                managedLockPasswordProvider,
+                new WrappedLockPatternUtils(mLockPatternUtils, lockDomain));
     }
 }

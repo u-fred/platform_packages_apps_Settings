@@ -20,6 +20,7 @@ import android.content.Context;
 import android.os.UserManager;
 import android.provider.Settings;
 
+import com.android.internal.widget.LockPatternUtils;
 import com.android.settings.Utils;
 import com.android.settings.biometrics.activeunlock.ActiveUnlockStatusUtils;
 import com.android.settings.core.TogglePreferenceController;
@@ -31,19 +32,17 @@ import static android.provider.Settings.Secure.BIOMETRIC_KEYGUARD_ENABLED;
 // based on src/com/android/settings/biometrics/combination/BiometricSettingsKeyguardPreferenceController.java
 // from android-14.0.0_r1
 public class FingerprintSettingsKeyguardPreferenceController extends TogglePreferenceController {
-    private static final int ON = 1;
-    private static final int OFF = 0;
-    private static final int DEFAULT = ON;
-
     private int mUserId;
+    private final LockPatternUtils mLockPatternUtils;
 
     public FingerprintSettingsKeyguardPreferenceController(Context context, String key) {
         super(context, key);
+        mLockPatternUtils = new LockPatternUtils(context);
     }
 
     protected RestrictedLockUtils.EnforcedAdmin getRestrictingAdmin() {
         return RestrictedLockUtilsInternal.checkIfKeyguardFeaturesDisabled(mContext,
-                DevicePolicyManager.KEYGUARD_DISABLE_BIOMETRICS, mUserId);
+                DevicePolicyManager.KEYGUARD_DISABLE_FINGERPRINT, mUserId);
     }
 
     public void setUserId(int userId) {
@@ -52,14 +51,12 @@ public class FingerprintSettingsKeyguardPreferenceController extends TogglePrefe
 
     @Override
     public boolean isChecked() {
-        return Settings.Secure.getIntForUser(mContext.getContentResolver(),
-                BIOMETRIC_KEYGUARD_ENABLED, DEFAULT, mUserId) == ON;
+        return mLockPatternUtils.isBiometricKeyguardEnabled(mUserId);
     }
 
     @Override
     public boolean setChecked(boolean isChecked) {
-        return Settings.Secure.putIntForUser(mContext.getContentResolver(),
-                BIOMETRIC_KEYGUARD_ENABLED, isChecked ? ON : OFF, mUserId);
+        return mLockPatternUtils.setBiometricKeyguardEnabled(mUserId, isChecked);
     }
 
     @Override

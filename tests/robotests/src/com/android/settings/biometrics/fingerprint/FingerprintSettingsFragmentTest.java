@@ -34,6 +34,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.content.Intent;
@@ -45,6 +46,7 @@ import android.hardware.fingerprint.FingerprintSensorProperties;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.os.Bundle;
 import android.os.CancellationSignal;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.view.LayoutInflater;
@@ -55,7 +57,11 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.test.core.app.ApplicationProvider;
 
+import com.android.internal.widget.LockPatternUtils;
+import com.android.settings.biometrics.fingerprint.feature.SfpsRestToUnlockFeature;
+import com.android.settings.overlay.FeatureFactory;
 import com.android.settings.password.ChooseLockSettingsHelper;
+import com.android.settings.security.SecurityFeatureProvider;
 import com.android.settings.testutils.FakeFeatureFactory;
 import com.android.settings.testutils.shadow.ShadowFragment;
 import com.android.settings.testutils.shadow.ShadowLockPatternUtils;
@@ -111,12 +117,23 @@ public class FingerprintSettingsFragmentTest {
 
     @Before
     public void setUp() {
+        SystemProperties.set("setupwizard.theme", "val");
         ShadowUtils.setFingerprintManager(mFingerprintManager);
         FakeFeatureFactory.setupForTest();
 
         mContext = spy(ApplicationProvider.getApplicationContext());
         mFragment = spy(new FingerprintSettingsFragment());
         doReturn(mContext).when(mFragment).getContext();
+
+        SecurityFeatureProvider sfp = FeatureFactory.getFeatureFactory()
+                .getSecurityFeatureProvider();
+        LockPatternUtils lpu = new LockPatternUtils(mContext);
+        doReturn(lpu).when(sfp).getLockPatternUtils(any());
+
+        FingerprintFeatureProvider ffp = FeatureFactory.getFeatureFactory()
+                .getFingerprintFeatureProvider();
+        SfpsRestToUnlockFeature mockSfpsRestToUnlockFeature = mock(SfpsRestToUnlockFeature.class);
+        doReturn(mockSfpsRestToUnlockFeature).when(ffp).getSfpsRestToUnlockFeature(any());
 
         doReturn(true).when(mFingerprintManager).isHardwareDetected();
     }

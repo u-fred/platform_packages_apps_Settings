@@ -23,6 +23,7 @@ import static androidx.test.espresso.intent.Intents.intended;
 import static androidx.test.espresso.intent.matcher.IntentMatchers.hasComponent;
 import static androidx.test.espresso.intent.matcher.IntentMatchers.hasExtra;
 
+import static com.android.internal.widget.LockDomain.Primary;
 import static com.android.settings.password.ChooseLockSettingsHelper.EXTRA_KEY_FOR_BIOMETRICS;
 import static com.android.settings.password.ChooseLockSettingsHelper.EXTRA_KEY_FOR_FACE;
 import static com.android.settings.password.ChooseLockSettingsHelper.EXTRA_KEY_FOR_FINGERPRINT;
@@ -51,6 +52,7 @@ import androidx.test.filters.MediumTest;
 import com.android.internal.widget.LockPatternChecker;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockscreenCredential;
+import com.android.internal.widget.WrappedLockPatternUtils;
 import com.android.settings.biometrics.face.FaceEnrollIntroduction;
 import com.android.settings.biometrics.fingerprint.FingerprintEnrollIntroduction;
 import com.android.settings.password.ChooseLockGeneric;
@@ -146,7 +148,7 @@ public class BiometricEnrollActivityTest {
 
         setPin();
         final Intent intent = getIntent(true /* useInternal */);
-        LockPatternChecker.verifyCredential(new LockPatternUtils(mContext),
+        LockPatternChecker.verifyCredential(new WrappedLockPatternUtils(mContext, Primary),
                 LockscreenCredential.createPin(TEST_PIN), UserHandle.myUserId(),
                 LockPatternUtils.VERIFY_FLAG_REQUEST_GK_PW_HANDLE, (response, timeoutMs) -> {
                     assertThat(response.containsGatekeeperPasswordHandle()).isTrue();

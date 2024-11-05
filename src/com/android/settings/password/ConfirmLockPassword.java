@@ -22,6 +22,8 @@ import static android.app.admin.DevicePolicyResources.Strings.Settings.WORK_PROF
 import static android.app.admin.DevicePolicyResources.Strings.Settings.WORK_PROFILE_LAST_PIN_ATTEMPT_BEFORE_WIPE;
 import static android.app.admin.DevicePolicyResources.UNDEFINED;
 
+import static com.android.internal.widget.LockDomain.Primary;
+import static com.android.internal.widget.LockDomain.Secondary;
 import static com.android.settings.biometrics.GatekeeperPasswordProvider.containsGatekeeperPasswordHandle;
 import static com.android.settings.biometrics.GatekeeperPasswordProvider.getGatekeeperPasswordHandle;
 import static com.android.settings.password.ChooseLockSettingsHelper.EXTRA_KEY_GK_PW_HANDLE;
@@ -197,8 +199,10 @@ public class ConfirmLockPassword extends ConfirmDeviceCredentialBaseActivity {
             } else {
                 mPasswordEntry.setInputType(
                         InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_VARIATION_PASSWORD);
-                mPasswordEntry.setContentDescription(
-                        getContext().getString(R.string.unlock_set_unlock_pin_title));
+                mPasswordEntry.setContentDescription(getContext().getString(mLockDomain == Primary ?
+                                R.string.unlock_set_unlock_pin_title :
+                                R.string.unlock_set_unlock_biometric_second_factor_pin_title));
+
             }
             // Can't set via XML since setInputType resets the fontFamily to null
             mPasswordEntry.setTypeface(Typeface.create(
@@ -266,6 +270,9 @@ public class ConfirmLockPassword extends ConfirmDeviceCredentialBaseActivity {
         }
 
         private String getDefaultHeader() {
+            if (mLockDomain == Secondary) {
+                return getString(R.string.lockpassword_confirm_your_biometric_second_factor_pin_header);
+            }
             if (mFrp) {
                 return mIsAlpha ? getString(R.string.lockpassword_confirm_your_password_header_frp)
                         : getString(R.string.lockpassword_confirm_your_pin_header_frp);
@@ -294,6 +301,10 @@ public class ConfirmLockPassword extends ConfirmDeviceCredentialBaseActivity {
         }
 
         private String getDefaultDetails() {
+            if (mLockDomain == Secondary) {
+                return getString(
+                        R.string.lockpassword_confirm_your_biometric_second_factor_generic);
+            }
             if (mFrp) {
                 return mIsAlpha ? getString(R.string.lockpassword_confirm_your_password_details_frp)
                         : getString(R.string.lockpassword_confirm_your_pin_details_frp);
@@ -325,8 +336,13 @@ public class ConfirmLockPassword extends ConfirmDeviceCredentialBaseActivity {
         }
 
         private int getErrorMessage() {
-            return mIsAlpha ? R.string.lockpassword_invalid_password
-                    : R.string.lockpassword_invalid_pin;
+            if (mIsAlpha) {
+                return R.string.lockpassword_invalid_password;
+            } else if (mLockDomain == Primary) {
+                return R.string.lockpassword_invalid_pin;
+            } else {
+                return R.string.lockpassword_invalid_biometric_second_factor_pin;
+            }
         }
 
         @Override
@@ -523,6 +539,7 @@ public class ConfirmLockPassword extends ConfirmDeviceCredentialBaseActivity {
                                 ChooseLockSettingsHelper.EXTRA_KEY_CHALLENGE_TOKEN,
                                 response.getGatekeeperHAT());
                     }
+                    intent.putExtra(ChooseLockSettingsHelper.EXTRA_KEY_PASSWORD, credential);
                 }
                 mCredentialCheckResultTracker.setResult(matched, intent, timeoutMs,
                         localEffectiveUserId);

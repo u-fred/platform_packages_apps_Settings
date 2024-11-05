@@ -16,6 +16,7 @@
 
 package com.android.settings.password;
 
+import static com.android.internal.widget.LockDomain.Primary;
 import static com.android.settings.password.ConfirmLockPassword.ConfirmLockPasswordFragment;
 import static com.android.settings.password.TestUtils.GUESS_INVALID_RESULT;
 import static com.android.settings.password.TestUtils.GUESS_VALID_RESULT;
@@ -44,6 +45,7 @@ import android.app.KeyguardManager;
 import android.app.admin.ManagedSubscriptionsPolicy;
 import android.content.Context;
 import android.content.Intent;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.service.remotelockscreenvalidation.IRemoteLockscreenValidationCallback;
 import android.service.remotelockscreenvalidation.RemoteLockscreenValidationClient;
@@ -100,6 +102,8 @@ public class ConfirmLockPasswordTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
+        SystemProperties.set("setupwizard.theme", "val");
+
         mContext = ApplicationProvider.getApplicationContext();
         mLockPatternUtils = new LockPatternUtils(mContext);
 
@@ -117,7 +121,7 @@ public class ConfirmLockPasswordTest {
                         ManagedSubscriptionsPolicy.TYPE_ALL_PERSONAL_SUBSCRIPTIONS));
 
         // Set false by default so we can check if lock was set when remote validation succeeds.
-        ShadowLockPatternUtils.setIsSecure(UserHandle.myUserId(), false);
+        ShadowLockPatternUtils.setIsSecure(UserHandle.myUserId(), Primary, false);
 
         FeatureFlagUtils.setEnabled(mContext,
                 FeatureFlagUtils.SETTINGS_REMOTE_DEVICE_CREDENTIAL_VALIDATION, true);

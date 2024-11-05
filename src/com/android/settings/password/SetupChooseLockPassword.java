@@ -16,6 +16,7 @@
 
 package com.android.settings.password;
 
+import static com.android.internal.widget.LockDomain.Primary;
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PASSWORD;
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PIN;
 
@@ -86,7 +87,7 @@ public class SetupChooseLockPassword extends ChooseLockPassword {
             super.onViewCreated(view, savedInstanceState);
             final Activity activity = getActivity();
             ChooseLockGenericController chooseLockGenericController =
-                    new ChooseLockGenericController.Builder(activity, mUserId)
+                    new ChooseLockGenericController.Builder(activity, mUserId, Primary)
                     .setHideInsecureScreenLockTypes(true)
                     .build();
             boolean anyOptionsShown = chooseLockGenericController

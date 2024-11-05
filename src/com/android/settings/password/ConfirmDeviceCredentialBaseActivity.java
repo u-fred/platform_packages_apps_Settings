@@ -50,6 +50,7 @@ public abstract class ConfirmDeviceCredentialBaseActivity extends SettingsActivi
     private boolean mFirstTimeVisible = true;
     private boolean mIsKeyguardLocked = false;
     private ConfirmCredentialTheme mConfirmCredentialTheme;
+    private int mNotForegroundResultCode;
 
     private boolean isInternalActivity() {
         return (this instanceof ConfirmLockPassword.InternalActivity)
@@ -107,6 +108,10 @@ public abstract class ConfirmDeviceCredentialBaseActivity extends SettingsActivi
             getActionBar().setHomeButtonEnabled(true);
         }
         mRestoring = savedState != null;
+
+        mNotForegroundResultCode = getIntent().getIntExtra(
+                ChooseLockSettingsHelper.EXTRA_KEY_NOT_FOREGROUND_RESULT_CODE,
+                RESULT_CANCELED);
     }
 
     @Override
@@ -158,6 +163,7 @@ public abstract class ConfirmDeviceCredentialBaseActivity extends SettingsActivi
         final boolean foregroundOnly = getIntent().getBooleanExtra(
                 ChooseLockSettingsHelper.EXTRA_KEY_FOREGROUND_ONLY, false);
         if (!isChangingConfigurations() && foregroundOnly) {
+            setResult(mNotForegroundResultCode);
             finish();
         }
     }

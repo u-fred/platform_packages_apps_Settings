@@ -15,6 +15,8 @@
  */
 package com.android.settings.security;
 
+import static com.android.internal.widget.LockDomain.Primary;
+import static com.android.internal.widget.LockDomain.Secondary;
 import static com.android.settings.security.OwnerInfoPreferenceController.KEY_OWNER_INFO;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -22,6 +24,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -75,6 +78,7 @@ public class OwnerInfoPreferenceControllerTest {
 
     private Context mContext;
     private OwnerInfoPreferenceController mController;
+    private OwnerInfoPreferenceController mControllerSecondary;
 
     @Before
     public void setUp() {
@@ -89,14 +93,22 @@ public class OwnerInfoPreferenceControllerTest {
         when(mFragment.getSettingsLifecycle()).thenReturn(mock(Lifecycle.class));
         when(mFragmentManager.beginTransaction()).thenReturn(mFragmentTransaction);
 
-        mController = spy(new OwnerInfoPreferenceController(mContext, mFragment));
+        mController = spy(new OwnerInfoPreferenceController(mContext, mFragment, Primary));
         when(mScreen.findPreference(mController.getPreferenceKey())).thenReturn(mPreference);
         ReflectionHelpers.setField(mController, "mLockPatternUtils", mLockPatternUtils);
+
+        mControllerSecondary = spy(new OwnerInfoPreferenceController(mContext, mFragment,
+                Secondary));
     }
 
     @Test
     public void isAvailable_shouldReturnTrue() {
         assertThat(mController.isAvailable()).isTrue();
+    }
+
+    @Test
+    public void isAvailable_secondary_returnsFalse() {
+        assertThat(mControllerSecondary.isAvailable()).isFalse();
     }
 
     @Test

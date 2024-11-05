@@ -21,10 +21,12 @@ import static android.app.admin.DevicePolicyResources.Strings.Settings.FINGERPRI
 import static android.app.admin.DevicePolicyResources.Strings.Settings.WORK_PROFILE_FINGERPRINT_LAST_DELETE_MESSAGE;
 import static android.app.admin.DevicePolicyResources.UNDEFINED;
 
+import static com.android.internal.widget.LockDomain.Secondary;
 import static com.android.settings.Utils.SETTINGS_PACKAGE_NAME;
 import static com.android.settings.Utils.isPrivateProfile;
 import static com.android.settings.biometrics.BiometricEnrollBase.EXTRA_FROM_SETTINGS_SUMMARY;
 import static com.android.settings.biometrics.BiometricEnrollBase.EXTRA_KEY_CHALLENGE;
+import static com.android.settings.security.ChangeScreenLockPreferenceController.KEY_UNLOCK_SET_OR_CHANGE;
 
 import android.app.Activity;
 import android.app.Dialog;
@@ -39,6 +41,7 @@ import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.text.InputFilter;
@@ -63,6 +66,7 @@ import androidx.preference.PreferenceViewHolder;
 import androidx.preference.TwoStatePreference;
 
 import com.android.internal.widget.LockPatternUtils;
+import com.android.internal.widget.LockscreenCredential;
 import com.android.settings.R;
 import com.android.settings.SubSettings;
 import com.android.settings.Utils;
@@ -78,6 +82,9 @@ import com.android.settings.overlay.FeatureFactory;
 import com.android.settings.password.ChooseLockGeneric;
 import com.android.settings.password.ChooseLockSettingsHelper;
 import com.android.settings.search.BaseSearchIndexProvider;
+import com.android.settings.security.ChangeScreenLockPreferenceController;
+import com.android.settings.security.screenlock.ScreenLockSettings;
+import com.android.settings.widget.GearPreference;
 import com.android.settingslib.HelpUtils;
 import com.android.settingslib.RestrictedLockUtils;
 import com.android.settingslib.RestrictedLockUtils.EnforcedAdmin;
@@ -157,19 +164,20 @@ public class FingerprintSettings extends SubSettings {
      */
     @SearchIndexable
     public static class FingerprintSettingsFragment extends DashboardFragment
-            implements OnPreferenceChangeListener, FingerprintPreference.OnDeleteClickListener {
+            implements OnPreferenceChangeListener, FingerprintPreference.OnDeleteClickListener,
+            GearPreference.OnGearClickListener {
 
         public static final BaseSearchIndexProvider SEARCH_INDEX_DATA_PROVIDER =
                 new BaseSearchIndexProvider(R.xml.security_settings_fingerprint) {
                     @Override
                     public List<AbstractPreferenceController>
                             createPreferenceControllers(Context context) {
-                        return createThePreferenceControllers(context);
+                        return createThePreferenceControllers(context, null);
                     }
                 };
 
         private static List<AbstractPreferenceController> createThePreferenceControllers(Context
-                context) {
+                context, FingerprintSettingsFragment host) {
             final List<AbstractPreferenceController> controllers = new ArrayList<>();
             FingerprintManager manager = Utils.getFingerprintManagerOrNull(context);
             if (manager == null || !manager.isHardwareDetected()) {
@@ -190,6 +198,14 @@ public class FingerprintSettings extends SubSettings {
                     KEY_FINGERPRINTS_ENROLLED_CATEGORY));
             controllers.add(new FingerprintSettingsKeyguardPreferenceController(context,
                     KEY_FINGERPRINT_ENABLE_KEYGUARD_TOGGLE));
+
+            ChangeScreenLockPreferenceController c =
+                    new ChangeScreenLockPreferenceController(context, host, Secondary);
+            c.setScreenLockSettingsRequestCode(BIOMETRIC_SECOND_FACTOR_SETTINGS_REQUEST);
+            c.setChooseLockRequestCode(CHOOSE_BIOMETRIC_SECOND_FACTOR_REQUEST);
+            c.setResultListener(host);
+            controllers.add(c);
+
             return controllers;
         }
 
@@ -210,6 +226,10 @@ public class FingerprintSettings extends SubSettings {
         private static final String KEY_LAUNCHED_CONFIRM = "launched_confirm";
         private static final String KEY_HAS_FIRST_ENROLLED = "has_first_enrolled";
         private static final String KEY_IS_ENROLLING = "is_enrolled";
+        private static final String KEY_LAUNCHED_CHOOSE_BIOMETRIC_SECOND_FACTOR =
+                "launched_choose_biometric_second_factor";
+        private static final String KEY_LAUNCHED_BIOMETRIC_SECOND_FACTOR_SETTINGS =
+                "launched_biometric_second_factor_settings";
         @VisibleForTesting
         static final String KEY_REQUIRE_SCREEN_ON_TO_AUTH =
                 "security_settings_require_screen_on_to_auth";
@@ -229,6 +249,10 @@ public class FingerprintSettings extends SubSettings {
         private static final int CONFIRM_REQUEST = 101;
         @VisibleForTesting
         static final int CHOOSE_LOCK_GENERIC_REQUEST = 102;
+        // Although this starts ChooseLockGeneric Activity, the constant CHOOSE_LOCK_GENERIC_REQUEST
+        // is used for a separate purpose.
+        public static final int CHOOSE_BIOMETRIC_SECOND_FACTOR_REQUEST = 9999;
+        public static final int BIOMETRIC_SECOND_FACTOR_SETTINGS_REQUEST = 9998;
         @VisibleForTesting
         static final int ADD_FINGERPRINT_REQUEST = 10;
         private static final int AUTO_ADD_FIRST_FINGERPRINT_REQUEST = 11;
@@ -238,6 +262,8 @@ public class FingerprintSettings extends SubSettings {
         private List<AbstractPreferenceController> mControllers;
         private FingerprintUnlockCategoryController
                 mFingerprintUnlockCategoryPreferenceController;
+        private ChangeScreenLockPreferenceController
+                mChangeBiometricSecondFactorPreferenceController;
         private FingerprintSettingsRequireScreenOnToAuthPreferenceController
                 mRequireScreenOnToAuthPreferenceController;
         private Preference mAddFingerprintPreference;
@@ -245,18 +271,22 @@ public class FingerprintSettings extends SubSettings {
         private PreferenceCategory mFingerprintsEnrolledCategory;
         private PreferenceCategory mFingerprintUnlockCategory;
         private PreferenceCategory mFingerprintUnlockFooter;
+        private GearPreference mBiometricSecondFactor;
 
         private FingerprintManager mFingerprintManager;
         private FingerprintUpdater mFingerprintUpdater;
         private List<FingerprintSensorPropertiesInternal> mSensorProperties;
         private boolean mInFingerprintLockout;
         private byte[] mToken;
+        private LockscreenCredential mUserPassword;
         private boolean mLaunchedConfirm;
         private boolean mHasFirstEnrolled = true;
         private Drawable mHighlightDrawable;
         private int mUserId;
         private final List<FooterColumn> mFooterColumns = new ArrayList<>();
         private boolean mIsEnrolling;
+        private boolean mLaunchedChooseBiometricSecondFactor;
+        private boolean mLaunchedBiometricSecondFactorSettings;
 
         private long mChallenge;
 
@@ -349,6 +379,15 @@ public class FingerprintSettings extends SubSettings {
                 }
             }
         };
+
+        @Override
+        public void onGearClick(GearPreference p) {
+            if (TextUtils.equals(p.getKey(),
+                    mChangeBiometricSecondFactorPreferenceController.getPreferenceKey())) {
+                mLaunchedBiometricSecondFactorSettings = true;
+                mChangeBiometricSecondFactorPreferenceController.onGearClick(p);
+            }
+        }
 
         /**
          *
@@ -463,6 +502,15 @@ public class FingerprintSettings extends SubSettings {
                 mIsEnrolling = savedInstanceState.getBoolean(KEY_IS_ENROLLING, mIsEnrolling);
                 mHasFirstEnrolled = savedInstanceState.getBoolean(KEY_HAS_FIRST_ENROLLED,
                         mHasFirstEnrolled);
+                mLaunchedChooseBiometricSecondFactor = savedInstanceState.getBoolean(
+                        KEY_LAUNCHED_CHOOSE_BIOMETRIC_SECOND_FACTOR);
+                mLaunchedBiometricSecondFactorSettings = savedInstanceState.getBoolean(
+                        KEY_LAUNCHED_BIOMETRIC_SECOND_FACTOR_SETTINGS);
+                mUserPassword = savedInstanceState.getParcelable(
+                        ChooseLockSettingsHelper.EXTRA_KEY_PASSWORD);
+                if (mChangeBiometricSecondFactorPreferenceController != null) {
+                    mChangeBiometricSecondFactorPreferenceController.setUserPassword(mUserPassword);
+                }
             }
 
             // (mLaunchedConfirm or mIsEnrolling) means that we are waiting an activity result.
@@ -585,6 +633,8 @@ public class FingerprintSettings extends SubSettings {
                     ((FingerprintUnlockCategoryController) controller).setUserId(mUserId);
                 } else if (controller instanceof FingerprintSettingsKeyguardPreferenceController c) {
                     c.setUserId(mUserId);
+                } else if (controller instanceof ChangeScreenLockPreferenceController c) {
+                    c.setEffectiveUserId(mUserId);
                 }
             }
 
@@ -666,6 +716,20 @@ public class FingerprintSettings extends SubSettings {
             }
         }
 
+        private void updateBiometricSecondFactorVisibility() {
+            final boolean available =
+                    mChangeBiometricSecondFactorPreferenceController.isAvailable();
+            if (mBiometricSecondFactor.isVisible() != available) {
+                mBiometricSecondFactor.setVisible(available);
+                if (available) {
+                    // Without this there will be no summary when preference was initially not
+                    // available.
+                    mChangeBiometricSecondFactorPreferenceController.updateState(
+                            mBiometricSecondFactor);
+                }
+            }
+        }
+
         private FingerprintSettingsKeyguardPreferenceController mFingerprintKeyguardController;
 
         private void setupFingerprintUnlockCategoryPreferences() {
@@ -688,8 +752,14 @@ public class FingerprintSettings extends SubSettings {
             keyguardFingerprintPref.setChecked(mFingerprintKeyguardController.isChecked());
             keyguardFingerprintPref.setOnPreferenceChangeListener((p, value) -> {
                 mFingerprintKeyguardController.setChecked((boolean) value);
+                updateBiometricSecondFactorVisibility();
                 return true;
             });
+            keyguardFingerprintPref.setVisible(mFingerprintKeyguardController.isAvailable());
+
+            mBiometricSecondFactor =
+                    findPreference(KEY_UNLOCK_SET_OR_CHANGE);
+            updateBiometricSecondFactorVisibility();
         }
 
         private void updateAddPreference() {
@@ -788,7 +858,9 @@ public class FingerprintSettings extends SubSettings {
         @Override
         public void onStop() {
             super.onStop();
-            if (!getActivity().isChangingConfigurations() && !mLaunchedConfirm && !mIsEnrolling) {
+            if (!getActivity().isChangingConfigurations() && !mLaunchedConfirm && !mIsEnrolling &&
+                    !mLaunchedChooseBiometricSecondFactor &&
+                    !mLaunchedBiometricSecondFactorSettings) {
                 setResult(RESULT_TIMEOUT);
                 getActivity().finish();
             }
@@ -812,6 +884,12 @@ public class FingerprintSettings extends SubSettings {
             outState.putSerializable("mFingerprintsRenaming", mFingerprintsRenaming);
             outState.putBoolean(KEY_IS_ENROLLING, mIsEnrolling);
             outState.putBoolean(KEY_HAS_FIRST_ENROLLED, mHasFirstEnrolled);
+            outState.putBoolean(KEY_LAUNCHED_CHOOSE_BIOMETRIC_SECOND_FACTOR,
+                    mLaunchedChooseBiometricSecondFactor);
+            outState.putBoolean(KEY_LAUNCHED_BIOMETRIC_SECOND_FACTOR_SETTINGS,
+                    mLaunchedBiometricSecondFactorSettings);
+            outState.putParcelable(ChooseLockSettingsHelper.EXTRA_KEY_PASSWORD,
+                    mUserPassword != null ? mUserPassword.duplicate() : null);
         }
 
         @Override
@@ -839,6 +917,8 @@ public class FingerprintSettings extends SubSettings {
                 FingerprintPreference fpref = (FingerprintPreference) pref;
                 final Fingerprint fp = fpref.getFingerprint();
                 showRenameDialog(fp);
+            } else if (KEY_UNLOCK_SET_OR_CHANGE.equals(key)) {
+                mLaunchedChooseBiometricSecondFactor = true;
             }
             return super.onPreferenceTreeClick(pref);
         }
@@ -922,7 +1002,7 @@ public class FingerprintSettings extends SubSettings {
 
         private List<AbstractPreferenceController> buildPreferenceControllers(Context context) {
             final List<AbstractPreferenceController> controllers =
-                    createThePreferenceControllers(context);
+                    createThePreferenceControllers(context, this);
 
             for (AbstractPreferenceController controller : controllers) {
                 if (controller.getPreferenceKey() == KEY_FINGERPRINT_UNLOCK_CATEGORY) {
@@ -934,6 +1014,9 @@ public class FingerprintSettings extends SubSettings {
                 } else if (controller.getPreferenceKey() == KEY_FINGERPRINT_ENABLE_KEYGUARD_TOGGLE) {
                     mFingerprintKeyguardController =
                         (FingerprintSettingsKeyguardPreferenceController) controller;
+                } else if (controller.getPreferenceKey() == KEY_UNLOCK_SET_OR_CHANGE) {
+                    mChangeBiometricSecondFactorPreferenceController =
+                            (ChangeScreenLockPreferenceController) controller;
                 }
             }
 
@@ -947,6 +1030,16 @@ public class FingerprintSettings extends SubSettings {
                 mLaunchedConfirm = false;
                 if (resultCode == RESULT_FINISHED || resultCode == RESULT_OK) {
                     if (BiometricUtils.containsGatekeeperPasswordHandle(data)) {
+                        if (data.hasExtra(ChooseLockSettingsHelper.EXTRA_KEY_PASSWORD)) {
+                            mUserPassword = data.getParcelableExtra(
+                                    ChooseLockSettingsHelper.EXTRA_KEY_PASSWORD);
+                            mChangeBiometricSecondFactorPreferenceController.setUserPassword(
+                                    mUserPassword);
+                        } else {
+                            Log.d(TAG, "Current primary credential missing");
+                            finish();
+                        }
+
                         if (!mHasFirstEnrolled && !mIsEnrolling) {
                             final Activity activity = getActivity();
                             if (activity != null) {
@@ -1033,6 +1126,27 @@ public class FingerprintSettings extends SubSettings {
                 mIsEnrolling = false;
                 mHasFirstEnrolled = true;
                 updateAddPreference();
+            } else if (requestCode == CHOOSE_BIOMETRIC_SECOND_FACTOR_REQUEST) {
+                mLaunchedChooseBiometricSecondFactor = false;
+                // This technique of relying on the launched Activity to indicate timeout isn't
+                // perfect. If an app calls finish() for something other than RESULT_TIMEOUT, but
+                // the app is in background, then on returning to foreground there will be no
+                // RESULT_TIMEOUT. This is easily seen by adding a sleep(1000ms) before the finish()
+                // call and going to background during this time.
+                // The technique is used inconsistently throughout Settings app, such as
+                // ChooseLockGeneric using it, but not ChooseLockPassword. However, it is used
+                // consistently within FingerprintSettings, so I use it for second factor.
+                if (resultCode ==
+                        ChooseLockGeneric.ChooseLockGenericFragment.RESULT_NOT_FOREGROUND) {
+                    getActivity().setResult(RESULT_TIMEOUT);
+                    getActivity().finish();
+                }
+            } else if (requestCode == BIOMETRIC_SECOND_FACTOR_SETTINGS_REQUEST) {
+                mLaunchedBiometricSecondFactorSettings = false;
+                if (resultCode == ScreenLockSettings.RESULT_NOT_FOREGROUND) {
+                    getActivity().setResult(RESULT_TIMEOUT);
+                    getActivity().finish();
+                }
             }
         }
 
@@ -1042,6 +1156,15 @@ public class FingerprintSettings extends SubSettings {
             if (getActivity().isFinishing()) {
                 mFingerprintManager.revokeChallenge(mUserId, mChallenge);
             }
+
+            if (mUserPassword != null) {
+                mUserPassword.zeroize();
+            }
+            new Handler(Looper.myLooper()).postDelayed(() -> {
+                System.gc();
+                System.runFinalization();
+                System.gc();
+            }, 5000);
         }
 
         private Drawable getHighlightDrawable() {
@@ -1099,6 +1222,7 @@ public class FingerprintSettings extends SubSettings {
                         true);
                 intent.putExtra(Intent.EXTRA_USER_ID, mUserId);
                 intent.putExtra(ChooseLockSettingsHelper.EXTRA_KEY_REQUEST_GK_PW_HANDLE, true);
+                intent.putExtra(ChooseLockSettingsHelper.EXTRA_KEY_RETURN_CREDENTIALS, true);
                 intent.putExtra(ChooseLockSettingsHelper.EXTRA_KEY_FOR_FINGERPRINT, true);
                 startActivityForResult(intent, CHOOSE_LOCK_GENERIC_REQUEST);
             }

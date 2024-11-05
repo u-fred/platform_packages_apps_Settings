@@ -42,6 +42,7 @@ import android.app.admin.DevicePolicyManager.PasswordComplexity;
 import android.app.admin.PasswordMetrics;
 import android.app.admin.PasswordPolicy;
 import android.content.Intent;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.view.View;
 import android.widget.CheckBox;
@@ -69,6 +70,8 @@ import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowDrawable;
 
+import java.util.Arrays;
+
 @RunWith(RobolectricTestRunner.class)
 @Config(shadows = {
         SettingsShadowResources.class,
@@ -79,6 +82,7 @@ import org.robolectric.shadows.ShadowDrawable;
 public class ChooseLockPasswordTest {
     @Before
     public void setUp() {
+        SystemProperties.set("setupwizard.theme", "val");
         SettingsShadowResources.overrideResource(
                 com.android.internal.R.string.config_headlineFontFamily, "");
     }
@@ -426,12 +430,15 @@ public class ChooseLockPasswordTest {
         PasswordPolicy policy = new PasswordPolicy();
         policy.quality = PASSWORD_QUALITY_UNSPECIFIED;
 
+        char[] repeat = new char[DevicePolicyManager.MAX_PASSWORD_LENGTH + 1];
+        Arrays.fill(repeat, '1');
+
         assertPasswordValidationResult(
                 /* minMetrics */ policy.getMinMetrics(),
                 /* minComplexity= */ PASSWORD_COMPLEXITY_NONE,
                 /* passwordType= */ PASSWORD_QUALITY_ALPHABETIC,
-                LockscreenCredential.createPassword("01234567890123456789"),
-                "Must be fewer than 17 characters");
+                LockscreenCredential.createPassword(new String(repeat)),
+                "Must be fewer than 129 characters");
     }
 
     @Test
@@ -467,7 +474,7 @@ public class ChooseLockPasswordTest {
         fragment.updateUi();
         assertThat(pinAutoConfirmOption.getVisibility()).isEqualTo(View.VISIBLE);
         assertThat(securityMessage.getVisibility()).isEqualTo(View.VISIBLE);
-        assertThat(pinAutoConfirmOption.isChecked()).isTrue();
+        assertThat(pinAutoConfirmOption.isChecked()).isFalse();
 
         passwordEntry.setText("12345678");
         fragment.updateUi();
@@ -479,7 +486,7 @@ public class ChooseLockPasswordTest {
         fragment.updateUi();
         assertThat(pinAutoConfirmOption.getVisibility()).isEqualTo(View.VISIBLE);
         assertThat(securityMessage.getVisibility()).isEqualTo(View.VISIBLE);
-        assertThat(pinAutoConfirmOption.isChecked()).isTrue();
+        assertThat(pinAutoConfirmOption.isChecked()).isFalse();
     }
 
     @Test
@@ -497,22 +504,22 @@ public class ChooseLockPasswordTest {
         fragment.updateUi();
         assertThat(pinAutoConfirmOption.getVisibility()).isEqualTo(View.VISIBLE);
         assertThat(securityMessage.getVisibility()).isEqualTo(View.VISIBLE);
-        assertThat(pinAutoConfirmOption.isChecked()).isTrue();
+        assertThat(pinAutoConfirmOption.isChecked()).isFalse();
 
         pinAutoConfirmOption.performClick();
-        assertThat(pinAutoConfirmOption.isChecked()).isFalse();
+        assertThat(pinAutoConfirmOption.isChecked()).isTrue();
 
         passwordEntry.setText("12345678");
         fragment.updateUi();
         assertThat(pinAutoConfirmOption.getVisibility()).isEqualTo(View.VISIBLE);
         assertThat(securityMessage.getVisibility()).isEqualTo(View.VISIBLE);
-        assertThat(pinAutoConfirmOption.isChecked()).isFalse();
+        assertThat(pinAutoConfirmOption.isChecked()).isTrue();
 
         passwordEntry.setText("123456");
         fragment.updateUi();
         assertThat(pinAutoConfirmOption.getVisibility()).isEqualTo(View.VISIBLE);
         assertThat(securityMessage.getVisibility()).isEqualTo(View.VISIBLE);
-        assertThat(pinAutoConfirmOption.isChecked()).isFalse();
+        assertThat(pinAutoConfirmOption.isChecked()).isTrue();
     }
 
     private ChooseLockPassword setupActivityWithPinTypeAndDefaultPolicy() {

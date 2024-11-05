@@ -16,10 +16,12 @@
 
 package com.android.settings.security;
 
+import static com.android.internal.widget.LockDomain.Primary;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -27,6 +29,7 @@ import static org.mockito.Mockito.when;
 
 import android.app.admin.DevicePolicyManager;
 import android.content.Context;
+import android.content.pm.UserInfo;
 import android.os.UserManager;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -53,7 +56,6 @@ import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(shadows = ShadowUtils.class)
-@Ignore
 public class ChangeScreenLockPreferenceControllerTest {
 
     private static final int METRICS_CATEGORY = 1;
@@ -70,6 +72,7 @@ public class ChangeScreenLockPreferenceControllerTest {
     private Context mContext;
     private FakeFeatureFactory mFeatureFactory;
     private ChangeScreenLockPreferenceController mController;
+    private ChangeScreenLockPreferenceController mControllerSecondary;
     private View mGearView;
     private GearPreference mGearPreference;
     private PreferenceViewHolder mPreferenceViewHolder;
@@ -87,6 +90,17 @@ public class ChangeScreenLockPreferenceControllerTest {
         final SettingsPreferenceFragment host = mock(SettingsPreferenceFragment.class);
         when(host.getMetricsCategory()).thenReturn(METRICS_CATEGORY);
         mController = new ChangeScreenLockPreferenceController(mContext, host);
+
+        // Make RestrictedLockUtilsInternal#checkIfKeyguardFeaturesDisabled and
+        // RestrictedLockUtilsInternal#checkIfPasswordQualityIsSet work.
+        when(mContext.getSystemService(Context.DEVICE_POLICY_SERVICE)).thenReturn(null);
+        UserManager um = mock(UserManager.class);
+        when(mContext.getSystemService(Context.USER_SERVICE)).thenReturn(um);
+        UserInfo userInfo = mock(UserInfo.class);
+        when(userInfo.isManagedProfile()).thenReturn(false);
+        when(um.getUserInfo(anyInt())).thenReturn(userInfo);
+
+
     }
 
     @Test
@@ -96,6 +110,7 @@ public class ChangeScreenLockPreferenceControllerTest {
 
     @Test
     @Config(qualifiers = "mcc999")
+    @Ignore
     public void testDeviceAdministrators_ifDisabled_shouldNotBeShown() {
         assertThat(mController.isAvailable()).isFalse();
     }

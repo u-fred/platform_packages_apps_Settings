@@ -18,6 +18,7 @@ package com.android.settings.security.screenlock;
 
 import static android.app.admin.DevicePolicyResources.Strings.Settings.DISABLED_BY_IT_ADMIN_TITLE;
 import static android.provider.Settings.System.SCREEN_OFF_TIMEOUT;
+import static com.android.internal.widget.LockDomain.Secondary;
 
 import android.app.admin.DevicePolicyManager;
 import android.content.Context;
@@ -28,6 +29,7 @@ import android.util.Log;
 
 import androidx.preference.Preference;
 
+import com.android.internal.widget.LockDomain;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.settings.R;
 import com.android.settings.core.PreferenceControllerMixin;
@@ -47,19 +49,24 @@ public class LockAfterTimeoutPreferenceController extends AbstractPreferenceCont
     private final LockPatternUtils mLockPatternUtils;
     private final TrustAgentManager mTrustAgentManager;
     private final DevicePolicyManager mDPM;
+    private final LockDomain mLockDomain;
 
     public LockAfterTimeoutPreferenceController(Context context, int userId,
-            LockPatternUtils lockPatternUtils) {
+            LockPatternUtils lockPatternUtils, LockDomain lockDomain) {
         super(context);
         mUserId = userId;
         mLockPatternUtils = lockPatternUtils;
         mDPM = (DevicePolicyManager) context.getSystemService(Context.DEVICE_POLICY_SERVICE);
         mTrustAgentManager = FeatureFactory.getFeatureFactory()
                 .getSecurityFeatureProvider().getTrustAgentManager();
+        mLockDomain = lockDomain;
     }
 
     @Override
     public boolean isAvailable() {
+        if (mLockDomain == Secondary) {
+            return false;
+        }
         if (!mLockPatternUtils.isSecure(mUserId)) {
             return false;
         }
