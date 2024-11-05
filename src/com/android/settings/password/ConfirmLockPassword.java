@@ -271,7 +271,7 @@ public class ConfirmLockPassword extends ConfirmDeviceCredentialBaseActivity {
 
         private String getDefaultHeader() {
             if (mLockDomain == Secondary) {
-                return getString(R.string.lockpassword_confirm_your_biometric_second_factor_header);
+                return getString(R.string.lockpassword_confirm_your_biometric_second_factor_pin_header);
             }
             if (mFrp) {
                 return mIsAlpha ? getString(R.string.lockpassword_confirm_your_password_header_frp)
