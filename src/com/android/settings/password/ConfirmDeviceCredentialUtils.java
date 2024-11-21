@@ -73,8 +73,14 @@ public class ConfirmDeviceCredentialUtils {
     public static void reportSuccessfulAttempt(WrappedLockPatternUtils utils,
             UserManager userManager, DevicePolicyManager dpm, int userId, boolean isStrongAuth) {
         LockDomain lockDomain = utils.getLockDomain();
-        if (isStrongAuth) {
+        if (lockDomain == Secondary && isStrongAuth) {
+            throw new IllegalArgumentException("Biometric second factor is not strong auth");
+        }
+        if (isStrongAuth || lockDomain == Secondary) {
             utils.reportSuccessfulPasswordAttempt(userId, false);
+            // The lockDomain check is not strictly needed as the inner conditional will always be
+            // false due to second factor support being checked by
+            // LPU#reportSuccessfulPasswordAttempt.
             if (lockDomain == Primary && isBiometricUnlockEnabledForPrivateSpace()) {
                 final UserInfo userInfo = userManager.getUserInfo(userId);
                 if (userInfo != null) {
@@ -87,12 +93,9 @@ public class ConfirmDeviceCredentialUtils {
                 }
             }
         } else {
-            if (lockDomain == Secondary) {
-                throw new IllegalArgumentException(
-                        "Secondary LockDomain only supports strong auth");
-            }
             dpm.reportSuccessfulBiometricAttempt(userId);
         }
+        // The lockDomain check is redundant as per above.
         if (lockDomain == Primary && !isBiometricUnlockEnabledForPrivateSpace()) {
             if (userManager.isManagedProfile(userId)) {
                 // Disable StrongAuth for work challenge only here.

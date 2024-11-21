@@ -20,6 +20,7 @@ import static android.app.admin.DevicePolicyResources.Strings.Settings.CONFIRM_W
 import static android.app.admin.DevicePolicyResources.Strings.Settings.WORK_PROFILE_LAST_PATTERN_ATTEMPT_BEFORE_WIPE;
 import static android.app.admin.DevicePolicyResources.UNDEFINED;
 
+import static com.android.internal.widget.LockDomain.Primary;
 import static com.android.settings.biometrics.GatekeeperPasswordProvider.containsGatekeeperPasswordHandle;
 import static com.android.settings.biometrics.GatekeeperPasswordProvider.getGatekeeperPasswordHandle;
 import static com.android.settings.password.ChooseLockSettingsHelper.EXTRA_KEY_GK_PW_HANDLE;
@@ -604,7 +605,7 @@ public class ConfirmLockPattern extends ConfirmDeviceCredentialBaseActivity {
                 if (newResult) {
                     ConfirmDeviceCredentialUtils.reportSuccessfulAttempt(mLockPatternUtils,
                             mUserManager, mDevicePolicyManager, mEffectiveUserId,
-                            /* isStrongAuth */ true);
+                            /* isStrongAuth */ mLockPatternUtils.getLockDomain() == Primary);
                 }
                 startDisappearAnimation(intent);
                 ConfirmDeviceCredentialUtils.checkForPendingIntent(getActivity());

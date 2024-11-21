@@ -607,7 +607,7 @@ public class ConfirmLockPassword extends ConfirmDeviceCredentialBaseActivity {
                 if (newResult) {
                     ConfirmDeviceCredentialUtils.reportSuccessfulAttempt(mLockPatternUtils,
                             mUserManager, mDevicePolicyManager, mEffectiveUserId,
-                            /* isStrongAuth */ true);
+                            /* isStrongAuth */ mLockPatternUtils.getLockDomain() == Primary);
                 }
                 startDisappearAnimation(intent);
                 ConfirmDeviceCredentialUtils.checkForPendingIntent(getActivity());
