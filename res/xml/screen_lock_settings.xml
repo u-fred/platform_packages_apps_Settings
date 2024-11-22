@@ -57,7 +57,6 @@
 
     <SwitchPreferenceCompat
         android:key="allow_keyguard_camera"
-        android:title="@string/keyguard_camera_title"
-        settings:boolSettingField="android.ext.settings.ExtSettings ALLOW_KEYGUARD_CAMERA" />
+        android:title="@string/keyguard_camera_title" />
 
 </PreferenceScreen>

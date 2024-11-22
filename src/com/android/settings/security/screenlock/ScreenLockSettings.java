@@ -199,6 +199,8 @@ public class ScreenLockSettings extends DashboardFragment
         controllers.add(new OwnerInfoPreferenceController(context, parent,
                 lockPatternUtils.getLockDomain()));
         controllers.add(new PinScramblingPrefController(context, lockPatternUtils.getLockDomain()));
+        controllers.add(new KeyguardCameraPrefController(context,
+                lockPatternUtils.getLockDomain()));
         return controllers;
     }
 
