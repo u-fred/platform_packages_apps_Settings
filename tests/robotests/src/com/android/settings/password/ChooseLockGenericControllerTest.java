@@ -30,8 +30,6 @@ import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED
 
 import static com.android.internal.widget.LockDomain.Primary;
 import static com.android.internal.widget.LockDomain.Secondary;
-import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_NONE;
-
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 
@@ -39,17 +37,17 @@ import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.robolectric.RuntimeEnvironment.application;
 
 import android.app.admin.DevicePolicyManager;
-import android.app.admin.PasswordMetrics;
 import android.app.admin.PasswordPolicy;
 import android.os.UserHandle;
 
 import com.android.internal.widget.LockDomain;
-import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.WrappedLockPatternUtils;
 import com.android.settings.R;
 import com.android.settings.testutils.shadow.SettingsShadowResources;
@@ -79,28 +77,27 @@ public class ChooseLockGenericControllerTest {
     private ManagedLockPasswordProvider mManagedLockPasswordProvider;
 
     @Mock
-    private LockPatternUtils mLockPatternUtils;
+    private WrappedLockPatternUtils mLockPatternUtils;
+    @Mock
+    private WrappedLockPatternUtils mLockPatternUtilsSecondary;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
         when(mLockPatternUtils.hasSecureLockScreen()).thenReturn(true);
-        when(mLockPatternUtils.checkUserSupportsBiometricSecondFactor(anyInt(), eq(true)))
-                .thenReturn(true);
-        setDevicePolicyPasswordQuality(DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED);
-        mController = createBuilder().build();
-        mControllerSecondary = createBuilder(Secondary).build();
+        when(mLockPatternUtilsSecondary.hasSecureLockScreen()).thenReturn(true);
 
-        // These values are constant for secondary, so mock them in setUp().
-        // TODO: Create an mLockPatternUtilsSecondary as WLPU. Update WLPU to use mLockDomain calls instead of if(primary).
-        when(mLockPatternUtils.isCredentialsDisabledForUser(anyInt(), eq(Secondary)))
-                .thenReturn(false);
-        when(mLockPatternUtils.getRequestedPasswordMetrics(anyInt(), eq(Secondary),
-                anyBoolean()))
-                .thenReturn(new PasswordMetrics(CREDENTIAL_TYPE_NONE));
-        when(mLockPatternUtils.getRequestedPasswordComplexity(anyInt(), eq(Secondary),
-                anyBoolean()))
+        setDevicePolicyPasswordQuality(DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED);
+        when(mLockPatternUtils.getLockDomain()).thenReturn(Primary);
+        mController = createBuilder().build();
+
+        setDevicePolicyPasswordQuality(PASSWORD_QUALITY_UNSPECIFIED, Secondary);
+        when(mLockPatternUtilsSecondary.getLockDomain()).thenReturn(Secondary);
+        when(mLockPatternUtilsSecondary.checkUserSupportsBiometricSecondFactor(anyInt(), eq(true)))
+                .thenReturn(true);
+        mControllerSecondary = createBuilder(Secondary).build();
+        when(mLockPatternUtilsSecondary.getRequestedPasswordComplexity(anyInt(), anyBoolean()))
                 .thenReturn(PASSWORD_COMPLEXITY_NONE);
 
         SettingsShadowResources.overrideResource(R.bool.config_hide_none_security_option, false);
@@ -114,30 +111,43 @@ public class ChooseLockGenericControllerTest {
 
     @Test
     public void constructor_SecondaryForUserNotSupportingSecondary_ThrowsException() {
-        when(mLockPatternUtils.checkUserSupportsBiometricSecondFactor(anyInt(), eq(true)))
-                .thenThrow(IllegalArgumentException.class);
-        ChooseLockGenericController.Builder builder = createBuilder(Secondary);
+        final int userId = 10;
+
+        clearInvocations(mLockPatternUtilsSecondary);
+
+        when(mLockPatternUtilsSecondary.checkUserSupportsBiometricSecondFactor(eq(userId),
+                eq(true))).thenThrow(IllegalArgumentException.class);
+
+        ChooseLockGenericController.Builder builder = new ChooseLockGenericController.Builder(
+                application, userId, null, mLockPatternUtilsSecondary);
 
         assertThrows(IllegalArgumentException.class, builder::build);
+        // Verify that exception was as a result of this call.
+        verify(mLockPatternUtilsSecondary).checkUserSupportsBiometricSecondFactor(eq(userId),
+                eq(true));
     }
 
     @Test
     public void constructor_SecondaryWithUnifiedProfile_ThrowsException() {
+        clearInvocations(mLockPatternUtilsSecondary);
+
         ChooseLockGenericController.Builder builder = new ChooseLockGenericController.Builder(
-                application, 0, null,
-                new WrappedLockPatternUtils(mLockPatternUtils, Secondary));
+                application, 0, null, mLockPatternUtilsSecondary);
         builder.setProfileToUnify(1);
 
-        assertThrows(IllegalArgumentException.class, builder::build);
+        assertThrows("unificationProfileId must be USER_NULL when lockDomain is Secondary",
+                IllegalArgumentException.class, builder::build);
     }
 
     @Test
     public void constructor_SecondaryWithManagedPasswordProvider_ThrowsException() {
-        ChooseLockGenericController.Builder builder = new ChooseLockGenericController.Builder(
-                application, 0, mManagedLockPasswordProvider,
-                new WrappedLockPatternUtils(mLockPatternUtils, Secondary));
+        clearInvocations(mLockPatternUtilsSecondary);
 
-        assertThrows(IllegalArgumentException.class, builder::build);
+        ChooseLockGenericController.Builder builder = new ChooseLockGenericController.Builder(
+                application, 0, mManagedLockPasswordProvider, mLockPatternUtilsSecondary);
+
+        assertThrows("managedPasswordProvider must be null when lockDomain is Secondary",
+                IllegalArgumentException.class, builder::build);
     }
 
     @Test
@@ -471,13 +481,20 @@ public class ChooseLockGenericControllerTest {
     }
 
     private void setDevicePolicyPasswordQuality(int quality) {
+        setDevicePolicyPasswordQuality(quality, Primary);
+    }
+
+    private void setDevicePolicyPasswordQuality(int quality, LockDomain lockDomain) {
         PasswordPolicy policy = new PasswordPolicy();
         policy.quality = quality;
 
-        when(mLockPatternUtils.getRequestedPasswordMetrics(anyInt(), anyBoolean()))
+        WrappedLockPatternUtils lpu = lockDomain == Primary ? mLockPatternUtils :
+                mLockPatternUtilsSecondary;
+
+        when(lpu.getRequestedPasswordMetrics(anyInt(), anyBoolean()))
                 .thenReturn(policy.getMinMetrics());
 
-        when(mLockPatternUtils.isCredentialsDisabledForUser(anyInt()))
+        when(lpu.isCredentialsDisabledForUser(anyInt()))
                 .thenReturn(quality == PASSWORD_QUALITY_MANAGED);
     }
 
@@ -486,12 +503,10 @@ public class ChooseLockGenericControllerTest {
     }
 
     private ChooseLockGenericController.Builder createBuilder(LockDomain lockDomain) {
-        ManagedLockPasswordProvider managedLockPasswordProvider = lockDomain == Primary ?
-                mManagedLockPasswordProvider : null;
         return new ChooseLockGenericController.Builder(
                 application,
                 0 /* userId */,
-                managedLockPasswordProvider,
-                new WrappedLockPatternUtils(mLockPatternUtils, lockDomain));
+                lockDomain == Primary ? mManagedLockPasswordProvider : null,
+                lockDomain == Primary ? mLockPatternUtils : mLockPatternUtilsSecondary);
     }
 }
