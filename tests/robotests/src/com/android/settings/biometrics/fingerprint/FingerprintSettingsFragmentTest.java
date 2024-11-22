@@ -34,7 +34,6 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.content.Intent;
@@ -127,8 +126,8 @@ public class FingerprintSettingsFragmentTest {
 
         SecurityFeatureProvider sfp = FeatureFactory.getFeatureFactory()
                 .getSecurityFeatureProvider();
-        LockPatternUtils lpu = new LockPatternUtils(mContext);
-        doReturn(lpu).when(sfp).getLockPatternUtils(any());
+        LockPatternUtils mockLpu = mock(LockPatternUtils.class);
+        doReturn(mockLpu).when(sfp).getLockPatternUtils(any());
 
         FingerprintFeatureProvider ffp = FeatureFactory.getFeatureFactory()
                 .getFingerprintFeatureProvider();
