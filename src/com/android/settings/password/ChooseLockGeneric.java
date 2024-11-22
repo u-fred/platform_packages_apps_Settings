@@ -133,7 +133,7 @@ public class ChooseLockGeneric extends SettingsActivity {
         private static final String PASSWORD_CONFIRMED = "password_confirmed";
         private static final String WAITING_FOR_CONFIRMATION = "waiting_for_confirmation";
         private static final String WAITING_FOR_CHOOSE_LOCK_REQUEST =
-                "waiting_forchoose_lock_request";
+                "waiting_for_choose_lock_request";
 
         public static final String HIDE_INSECURE_OPTIONS = "hide_insecure_options";
         public static final String TAG_FRP_WARNING_DIALOG = "frp_warning_dialog";
