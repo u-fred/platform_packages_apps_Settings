@@ -198,6 +198,7 @@ public class ScreenLockSettings extends DashboardFragment
                 context, MY_USER_ID, lockPatternUtils, parent));
         controllers.add(new OwnerInfoPreferenceController(context, parent,
                 lockPatternUtils.getLockDomain()));
+        controllers.add(new PinScramblingPrefController(context, lockPatternUtils.getLockDomain()));
         return controllers;
     }
 
