@@ -104,6 +104,10 @@ public class ChooseLockGenericController {
         private boolean mDevicePasswordRequirementOnly = false;
         private int mUnificationProfileId = UserHandle.USER_NULL;
 
+        public Builder(Context context, int userId) {
+            this(context, userId, Primary);
+        }
+
         public Builder(Context context, int userId, LockDomain lockDomain) {
             this(context, userId, new WrappedLockPatternUtils(context, lockDomain));
         }
