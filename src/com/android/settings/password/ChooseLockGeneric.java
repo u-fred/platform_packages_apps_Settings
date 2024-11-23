@@ -991,6 +991,10 @@ public class ChooseLockGeneric extends SettingsActivity {
 
         private int getResIdForFactoryResetProtectionWarningMessage(
                 boolean hasAppsWithAuthBoundKeys) {
+            if (mLockDomain == Secondary) {
+                return R.string.unlock_disable_biometric_second_factor_warning_content;
+            }
+
             final boolean hasFingerprints;
             final boolean hasFace;
             if (mFingerprintManager != null && mFingerprintManager.isHardwareDetected()) {
@@ -1029,10 +1033,6 @@ public class ChooseLockGeneric extends SettingsActivity {
                     }
                 case DevicePolicyManager.PASSWORD_QUALITY_NUMERIC:
                 case DevicePolicyManager.PASSWORD_QUALITY_NUMERIC_COMPLEX:
-                    // Guaranteed to get here if mLockDomain == Secondary is true.
-                    if (mLockDomain == Secondary) {
-                        return R.string.unlock_disable_biometric_second_factor_warning_content;
-                    }
                     if (hasFingerprints && hasFace) {
                         return hasAppsWithAuthBoundKeys
                                 ?
