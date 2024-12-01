@@ -882,6 +882,17 @@
     <string name="setup_fingerprint_enroll_skip_after_adding_lock_text">Fingerprint setup only takes a minute or two. If you skip this, you can add your fingerprint later in settings.</string>
     <!-- Title of dialog shown when the user tries to skip setting up a screen lock, warning them of potential consequences of not doing so [CHAR LIMIT=30]-->
 
+    <!-- Title of preference within fingerprint settings to set/configure biometric second factor PIN [CHAR LIMIT=NONE] -->
+    <string name="security_settings_biometric_second_factor_pin_title">Second factor PIN</string>
+    <string name="security_settings_biometric_second_factor_pin_setup_summary">Setup needed</string>
+    <string name="security_settings_biometric_second_factor_pin_empty_summary"></string>
+    <!--  Title of biometric second factor pin settings page [CHAR LIMIT=22] -->
+    <string name="biometric_second_factor_pin_settings_title">Second factor PIN</string>
+    <!-- Title of preference within second factor settings to change biometric second factor PIN [CHAR LIMIT=NONE] -->
+    <string name="change_biometric_second_factor_pin_title">Change PIN</string>
+    <!-- Title of preference within second factor settings to delete biometric second factor PIN [CHAR LIMIT=NONE] -->
+    <string name="delete_biometric_second_factor_pin_title">Delete PIN</string>
+
     <!-- Introduction detail message shown in fingerprint enrollment introduction screen in setup wizard. [CHAR LIMIT=NONE]-->
     <string name="security_settings_fingerprint_v2_enroll_introduction_message_setup">When you see this icon, use your fingerprint for authentication, like when you sign in to apps or approve a purchase</string>
     <!-- Introduction subtitle message shown in fingerprint enrollment introduction screen in setup wizard. [CHAR LIMIT=NONE]-->
@@ -1593,6 +1604,11 @@
     <!-- Title of the dialog shown when the user removes the profile lock [CHAR LIMIT=NONE] -->
     <string name="unlock_disable_frp_warning_title_profile">Remove profile protection?</string>
 
+    <!-- Title of the dialog shown when the user removes the biometric second factor [CHAR LIMIT=NONE] -->
+    <string name="delete_biometric_second_factor_pin_dialog_title">Delete second factor PIN?</string>
+    <string name="delete_biometric_second_factor_pin_dialog_message">It is recommended to always have a second factor PIN when biometric unlock is enabled. Deleting this will make your device less secure.</string>
+    <string name="delete_biometric_second_factor_pin_dialog_positive_button">Delete</string>
+
     <!-- Content of the dialog shown when the user removes the device lock pattern [CHAR LIMIT=NONE] -->
     <string name="unlock_disable_frp_warning_content_pattern">"A pattern protects your phone if it\u2019s lost or stolen"</string>
     <!-- Content of the dialog shown when the user removes the device lock pattern and the user has fingerprints enrolled [CHAR LIMIT=NONE] -->
@@ -1773,6 +1789,12 @@
 
     <!-- Toast for a failed password change attempt when the old credential has been changed. [CHAR LIMIT=120]-->
     <string name="lockpassword_credential_changed">Screen lock was already changed. Try again with the new screen lock.</string>
+
+    <!-- Toast for a failed biometric second factor change attempt when the primary credential has been changed. [CHAR LIMIT=120]-->
+    <string name="lockpassword_credential_changed_unable_to_update_biometric_second_factor">Primary credential was changed! Unable to update biometric second factor.</string>
+
+    <!-- Toast for a failed password change attempt when the old credential has been changed. [CHAR LIMIT=120]-->
+    <string name="biome">Screen lock was already changed. Try again with the new screen lock.</string>
 
     <!-- Label for LockPatternTutorial Cancel button -->
     <string name="lockpattern_tutorial_cancel_label">Cancel</string>
