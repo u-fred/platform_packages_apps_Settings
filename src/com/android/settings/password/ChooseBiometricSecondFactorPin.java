@@ -191,10 +191,7 @@ public class ChooseBiometricSecondFactorPin extends SettingsActivity {
                     R.string.lockpassword_confirm_pins_dont_match,
                     R.string.lockpassword_confirm_label);
 
-            Stage(
-                    int hintInNumeric,
-                    int nextButtonText) {
-
+            Stage(int hintInNumeric, int nextButtonText) {
                 this.numericHint = hintInNumeric;
                 this.buttonText = nextButtonText;
             }
@@ -204,10 +201,6 @@ public class ChooseBiometricSecondFactorPin extends SettingsActivity {
 
             public String getHint(Context context) {
                 return context.getString(numericHint);
-            }
-
-            public @StringRes int getMessage(boolean isAlpha, int type) {
-                return 0;
             }
         }
 
@@ -422,9 +415,7 @@ public class ChooseBiometricSecondFactorPin extends SettingsActivity {
             super.onSaveInstanceState(outState);
             outState.putString(KEY_UI_STAGE, mUiStage.name());
             outState.putParcelable(KEY_FIRST_PASSWORD, mFirstPassword);
-            if (mPrimaryCredential != null) {
-                outState.putParcelable(KEY_PRIMARY_CREDENTIAL, mPrimaryCredential.duplicate());
-            }
+            outState.putParcelable(KEY_PRIMARY_CREDENTIAL, mPrimaryCredential.duplicate());
             outState.putBoolean(KEY_IS_AUTO_CONFIRM_CHECK_MANUALLY_CHANGED,
                     mIsAutoPinConfirmOptionSetManually);
         }
@@ -630,7 +621,6 @@ public class ChooseBiometricSecondFactorPin extends SettingsActivity {
                     FRAGMENT_BIOMETRIC_SECOND_FACTOR_TAG_SAVE_AND_FINISH).commit();
             getFragmentManager().executePendingTransactions();
 
-            final Intent intent = getActivity().getIntent();
             // update the setting before triggering the password save workflow,
             // so that pinLength information is stored accordingly when setting is turned on.
             mLockPatternUtils.setAutoPinConfirm(
