@@ -83,11 +83,17 @@ public class ChooseBiometricSecondFactorPin extends SettingsActivity {
         }
 
         public IntentBuilder setUserId(int userId) {
+            if (userId < 0) {
+                throw new IllegalArgumentException("Invalid userId!");
+            }
             mIntent.putExtra(Intent.EXTRA_USER_ID, userId);
             return this;
         }
 
         public IntentBuilder setPrimaryCredential(LockscreenCredential primaryCredential) {
+            if (primaryCredential == null) {
+                throw new IllegalArgumentException("Credential can't be null!");
+            }
             mIntent.putExtra(EXTRA_KEY_PRIMARY_CREDENTIAL, primaryCredential);
             return this;
         }

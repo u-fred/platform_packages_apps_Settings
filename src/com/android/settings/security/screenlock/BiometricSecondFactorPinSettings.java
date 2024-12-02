@@ -65,11 +65,17 @@ public class BiometricSecondFactorPinSettings extends DashboardFragment
         }
 
         public IntentBuilder setUserId(int userId) {
+            if (userId < 0) {
+                throw new IllegalArgumentException("Invalid userId!");
+            }
             mExtras.putInt(EXTRA_USER_ID, userId);
             return this;
         }
 
         public IntentBuilder setPrimaryCredential(LockscreenCredential primaryCredential) {
+            if (primaryCredential == null) {
+                throw new IllegalArgumentException("Credential can't be null!");
+            }
             mExtras.putParcelable(EXTRA_PRIMARY_CREDENTIAL, primaryCredential);
             return this;
         }

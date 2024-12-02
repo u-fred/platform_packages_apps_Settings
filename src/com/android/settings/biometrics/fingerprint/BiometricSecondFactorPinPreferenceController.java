@@ -99,17 +99,7 @@ public class BiometricSecondFactorPinPreferenceController extends BasePreference
         mHost.startActivityForResult(getSettingsIntent(), mSettingsRequestCode);
     }
 
-    private void ensureUserAndPasswordSet() {
-        if (mPrimaryCredential == null) {
-            throw new IllegalArgumentException("Must set mPrimaryCredential!");
-        } else if (mUserId < 0) {
-            throw new IllegalArgumentException("Must set userId!");
-        }
-    }
-
     private Intent getSettingsIntent() {
-        ensureUserAndPasswordSet();
-
         BiometricSecondFactorPinSettings.IntentBuilder builder =
                 new BiometricSecondFactorPinSettings.IntentBuilder(mContext)
                         .setSourceMetricsCateogry(getMetricsCategory())
@@ -124,8 +114,6 @@ public class BiometricSecondFactorPinPreferenceController extends BasePreference
     }
 
     private Intent getChooseIntent() {
-        ensureUserAndPasswordSet();
-
         ChooseBiometricSecondFactorPin.IntentBuilder builder =
                 new ChooseBiometricSecondFactorPin.IntentBuilder(mContext)
                         .setUserId(mUserId)
