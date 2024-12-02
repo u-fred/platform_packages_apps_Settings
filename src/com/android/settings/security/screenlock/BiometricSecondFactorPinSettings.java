@@ -106,8 +106,6 @@ public class BiometricSecondFactorPinSettings extends DashboardFragment
         final List<AbstractPreferenceController> controllers = new ArrayList<>();
         controllers.add(new PinPrivacyPreferenceController(
                 context, userId, lockPatternUtils));
-        controllers.add(new BiometricSecondFactorPinAutoConfirmPreferenceController(
-                context, userId, lockPatternUtils));
         controllers.add(new PinScramblingPrefController(context, Secondary));
         controllers.add(new DeleteBiometricSecondFactorPinPreferenceController(context, parent,
                 userId, primaryCredential, lockPatternUtils));

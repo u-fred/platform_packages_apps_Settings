@@ -554,7 +554,7 @@ public class ChooseBiometricSecondFactorPin extends SettingsActivity {
         }
 
         private void setAutoPinConfirmOption(boolean enabled, int length) {
-            if (!LockPatternUtils.isAutoPinConfirmFeatureAvailable()
+            if (!LockPatternUtils.isAutoPinConfirmFeatureAvailable(Secondary)
                     || mAutoPinConfirmOption == null) {
                 return;
             }

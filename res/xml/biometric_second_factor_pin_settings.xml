@@ -8,11 +8,6 @@
     settings:searchable="false">
 
     <SwitchPreferenceCompat
-        android:key="auto_pin_confirm"
-        android:title="@string/lock_screen_auto_pin_confirm_title"
-        android:summary="@string/lock_screen_auto_pin_confirm_summary" />
-
-    <SwitchPreferenceCompat
         android:key="scramble_pin_layout"
         android:title="@string/scramble_pin_title" />
 

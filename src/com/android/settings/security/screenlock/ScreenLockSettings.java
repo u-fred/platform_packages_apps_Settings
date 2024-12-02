@@ -107,7 +107,7 @@ public class ScreenLockSettings extends DashboardFragment
         if (mLockDomain == Secondary) {
             if (!mLaunchedConfirm && !mCredentialConfirmed) {
                 // isPinLock() will always be be true with current implementation of second factor.
-                if (LockPatternUtils.isAutoPinConfirmFeatureAvailable() && isPinLock() &&
+                if (LockPatternUtils.isAutoPinConfirmFeatureAvailable(Secondary) && isPinLock() &&
                         !mLockPatternUtils.refreshStoredPinLength(MY_USER_ID)) {
                     mLaunchedConfirm = true;
                     confirmBiometricSecondFactor();
