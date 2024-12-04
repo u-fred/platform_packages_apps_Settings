@@ -285,6 +285,8 @@
     <!-- Choose lock Password requirement dimensions -->
     <dimen name="password_requirement_view_margin_top">16dp</dimen>
 
+    <dimen name="biometric_second_factor_pin_requirement_view_margin_top">44dp</dimen>
+
     <!-- Screen lock option button dimensions -->
     <dimen name="screen_lock_options_button_margin_top">32dp</dimen>
 
