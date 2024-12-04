@@ -22,6 +22,7 @@ import static android.app.admin.DevicePolicyResources.Strings.Settings.WORK_PROF
 import static android.app.admin.DevicePolicyResources.Strings.Settings.WORK_PROFILE_LAST_PIN_ATTEMPT_BEFORE_WIPE;
 import static android.app.admin.DevicePolicyResources.UNDEFINED;
 
+import static com.android.internal.widget.LockDomain.Primary;
 import static com.android.settings.biometrics.GatekeeperPasswordProvider.containsGatekeeperPasswordHandle;
 import static com.android.settings.biometrics.GatekeeperPasswordProvider.getGatekeeperPasswordHandle;
 import static com.android.settings.password.ChooseLockSettingsHelper.EXTRA_KEY_GK_PW_HANDLE;
@@ -63,6 +64,7 @@ import com.android.internal.widget.LockPatternChecker;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockscreenCredential;
 import com.android.internal.widget.TextViewInputDisabler;
+import com.android.internal.widget.WrappedLockPatternUtils;
 import com.android.settings.R;
 import com.android.settingslib.animation.AppearAnimationUtils;
 import com.android.settingslib.animation.DisappearAnimationUtils;
@@ -538,7 +540,7 @@ public class ConfirmLockPassword extends ConfirmDeviceCredentialBaseActivity {
                 final Intent intent) {
             final int localEffectiveUserId = mEffectiveUserId;
             mPendingLockCheck = LockPatternChecker.checkCredential(
-                    mLockPatternUtils,
+                    new WrappedLockPatternUtils(mLockPatternUtils, Primary),
                     credential,
                     localEffectiveUserId,
                     new LockPatternChecker.OnCheckCallback() {
