@@ -55,7 +55,11 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.test.core.app.ApplicationProvider;
 
+import com.android.internal.widget.LockPatternUtils;
+import com.android.settings.biometrics.fingerprint.feature.SfpsRestToUnlockFeature;
+import com.android.settings.overlay.FeatureFactory;
 import com.android.settings.password.ChooseLockSettingsHelper;
+import com.android.settings.security.SecurityFeatureProvider;
 import com.android.settings.testutils.FakeFeatureFactory;
 import com.android.settings.testutils.shadow.ShadowFragment;
 import com.android.settings.testutils.shadow.ShadowLockPatternUtils;
@@ -117,6 +121,16 @@ public class FingerprintSettingsFragmentTest {
         mContext = spy(ApplicationProvider.getApplicationContext());
         mFragment = spy(new FingerprintSettingsFragment());
         doReturn(mContext).when(mFragment).getContext();
+
+        SecurityFeatureProvider sfp = FeatureFactory.getFeatureFactory()
+                .getSecurityFeatureProvider();
+        LockPatternUtils mockLpu = mock(LockPatternUtils.class);
+        doReturn(mockLpu).when(sfp).getLockPatternUtils(any());
+
+        FingerprintFeatureProvider ffp = FeatureFactory.getFeatureFactory()
+                .getFingerprintFeatureProvider();
+        SfpsRestToUnlockFeature mockSfpsRestToUnlockFeature = mock(SfpsRestToUnlockFeature.class);
+        doReturn(mockSfpsRestToUnlockFeature).when(ffp).getSfpsRestToUnlockFeature(any());
 
         doReturn(true).when(mFingerprintManager).isHardwareDetected();
     }
