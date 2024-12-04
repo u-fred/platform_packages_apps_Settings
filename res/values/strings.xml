@@ -882,6 +882,19 @@
     <string name="setup_fingerprint_enroll_skip_after_adding_lock_text">Fingerprint setup only takes a minute or two. If you skip this, you can add your fingerprint later in settings.</string>
     <!-- Title of dialog shown when the user tries to skip setting up a screen lock, warning them of potential consequences of not doing so [CHAR LIMIT=30]-->
 
+    <!--  Title of biometric second factor PIN settings page -->
+    <string name="biometric_second_factor_pin_settings_title">Second factor PIN</string>
+    <!-- Title of preference within biometric second factor PIN settings to change the PIN -->
+    <string name="biometric_second_factor_pin_change_title">Change PIN</string>
+    <!-- Title of preference within biometric second factor PIN settings to delete the PIN -->
+    <string name="biometric_second_factor_pin_delete_title">Delete PIN</string>
+    <!-- Title of the confirmation dialog displayed to the user when they attempt to delete biometric second factor PIN -->
+    <string name="biometric_second_factor_pin_delete_confirmation_dialog_title">Delete second factor PIN?</string>
+    <!-- Message of the confirmation dialog displayed to the user when they attempt to delete biometric second factor PIN -->
+    <string name="biometric_second_factor_pin_delete_confirmation_dialog_message">It is recommended to always have a second factor PIN when biometric unlock is enabled. Deleting this will make your device less secure.</string>
+    <!-- Positive button of the confirmation dialog displayed to the user when they attempt to delete biometric second factor PIN -->
+    <string name="biometric_second_factor_pin_delete_confirmation_dialog_positive_button">Delete</string>
+
     <!-- Toast for a failed biometric second factor PIN change attempt when the primary credential has been changed. [CHAR LIMIT=120]-->
     <string name="biometric_second_factor_unable_to_update_due_to_changed_primary">Primary credential was changed! Unable to update biometric second factor.</string>
 
