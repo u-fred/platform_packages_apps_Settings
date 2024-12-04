@@ -16,6 +16,8 @@
 
 package com.android.settings.testutils.shadow;
 
+import static com.android.internal.widget.LockDomain.Primary;
+
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.PasswordMetrics;
 import android.content.ComponentName;
@@ -26,6 +28,7 @@ import android.os.UserHandle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.android.internal.widget.LockDomain;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockscreenCredential;
 
@@ -51,6 +54,8 @@ public class ShadowLockPatternUtils {
     private static Map<Integer, Boolean> sUserToBiometricAllowedMap = new HashMap<>();
     private static Map<Integer, Boolean> sUserToLockPatternEnabledMap = new HashMap<>();
     private static Map<Integer, Integer> sKeyguardStoredPasswordQualityMap = new HashMap<>();
+    private static Map<Integer, Integer> sKeyguardStoredPasswordQualityMapSecondary =
+            new HashMap<>();
 
     private static boolean sIsUserOwnsFrpCredential;
 
@@ -99,7 +104,14 @@ public class ShadowLockPatternUtils {
 
     @Implementation
     protected int getKeyguardStoredPasswordQuality(int userHandle) {
-        return sKeyguardStoredPasswordQualityMap.getOrDefault(userHandle, /* defaultValue= */ 1);
+        return getKeyguardStoredPasswordQuality(userHandle, Primary);
+    }
+
+    @Implementation
+    protected int getKeyguardStoredPasswordQuality(int userHandle, LockDomain lockDomain) {
+        Map<Integer, Integer> passwordQualityMap = lockDomain == Primary ?
+                sKeyguardStoredPasswordQualityMap : sKeyguardStoredPasswordQualityMapSecondary;
+        return passwordQualityMap.getOrDefault(userHandle, /* defaultValue= */ 1);
     }
 
     @Implementation
