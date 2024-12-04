@@ -164,6 +164,7 @@ public class ChooseLockGeneric extends SettingsActivity {
         private LockPatternUtils mLockPatternUtils;
         private DevicePolicyManager mDpm;
         private boolean mRequestGatekeeperPasswordHandle = false;
+        private boolean mReturnCredentials = false;
         private boolean mPasswordConfirmed = false;
         private boolean mWaitingForConfirmation = false;
         private boolean mWaitingForActivityResult = false;
@@ -252,6 +253,8 @@ public class ChooseLockGeneric extends SettingsActivity {
 
             mRequestGatekeeperPasswordHandle = intent.getBooleanExtra(
                     ChooseLockSettingsHelper.EXTRA_KEY_REQUEST_GK_PW_HANDLE, false);
+            mReturnCredentials = intent.getBooleanExtra(
+                    ChooseLockSettingsHelper.EXTRA_KEY_RETURN_CREDENTIALS, false);
             mForFingerprint = intent.getBooleanExtra(
                     ChooseLockSettingsHelper.EXTRA_KEY_FOR_FINGERPRINT, false);
             mForFace = intent.getBooleanExtra(
@@ -783,7 +786,8 @@ public class ChooseLockGeneric extends SettingsActivity {
                             .setForFace(mForFace)
                             .setForBiometrics(mForBiometrics)
                             .setUserId(mUserId)
-                            .setRequestGatekeeperPasswordHandle(mRequestGatekeeperPasswordHandle);
+                            .setRequestGatekeeperPasswordHandle(mRequestGatekeeperPasswordHandle)
+                            .setReturnCredentials(mReturnCredentials);
             if (mUserPassword != null) {
                 builder.setPassword(mUserPassword);
             }

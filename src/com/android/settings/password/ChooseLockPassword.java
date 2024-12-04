@@ -179,6 +179,12 @@ public class ChooseLockPassword extends SettingsActivity {
             return this;
         }
 
+        public IntentBuilder setReturnCredentials(boolean returnCredentials) {
+            mIntent.putExtra(ChooseLockSettingsHelper.EXTRA_KEY_RETURN_CREDENTIALS,
+                    returnCredentials);
+            return this;
+        }
+
         /**
          * Configures the launch such that at the end of the password enrollment, one of its
          * managed profile (specified by {@code profileId}) will have its lockscreen unified
@@ -235,6 +241,7 @@ public class ChooseLockPassword extends SettingsActivity {
         private LockscreenCredential mChosenPassword;
         private boolean mRequestGatekeeperPassword;
         private boolean mRequestWriteRepairModePassword;
+        private boolean mReturnCredentials;
         private ImeAwareEditText mPasswordEntry;
         private TextViewInputDisabler mPasswordEntryInputDisabler;
 
@@ -594,6 +601,8 @@ public class ChooseLockPassword extends SettingsActivity {
                     ChooseLockSettingsHelper.EXTRA_KEY_REQUEST_GK_PW_HANDLE, false);
             mRequestWriteRepairModePassword = intent.getBooleanExtra(
                     ChooseLockSettingsHelper.EXTRA_KEY_REQUEST_WRITE_REPAIR_MODE_PW, false);
+            mReturnCredentials = intent.getBooleanExtra(
+                    ChooseLockSettingsHelper.EXTRA_KEY_RETURN_CREDENTIALS, false);
             if (savedInstanceState == null) {
                 updateStage(Stage.Introduction);
                 if (confirmCredentials) {
@@ -1087,7 +1096,8 @@ public class ChooseLockPassword extends SettingsActivity {
             mSaveAndFinishWorker
                     .setListener(this)
                     .setRequestGatekeeperPasswordHandle(mRequestGatekeeperPassword)
-                    .setRequestWriteRepairModePassword(mRequestWriteRepairModePassword);
+                    .setRequestWriteRepairModePassword(mRequestWriteRepairModePassword)
+                    .setReturnCredentials(mReturnCredentials);
 
             getFragmentManager().beginTransaction().add(mSaveAndFinishWorker,
                     FRAGMENT_TAG_SAVE_AND_FINISH).commit();
