@@ -886,6 +886,16 @@
     <string name="setup_fingerprint_enroll_skip_after_adding_lock_text">Fingerprint setup only takes a minute or two. If you skip this, you can add your fingerprint later in settings.</string>
     <!-- Title of dialog shown when the user tries to skip setting up a screen lock, warning them of potential consequences of not doing so [CHAR LIMIT=30]-->
 
+    <!-- Header on first screen of choose biometric second factor PIN flow [CHAR LIMIT=40] -->
+    <string name="biometric_second_factor_pin_choose_header">Set a second factor PIN</string>
+    <!-- Header on biometric second factor PIN confirm screen [CHAR LIMIT=40] -->
+    <string name="biometric_second_factor_confirm_header">Re-enter your second factor PIN</string>
+    <!-- Description of biometric second factor PIN -->
+    <string name="biometric_second_factor_pin_description">This PIN will be required in addition to your fingerprint when attempting to enter the device from the lockscreen.</string>
+    <string name="biometric_second_factor_pin_description_empty"></string>
+    <!-- Toast for a failed biometric second factor PIN change attempt when the primary credential has been changed. [CHAR LIMIT=120]-->
+    <string name="biometric_second_factor_unable_to_update_due_to_changed_primary">Primary credential was changed! Unable to update biometric second factor.</string>
+
     <!-- Introduction detail message shown in fingerprint enrollment introduction screen in setup wizard. [CHAR LIMIT=NONE]-->
     <string name="security_settings_fingerprint_v2_enroll_introduction_message_setup">When you see this icon, use your fingerprint for authentication, like when you sign in to apps or approve a purchase</string>
     <!-- Introduction subtitle message shown in fingerprint enrollment introduction screen in setup wizard. [CHAR LIMIT=NONE]-->

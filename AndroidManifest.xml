@@ -3071,6 +3071,12 @@
             android:enableOnBackInvokedCallback="false"
             android:windowSoftInputMode="stateVisible|adjustResize"/>
 
+        <activity android:name=".password.ChooseBiometricSecondFactorPin"
+            android:exported="false"
+            android:theme="@style/GlifTheme.Light"
+            android:enableOnBackInvokedCallback="false"
+            android:windowSoftInputMode="stateVisible|adjustResize"/>
+
         <activity
             android:name=".Settings$StorageDashboardActivity"
             android:label="@string/storage_settings"
