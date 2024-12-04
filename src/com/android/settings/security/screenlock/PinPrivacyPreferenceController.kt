@@ -20,15 +20,15 @@ import android.content.Context
 import android.provider.Settings
 import androidx.preference.Preference
 import androidx.preference.TwoStatePreference
-import com.android.internal.widget.LockPatternUtils
 import com.android.internal.widget.LockPatternUtils.*
+import com.android.internal.widget.WrappedLockPatternUtils
 import com.android.settings.core.PreferenceControllerMixin
 import com.android.settingslib.core.AbstractPreferenceController
 
 class PinPrivacyPreferenceController(
     context: Context,
     private val userId: Int,
-    private val lockPatternUtils: LockPatternUtils
+    private val lockPatternUtils: WrappedLockPatternUtils,
 ) : AbstractPreferenceController(context), PreferenceControllerMixin,
     Preference.OnPreferenceChangeListener {
 
