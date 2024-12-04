@@ -47,6 +47,7 @@ public class SaveAndFinishWorker extends Fragment {
     private LockPatternUtils mUtils;
     private boolean mRequestGatekeeperPassword;
     private boolean mRequestWriteRepairModePassword;
+    private boolean mReturnCredentials;
     private boolean mWasSecureBefore;
     private int mUserId;
     private int mUnificationProfileId = UserHandle.USER_NULL;
@@ -128,11 +129,17 @@ public class SaveAndFinishWorker extends Fragment {
         if (mRequestWriteRepairModePassword) {
             flags |= LockPatternUtils.VERIFY_FLAG_WRITE_REPAIR_MODE_PW;
         }
+        Intent result = new Intent();
+        if (mReturnCredentials) {
+            // Need to duplicate as the original gets zeroized. Leaving the duplicate in memory is
+            // unavoidable when it is being returned as result data.
+            result.putExtra(ChooseLockSettingsHelper.EXTRA_KEY_PASSWORD,
+                    mChosenCredential.duplicate());
+        }
         if (flags == 0) {
-            return Pair.create(true, null);
+            return Pair.create(true, mReturnCredentials ? result : null);
         }
 
-        Intent result = new Intent();
         final VerifyCredentialResponse response = mUtils.verifyCredential(mChosenCredential,
                 userId, flags);
         if (response.isMatched()) {
@@ -173,6 +180,11 @@ public class SaveAndFinishWorker extends Fragment {
 
     public SaveAndFinishWorker setRequestWriteRepairModePassword(boolean value) {
         mRequestWriteRepairModePassword = value;
+        return this;
+    }
+
+    public SaveAndFinishWorker setReturnCredentials(boolean value) {
+        mReturnCredentials = value;
         return this;
     }
 
