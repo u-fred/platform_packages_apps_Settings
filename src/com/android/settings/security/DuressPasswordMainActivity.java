@@ -19,12 +19,18 @@ import com.google.android.setupdesign.items.Item;
 import com.google.android.setupdesign.items.ItemGroup;
 import com.google.android.setupdesign.items.RecyclerItemAdapter;
 
+import java.util.Objects;
+
+import static java.util.Objects.requireNonNull;
+
 public class DuressPasswordMainActivity extends DuressPasswordActivity implements RecyclerItemAdapter.OnItemSelectedListener {
     private static final String TAG = DuressPasswordMainActivity.class.getSimpleName();
     private static final String KEY_USER_CREDENTIAL = "user_credential";
+    private static final String KEY_HAS_ASKED_FOR_USER_CREDENTIALS = "asked_for_user_credentials";
 
     private GlifRecyclerLayout layout;
     private LockscreenCredential userCredential;
+    private boolean askedForUserCredentials;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -41,6 +47,7 @@ public class DuressPasswordMainActivity extends DuressPasswordActivity implement
 
         if (savedInstanceState != null) {
             userCredential = savedInstanceState.getParcelable(KEY_USER_CREDENTIAL, LockscreenCredential.class);
+            askedForUserCredentials = requireNonNull(savedInstanceState.getBoolean2(KEY_HAS_ASKED_FOR_USER_CREDENTIALS));
         }
     }
 
@@ -53,6 +60,7 @@ public class DuressPasswordMainActivity extends DuressPasswordActivity implement
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putParcelable(KEY_USER_CREDENTIAL, userCredential);
+        outState.putBoolean(KEY_HAS_ASKED_FOR_USER_CREDENTIALS, askedForUserCredentials);
     }
 
     @Override
@@ -62,12 +70,13 @@ public class DuressPasswordMainActivity extends DuressPasswordActivity implement
         if (userCredential == null) {
             if (!getLockPatternUtils().isSecure(getUserId())) {
                 userCredential = LockscreenCredential.createNone();
-            } else {
+            } else if (!askedForUserCredentials) {
                 var b = new ChooseLockSettingsHelper.Builder(this);
                 b.setRequestCode(REQ_CODE_OBTAIN_USER_CREDENTIALS);
                 b.setReturnCredentials(true);
                 b.setForegroundOnly(true);
                 b.show();
+                askedForUserCredentials = true;
             }
         }
 
