@@ -224,7 +224,7 @@ public class ChooseBiometricSecondFactorPin extends SettingsActivity {
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                 Bundle savedInstanceState) {
-            return inflater.inflate(R.layout.choose_lock_password, container, false);
+            return inflater.inflate(R.layout.choose_biometric_second_factor_pin, container, false);
         }
 
         @Override
