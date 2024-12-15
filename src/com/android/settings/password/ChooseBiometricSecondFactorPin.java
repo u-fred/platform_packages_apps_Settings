@@ -366,7 +366,8 @@ public class ChooseBiometricSecondFactorPin extends SettingsActivity {
                     LinearLayout.LayoutParams.MATCH_PARENT,
                     LinearLayout.LayoutParams.WRAP_CONTENT);
             lp.setMargins(titleLayoutParams.leftMargin, getResources().getDimensionPixelSize(
-                    R.dimen.password_requirement_view_margin_top), titleLayoutParams.leftMargin, 0);
+                    R.dimen.biometric_second_factor_pin_requirement_view_margin_top),
+                    titleLayoutParams.leftMargin, 0);
             mPasswordRestrictionView.setLayoutParams(lp);
         }
 
