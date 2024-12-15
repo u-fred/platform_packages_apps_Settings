@@ -3908,6 +3908,9 @@
     <string name="lockpassword_choose_your_pin_header">Set a PIN</string>
     <!-- Header on first screen of choose biometric second factor PIN flow [CHAR LIMIT=40] -->
     <string name="biometric_second_factor_pin_choose_header">Set a second factor PIN</string>
+    <string name="biometric_second_factor_pin_choose_description">This PIN will be required in addition to your fingerprint when attempting to enter the device from the lockscreen.</string>
+    <string name="biometric_second_factor_pin_choose_description_empty"></string>
+
     <!-- Header on first screen of choose work profile PIN flow [CHAR LIMIT=40] -->
     <string name="lockpassword_choose_your_profile_pin_header">Set a work PIN</string>
     <!-- Header on first screen of choose device pattern flow [CHAR LIMIT=40] -->

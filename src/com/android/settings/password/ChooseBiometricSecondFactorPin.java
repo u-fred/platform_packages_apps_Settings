@@ -518,6 +518,7 @@ public class ChooseBiometricSecondFactorPin extends SettingsActivity {
             LockscreenCredential password = LockscreenCredential.createPin(mPasswordEntry.getText());
             final int length = password.size();
             if (mUiStage == Stage.Introduction) {
+                mLayout.setDescriptionText(R.string.biometric_second_factor_pin_choose_description);
                 mPasswordRestrictionView.setVisibility(View.VISIBLE);
                 final boolean passwordCompliant = validatePassword(password);
                 String[] messages = convertErrorCodeToMessages();
@@ -528,6 +529,8 @@ public class ChooseBiometricSecondFactorPin extends SettingsActivity {
                 // Enable/Disable the next button accordingly.
                 setNextEnabled(passwordCompliant);
             } else {
+                mLayout.setDescriptionText(
+                        R.string.biometric_second_factor_pin_choose_description_empty);
                 // Hide password requirement view when we are just asking user to confirm the pw.
                 mPasswordRestrictionView.setVisibility(View.GONE);
                 setHeaderText(mUiStage.getHint(getContext()));
