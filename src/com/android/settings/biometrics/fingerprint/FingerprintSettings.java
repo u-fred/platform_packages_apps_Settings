@@ -525,6 +525,9 @@ public class FingerprintSettings extends SubSettings {
                 mUserPassword = savedInstanceState.getParcelable(
                         ChooseLockSettingsHelper.EXTRA_KEY_PASSWORD);
                 mBiometricSecondFactorPinPreferenceController.setPrimaryCredential(mUserPassword);
+                // This controller needs userId set in #onActivityResult, but upstream doesn't set
+                // them until #onResume.
+                mBiometricSecondFactorPinPreferenceController.setUserId(mUserId);
             }
 
             // (mLaunchedConfirm or mIsEnrolling) means that we are waiting an activity result.
