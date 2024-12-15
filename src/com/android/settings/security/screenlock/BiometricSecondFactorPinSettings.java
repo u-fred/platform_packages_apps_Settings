@@ -27,7 +27,6 @@ import java.util.List;
  * Fragment that allows the user to configure the settings of their biometric second factor PIN.
  * Based on upstream's ScreenLockSettings.
  */
-@SearchIndexable
 public class BiometricSecondFactorPinSettings extends DashboardFragment
         implements DeleteBiometricSecondFactorPinPreferenceController.DeleteConfirmedCallback {
 
@@ -82,17 +81,6 @@ public class BiometricSecondFactorPinSettings extends DashboardFragment
             return mLauncher.toIntent();
         }
     }
-
-    public static final BaseSearchIndexProvider SEARCH_INDEX_DATA_PROVIDER =
-            new BaseSearchIndexProvider(R.xml.biometric_second_factor_pin_settings) {
-
-                @Override
-                public List<AbstractPreferenceController> createPreferenceControllers(
-                        Context context) {
-                    return buildPreferenceControllers(context, null /* parent */,
-                            new WrappedLockPatternUtils(context, null), null, 0);
-                }
-            };
 
     private static List<AbstractPreferenceController> buildPreferenceControllers(Context context,
             DashboardFragment parent, WrappedLockPatternUtils lockPatternUtils,
