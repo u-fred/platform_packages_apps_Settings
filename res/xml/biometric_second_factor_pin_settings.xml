@@ -7,15 +7,6 @@
     android:title="@string/biometric_second_factor_pin_settings_title"
     settings:searchable="false">
 
-    <SwitchPreferenceCompat
-        android:key="scramble_pin_layout"
-        android:title="@string/scramble_pin_title" />
-
-    <SwitchPreferenceCompat
-        android:key="enhancedPinPrivacy"
-        android:title="@string/lockpattern_settings_enhanced_pin_privacy_title"
-        android:summary="@string/lockpattern_settings_enhanced_pin_privacy_summary" />
-
     <androidx.preference.Preference
         android:key="change_pin"
         android:title="@string/biometric_second_factor_pin_change_title" />
@@ -23,5 +14,19 @@
     <androidx.preference.Preference
         android:key="delete_pin"
         android:title="@string/biometric_second_factor_pin_delete_title" />
+
+    <PreferenceCategory
+        android:title="@string/biometric_second_factor_pin_settings_category_title">
+
+        <SwitchPreferenceCompat
+            android:key="scramble_pin_layout"
+            android:title="@string/scramble_pin_title" />
+
+        <SwitchPreferenceCompat
+            android:key="enhancedPinPrivacy"
+            android:title="@string/lockpattern_settings_enhanced_pin_privacy_title"
+            android:summary="@string/lockpattern_settings_enhanced_pin_privacy_summary" />
+
+    </PreferenceCategory>
 
 </PreferenceScreen>

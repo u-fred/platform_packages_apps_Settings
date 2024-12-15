@@ -895,6 +895,8 @@
 
     <!--  Title of biometric second factor PIN settings page -->
     <string name="biometric_second_factor_pin_settings_title">Second factor PIN</string>
+    <!--  Title of biometric second factor PIN settings page -->
+    <string name="biometric_second_factor_pin_settings_category_title">Settings</string>
     <!-- Title of preference within biometric second factor PIN settings to change the PIN -->
     <string name="biometric_second_factor_pin_change_title">Change PIN</string>
     <!-- Title of preference within biometric second factor PIN settings to delete the PIN -->
