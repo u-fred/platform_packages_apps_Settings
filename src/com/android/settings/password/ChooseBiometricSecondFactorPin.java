@@ -541,7 +541,7 @@ public class ChooseBiometricSecondFactorPin extends SettingsActivity {
                 mAutoPinConfirmOption.setVisibility(View.GONE);
                 mAutoConfirmSecurityMessage.setVisibility(View.GONE);
             }
-                mMessage.setVisibility(View.GONE);
+            mMessage.setVisibility(View.GONE);
 
             setNextText(mUiStage.buttonText);
             mPasswordEntryInputDisabler.setInputEnabled(canInput);
