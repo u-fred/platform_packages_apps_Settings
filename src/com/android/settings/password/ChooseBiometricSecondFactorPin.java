@@ -166,6 +166,8 @@ public class ChooseBiometricSecondFactorPin extends SettingsActivity {
         public static final int RESULT_FINISHED = RESULT_FIRST_USER;
         public static final int RESULT_NOT_FOREGROUND = RESULT_FIRST_USER + 1;
 
+        private boolean mIsErrorTooShort = true;
+
         /**
          * Keep track internally of where the user is in choosing a pattern.
          */
@@ -498,8 +500,12 @@ public class ChooseBiometricSecondFactorPin extends SettingsActivity {
         }
 
     String[] convertErrorCodeToMessages() {
-        return new ChooseLockPassword.ChooseLockPasswordFragment.PasswordValidationErrorConverter(
-                getContext(), false, mValidationErrors).convertErrorCodeToMessages();
+        var pvec =
+                new ChooseLockPassword.ChooseLockPasswordFragment.PasswordValidationErrorConverter(
+                        getContext(), false, mValidationErrors);
+        String[] res = pvec.convertErrorCodeToMessages();
+        mIsErrorTooShort = pvec.mIsErrorTooShort;
+        return res;
     }
 
         /**
@@ -515,7 +521,7 @@ public class ChooseBiometricSecondFactorPin extends SettingsActivity {
                 final boolean passwordCompliant = validatePassword(password);
                 String[] messages = convertErrorCodeToMessages();
                 // Update the fulfillment of requirements.
-                mPasswordRequirementAdapter.setRequirements(messages);
+                mPasswordRequirementAdapter.setRequirements(messages, mIsErrorTooShort);
                 // set the visibility of pin_auto_confirm option accordingly
                 setAutoPinConfirmOption(passwordCompliant, length);
                 // Enable/Disable the next button accordingly.
