@@ -29,4 +29,12 @@
 
     </PreferenceCategory>
 
+    <PreferenceCategory>
+
+        <com.android.settingslib.widget.FooterPreference
+            android:title="@string/biometric_second_factor_pin_description"
+            android:selectable="false" />
+
+    </PreferenceCategory>
+
 </PreferenceScreen>
