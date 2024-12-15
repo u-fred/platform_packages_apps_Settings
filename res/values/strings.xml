@@ -908,6 +908,10 @@
     <!-- Positive button of the confirmation dialog displayed to the user when they attempt to delete biometric second factor PIN -->
     <string name="biometric_second_factor_pin_delete_confirmation_dialog_positive_button">Delete</string>
 
+    <!-- Description of biometric second factor PIN -->
+    <string name="biometric_second_factor_pin_description">This PIN will be required in addition to your fingerprint when attempting to enter the device from the lockscreen.</string>
+    <string name="biometric_second_factor_pin_description_empty"></string>
+
     <!-- Toast for a failed biometric second factor PIN change attempt when the primary credential has been changed. [CHAR LIMIT=120]-->
     <string name="biometric_second_factor_unable_to_update_due_to_changed_primary">Primary credential was changed! Unable to update biometric second factor.</string>
 
@@ -3910,8 +3914,6 @@
     <string name="lockpassword_choose_your_pin_header">Set a PIN</string>
     <!-- Header on first screen of choose biometric second factor PIN flow [CHAR LIMIT=40] -->
     <string name="biometric_second_factor_pin_choose_header">Set a second factor PIN</string>
-    <string name="biometric_second_factor_pin_choose_description">This PIN will be required in addition to your fingerprint when attempting to enter the device from the lockscreen.</string>
-    <string name="biometric_second_factor_pin_choose_description_empty"></string>
 
     <!-- Header on first screen of choose work profile PIN flow [CHAR LIMIT=40] -->
     <string name="lockpassword_choose_your_profile_pin_header">Set a work PIN</string>
