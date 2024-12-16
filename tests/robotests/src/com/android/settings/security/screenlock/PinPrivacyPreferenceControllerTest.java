@@ -29,7 +29,7 @@ import android.content.Context;
 
 import androidx.preference.SwitchPreference;
 
-import com.android.internal.widget.LockPatternUtils;
+import com.android.internal.widget.WrappedLockPatternUtils;
 
 import org.junit.Before;
 import org.junit.Ignore;
@@ -46,7 +46,7 @@ public class PinPrivacyPreferenceControllerTest {
     private static final int TEST_USER_ID = 0;
 
     @Mock
-    private LockPatternUtils mLockPatternUtils;
+    private WrappedLockPatternUtils mLockPatternUtils;
     private Context mContext;
     private PinPrivacyPreferenceController mController;
     private SwitchPreference mPreference;
