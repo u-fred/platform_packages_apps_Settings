@@ -222,7 +222,7 @@ public class AdvancedPowerUsageDetailTest {
 
         mAllowBackgroundUsagePreference = new PrimarySwitchPreference(mContext);
         mAllowBackgroundUsagePreference.setKey(KEY_ALLOW_BACKGROUND_USAGE);
-        mFragment.mAllowBackgroundUsagePreference = mAllowBackgroundUsagePreference;
+        //mFragment.mAllowBackgroundUsagePreference = mAllowBackgroundUsagePreference;
     }
 
     @After
