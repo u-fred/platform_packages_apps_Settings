@@ -27,6 +27,7 @@ import android.os.UserHandle;
 import androidx.annotation.Nullable;
 
 import com.android.internal.widget.LockPatternUtils;
+import com.android.internal.widget.WrappedLockPatternUtils;
 import com.android.settings.R;
 import com.android.settings.dashboard.DashboardFragment;
 import com.android.settings.search.BaseSearchIndexProvider;
@@ -83,7 +84,7 @@ public class ScreenLockSettings extends DashboardFragment
         controllers.add(new PatternVisiblePreferenceController(
                 context, MY_USER_ID, lockPatternUtils));
         controllers.add(new PinPrivacyPreferenceController(
-                context, MY_USER_ID, lockPatternUtils));
+                context, MY_USER_ID, new WrappedLockPatternUtils(lockPatternUtils, Primary)));
         controllers.add(new PowerButtonInstantLockPreferenceController(
                 context, MY_USER_ID, lockPatternUtils));
         controllers.add(new LockAfterTimeoutPreferenceController(
