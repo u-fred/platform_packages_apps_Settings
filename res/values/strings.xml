@@ -896,6 +896,21 @@
     <!-- Toast for a failed biometric second factor PIN change attempt [CHAR LIMIT=120]-->
     <string name="biometric_second_factor_pin_change_failed">Unable to change second factor PIN!</string>
 
+    <!--  Title of biometric second factor PIN settings page -->
+    <string name="biometric_second_factor_pin_settings_title">Second factor PIN</string>
+    <!--  Title of biometric second factor PIN settings page -->
+    <string name="biometric_second_factor_pin_settings_category_title">Settings</string>
+    <!-- Title of preference within biometric second factor PIN settings to change the PIN -->
+    <string name="biometric_second_factor_pin_change_title">Change PIN</string>
+    <!-- Title of preference within biometric second factor PIN settings to delete the PIN -->
+    <string name="biometric_second_factor_pin_delete_title">Delete PIN</string>
+    <!-- Title of the confirmation dialog displayed to the user when they attempt to delete biometric second factor PIN -->
+    <string name="biometric_second_factor_pin_delete_confirmation_dialog_title">Delete second factor PIN?</string>
+    <!-- Message of the confirmation dialog displayed to the user when they attempt to delete biometric second factor PIN -->
+    <string name="biometric_second_factor_pin_delete_confirmation_dialog_message">It is recommended to always have a second factor PIN when biometric unlock is enabled. Deleting this will make your device less secure.</string>
+    <!-- Positive button of the confirmation dialog displayed to the user when they attempt to delete biometric second factor PIN -->
+    <string name="biometric_second_factor_pin_delete_confirmation_dialog_positive_button">Delete</string>
+
     <!-- Introduction detail message shown in fingerprint enrollment introduction screen in setup wizard. [CHAR LIMIT=NONE]-->
     <string name="security_settings_fingerprint_v2_enroll_introduction_message_setup">When you see this icon, use your fingerprint for authentication, like when you sign in to apps or approve a purchase</string>
     <!-- Introduction subtitle message shown in fingerprint enrollment introduction screen in setup wizard. [CHAR LIMIT=NONE]-->
