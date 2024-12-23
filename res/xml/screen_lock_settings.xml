@@ -35,8 +35,7 @@
 
     <SwitchPreferenceCompat
         android:key="scramble_pin_layout"
-        android:title="@string/scramble_pin_title"
-        settings:controller="com.android.settings.security.screenlock.PinScramblingPrefController" />
+        android:title="@string/scramble_pin_title" />
 
     <SwitchPreferenceCompat
         android:key="enhancedPinPrivacy"
