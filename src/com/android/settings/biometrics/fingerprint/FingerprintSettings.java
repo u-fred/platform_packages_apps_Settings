@@ -723,6 +723,8 @@ public class FingerprintSettings extends SubSettings {
                 mFingerprintKeyguardController.setChecked((boolean) value);
                 return true;
             });
+            // Without this, the preference will display even when it is not available.
+            keyguardFingerprintPref.setVisible(mFingerprintKeyguardController.isAvailable());
         }
 
         private void updatePreferencesAfterFingerprintRemoved() {
