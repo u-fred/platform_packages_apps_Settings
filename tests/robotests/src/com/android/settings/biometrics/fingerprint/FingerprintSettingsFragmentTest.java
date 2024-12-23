@@ -69,6 +69,8 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.preference.Preference;
 import androidx.test.core.app.ApplicationProvider;
 
+import com.android.internal.widget.LockPatternUtils;
+import com.android.settings.biometrics.fingerprint.feature.SfpsRestToUnlockFeature;
 import com.android.settings.password.ChooseLockSettingsHelper;
 import com.android.settings.password.ConfirmDeviceCredentialActivity;
 import com.android.settings.search.BaseSearchIndexProvider;
@@ -137,6 +139,12 @@ public class FingerprintSettingsFragmentTest {
     private FingerprintAuthenticateSidecar mFingerprintAuthenticateSidecar;
     private FingerprintRemoveSidecar mFingerprintRemoveSidecar;
 
+    private FakeFeatureFactory mFeatureFactory;
+    @Mock
+    private LockPatternUtils mLockPatternUtils;
+    @Mock
+    private SfpsRestToUnlockFeature mSfpsRestToUnlockFeature;
+
     @Before
     public void setUp() {
         ShadowUtils.setFingerprintManager(mFingerprintManager);
@@ -151,6 +159,15 @@ public class FingerprintSettingsFragmentTest {
         when(mBiometricManager.canAuthenticate(PRIMARY_USER_ID,
                 BiometricManager.Authenticators.MANDATORY_BIOMETRICS))
                 .thenReturn(BiometricManager.BIOMETRIC_ERROR_HW_UNAVAILABLE);
+
+        // FeatureFactory mocking copied from ChangeScreenLockPreferenceControllerTest.
+        mFeatureFactory = FakeFeatureFactory.setupForTest();
+        when(mFeatureFactory.securityFeatureProvider.getLockPatternUtils(mContext))
+                .thenReturn(mLockPatternUtils);
+        when(mFeatureFactory.mFingerprintFeatureProvider.getSfpsRestToUnlockFeature(mContext))
+                .thenReturn(mSfpsRestToUnlockFeature);
+
+        when(mLockPatternUtils.checkUserSupportsBiometricSecondFactor(anyInt())).thenReturn(true);
     }
 
     @After
